@@ -6,11 +6,13 @@
  *     http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-package com.mycompany.imagej;
+package de.qbic.xml_edit;
 
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.ops.OpService;
+import net.imagej.display.ImageDisplay;
+import loci.formats.ome.OMEXMLMetadata;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.RealType;
@@ -30,11 +32,11 @@ import java.util.List;
  * </p>
  * <p>
  * You should replace the parameter fields with your own inputs and outputs,
- * and replace the {@link run} method implementation with your own logic.
+ * and replace the {@link } method implementation with your own logic.
  * </p>
  */
-@Plugin(type = Command.class, menuPath = "Plugins>Gauss Filtering")
-public class GaussFiltering<T extends RealType<T>> implements Command {
+@Plugin(type = Command.class, menuPath = "Plugins>XML_Editor")
+public class XML_Editor<T extends RealType<T>> implements Command {
     //
     // Feel free to add more parameters here...
     //
@@ -48,26 +50,16 @@ public class GaussFiltering<T extends RealType<T>> implements Command {
     @Parameter
     private OpService opService;
 
+    @Parameter
+    private ImageDisplay image;
+
     @Override
     public void run() {
-        final Img<T> image = (Img<T>)currentData.getImgPlus();
+        // final Img<T> image = (Img<T>)currentData.getImgPlus();
+        Dataset data = (Dataset) image.getActiveView().getData();
 
-        //
-        // Enter image processing code here ...
-        // The following is just a Gauss filtering example
-        //
-        final double[] sigmas = {1.0, 3.0, 5.0};
+        OMEXMLMetadata md = OME_XML_Reader.read(data);
 
-        List<RandomAccessibleInterval<T>> results = new ArrayList<>();
-
-        for (double sigma : sigmas) {
-            results.add(opService.filter().gauss(image, sigma));
-        }
-
-        // display result
-        for (RandomAccessibleInterval<T> elem : results) {
-            uiService.show(elem);
-        }
     }
 
     /**
@@ -94,7 +86,7 @@ public class GaussFiltering<T extends RealType<T>> implements Command {
             ij.ui().show(dataset);
 
             // invoke the plugin
-            ij.command().run(GaussFiltering.class, true);
+            ij.command().run(XML_Editor.class, true);
         }
     }
 

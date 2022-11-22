@@ -12,17 +12,17 @@
         <relativePath />
     </parent>
 
-    <groupId>com.mycompany</groupId>        <!-- FIXME: Your organization groupId here -->
-    <artifactId>GaussFiltering</artifactId> <!-- FIXME: Your project artifactId here   -->
-    <version>0.1.0-SNAPSHOT</version>
+    <groupId>de.qbic.xml_edit</groupId>        <!-- FIXME: Your organization groupId here -->
+    <artifactId>XML_Editor</artifactId> <!-- FIXME: Your project artifactId here   -->
+    <version>1</version>
 
-    <name>Gauss Filtering</name>                                               <!-- FIXME: Your project name here          -->
+    <name>OME_XML_Meta_Data_Editor</name>                                               <!-- FIXME: Your project name here          -->
     <description>A Maven project implementing an ImageJ command.</description> <!-- FIXME: Your project description here   -->
     <url>https://mycompany.com/imagej/gauss-filtering/</url>                   <!-- FIXME: Your project website here       -->
-    <inceptionYear>2017</inceptionYear>                                        <!-- FIXME: Your project starting year here -->
+    <inceptionYear>2022</inceptionYear>                                        <!-- FIXME: Your project starting year here -->
     <organization>
-        <name>My Company</name>           <!-- FIXME: Your organization name here    -->
-        <url>https://mycompany.com/</url> <!-- FIXME: Your organization website here -->
+        <name>QBiC</name>           <!-- FIXME: Your organization name here    -->
+        <url>https://uni-tuebingen.de/forschung/forschungsinfrastruktur/zentrum-fuer-quantitative-biologie-qbic/</url> <!-- FIXME: Your organization website here -->
     </organization>
     <licenses>
         <license>                         <!-- FIXME: Your license here -->
@@ -78,7 +78,7 @@
 
     <properties>
         <package-name>com.mycompany.imagej</package-name>                   <!-- FIXME: Your project package prefix here -->
-        <main-class>com.mycompany.imagej.GaussFiltering</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
+        <main-class>de.qbic.xml_edit.XML_Editor</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
         <license.licenseName>cc0</license.licenseName>                      <!-- FIXME: Your license-maven-plugin license code here -->
         <license.copyrightOwners>My Company, Inc.</license.copyrightOwners> <!-- FIXME: Your organization legal entity name here -->
     </properties>
@@ -94,6 +94,16 @@
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>imagej</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ijaux</groupId>
+            <artifactId>pixlib</artifactId>
+            <version>0.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.scif</groupId>
+            <artifactId>scifio-ome-xml</artifactId>
+            <version>0.17.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
