@@ -38,10 +38,7 @@ import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
 import loci.common.xml.XMLTools;
 import loci.formats.*;
-import loci.formats.gui.AWTImageTools;
-import loci.formats.gui.BufferedImageReader;
-import loci.formats.gui.ImageViewer;
-import loci.formats.gui.XMLWindow;
+import loci.formats.gui.*;
 import loci.formats.in.DynamicMetadataOptions;
 import loci.formats.in.MetadataLevel;
 import loci.formats.meta.MetadataRetrieve;
@@ -964,6 +961,9 @@ public class ImageInfo {
             window.setXML(xml);
             window.show();
 
+            XMLCellRenderer cell = new XMLCellRenderer();
+            cell.setText(xml);
+            cell.show();
 
             String out = "/home/aaron/Desktop/test.xml";
             BufferedWriter writer = new BufferedWriter(new FileWriter(out));
