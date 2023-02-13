@@ -5,10 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="Create maven structure">
-      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/XML_editor_dataflow_schema" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/tubhiswt-3D.zip" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/metadata.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/ConvertToOmeTiff.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/Editor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/FileExport.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/SaveFileDialogExample.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLTreeModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XmlJTree.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XmlNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/old.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.ome.tif" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/EditTiffComment.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/GUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/ImageInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/ImageInfo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/OpenImage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/OpenImage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/Test1.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/Test2.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/test3.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +78,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/aaron/Documents/Work/HiWi/HiWi_QBiC_WS_22/Metadata_Curation/XML_metadata_editor&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/aaron/Documents/Work/HiWi/HiWi_QBiC_WS_22/Metadata_Curation/XML_metadata_editor/src/main/java/de/qbic/xml_edit&quot;,
     &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
@@ -68,11 +86,27 @@
   }
 }</component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java/com/mycompany/imagej" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Main (3)">
+  <component name="RunManager" selected="Application.Editor">
+    <configuration name="Editor" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="de.qbic.xml_edit.Editor" />
+      <module name="XML_metadata_editor" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="de.qbic.xml_edit.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="GUI" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="de.qbic.xml_edit.GUI" />
       <module name="XML_metadata_editor" />
@@ -86,34 +120,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Main (1)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="de.qbic.xml_edit.Main" />
-      <module name="XML_metadata_editor" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="de.qbic.xml_edit.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Main (2)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="de.qbic.xml_edit.Main" />
-      <module name="XML_metadata_editor" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="de.qbic.xml_edit.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Main (3)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="de.qbic.xml_edit.Main" />
+    <configuration name="ImageInfo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="de.qbic.xml_edit.ImageInfo" />
       <module name="XML_metadata_editor" />
       <extension name="coverage">
         <pattern>
@@ -138,13 +146,26 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="XMLTreeViewer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="de.qbic.xml_edit.XMLTreeViewer" />
+      <module name="XML_metadata_editor" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="de.qbic.xml_edit.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Main (3)" />
-        <item itemvalue="Application.Main (2)" />
-        <item itemvalue="Application.Main (1)" />
-        <item itemvalue="Application.Main" />
+        <item itemvalue="Application.Editor" />
+        <item itemvalue="Application.ImageInfo" />
+        <item itemvalue="Application.XMLTreeViewer" />
         <item itemvalue="Application.GUI" />
+        <item itemvalue="Application.Main" />
       </list>
     </recent_temporary>
   </component>
@@ -199,7 +220,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670596094108</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Create maven structure">
+      <created>1670605661290</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1670605661290</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

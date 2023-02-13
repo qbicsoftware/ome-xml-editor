@@ -1,4 +1,4 @@
-package de.qbic.xml_edit;
+package de.qbic.xml_edit; // DONT CHANGE ANYTHING HERE = BACKUP FILE
 /*
  * #%L
  * Bio-Formats command line tools for reading and converting files
@@ -38,7 +38,9 @@ import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
 import loci.common.xml.XMLTools;
 import loci.formats.*;
-import loci.formats.gui.*;
+import loci.formats.gui.AWTImageTools;
+import loci.formats.gui.BufferedImageReader;
+import loci.formats.gui.ImageViewer;
 import loci.formats.in.DynamicMetadataOptions;
 import loci.formats.in.MetadataLevel;
 import loci.formats.meta.MetadataRetrieve;
@@ -49,13 +51,12 @@ import loci.formats.tools.AsciiImage;
 import net.imagej.ImageJ;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -957,6 +958,16 @@ public class ImageInfo {
             }
             String xml = service.getOMEXML((MetadataRetrieve) ms);
             LOGGER.info("{}", XMLTools.indentXML(xml, xmlSpaces, true));
+
+            Document xml_doc = XMLTools.parseDOM(xml);
+
+
+            // new GUI(xml_doc).setVisible(true);
+
+
+
+
+            /*
             XMLWindow window = new XMLWindow();
             window.setXML(xml);
             window.show();
@@ -964,14 +975,17 @@ public class ImageInfo {
             XMLCellRenderer cell = new XMLCellRenderer();
             cell.setText(xml);
             cell.show();
-
-            String out = "/home/aaron/Desktop/test.xml";
+            String out = "/home/aaron/Desktop/test5.xml";
             BufferedWriter writer = new BufferedWriter(new FileWriter(out));
             writer.write(xml);
             writer.close();
+            */
+
             if (omexmlOnly) {
                 DebugTools.setRootLevel("OFF");
             }
+
+
         }
         else {
             LOGGER.info("The metadata could not be converted to OME-XML.");
@@ -1111,7 +1125,7 @@ public class ImageInfo {
         }
     }
 
-    // -- Main method --
+    // -- SaveFileDialogExample method --
 
     public static void main(String[] args) throws Exception {
         DebugTools.enableLogging("INFO");
