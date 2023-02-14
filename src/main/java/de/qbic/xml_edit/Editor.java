@@ -21,8 +21,6 @@ import loci.formats.out.OMETiffWriter;
 import loci.formats.services.OMEXMLService;
 import loci.formats.services.OMEXMLServiceImpl;
 import loci.formats.tools.AsciiImage;
-import net.imagej.ImageJ;
-import ome.xml.meta.AbstractOMEXMLMetadata;
 import ome.xml.meta.MetadataRoot;
 import ome.xml.meta.OMEXMLMetadataRoot;
 import ome.xml.model.OMEModel;
@@ -34,6 +32,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -98,6 +98,7 @@ public class Editor {
     private MinMaxCalculator minMaxCalc;
     private DimensionSwapper dimSwapper;
     private BufferedImageReader biReader;
+    private GUI myGUI;
 
     // -- ImageInfo methods --
 
@@ -1044,16 +1045,7 @@ public class Editor {
         System.out.println("[done]");
     }
 
-    public void getSchema() {
-        AbstractOMEXMLMetadata test = null;
-        System.out.println(test.dumpXML());
-
-    }
-    public void testEdit()
-            throws Exception {
-        final ImageJ ij = new ImageJ();
-        File file = ij.ui().chooseFile(null, "open");
-        String path = file.getPath();
+    public void readImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException {
         String[] args = new String[2];
         args[0] = path; // the id parameter
         args[1] = "-omexml-only";
@@ -1072,13 +1064,23 @@ public class Editor {
 
         printGlobalMetadata();
         printOriginalMetadata();
-
         String xml = getOMEXML();
         xml_doc = XMLTools.parseDOM(xml);
         changeHistory = new LinkedHashMap<>();
-        // getSchema();
-        new GUI(this).setVisible(true);
-
+        myGUI.makeTree(xml_doc);
+    }
+    public void readSchema(String path) throws Exception {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        xml_doc = db.parse(new File(path));
+        String xml = XMLTools.getXML(xml_doc);
+        System.out.println(xml);
+        changeHistory = new LinkedHashMap<>();
+        myGUI.makeTree(xml_doc);
+    }
+    public void testEdit() {
+        myGUI = new GUI(this);
+        myGUI.setVisible(true);
     }
 
     // -- SaveFileDialogExample method --

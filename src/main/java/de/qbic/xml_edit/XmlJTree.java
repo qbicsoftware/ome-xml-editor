@@ -28,6 +28,7 @@ class XmlJTree extends JTree {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(filePath);
             root = doc.getDocumentElement();
+            System.out.println(root.getNodeName());
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Can't parse file", "Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -59,21 +60,33 @@ class XmlJTree extends JTree {
         XmlNode dmtNode;
         dmtNode = new XmlNode(root.getNodeName());
 
+        if (root.getNodeType() == 1) {
 
-        String text;
-        if (root.hasAttributes()) {
-            int numAttrs = root.getAttributes().getLength();
+            String text;
 
-            for (int i = 0; i < numAttrs; i++){
-                Attr attr = (Attr) root.getAttributes().item(i);
-                String attrName = attr.getNodeName();
-                String attrValue = attr.getNodeValue();
-                text = "@"+attrName + " = " + attrValue;
-                dmtNode.add(new XmlNode(text));
+            if (root.hasAttributes()) {
+                int numAttrs = root.getAttributes().getLength();
+
+                for (int i = 0; i < numAttrs; i++){
+                    Attr attr = (Attr) root.getAttributes().item(i);
+                    String attrName = attr.getNodeName();
+                    String attrValue = attr.getNodeValue();
+                    XmlNode atrNode = new XmlNode("@"+attrName);
+                    XmlNode valNode = new XmlNode(":"+attrValue);
+                    atrNode.add(valNode);
+                    dmtNode.add(atrNode);
+                }
             }
+        }
+        else if (root.getNodeType() == 2) {
+            System.out.println("Node Type 2");
+        }
+        else if (root.getNodeType() == 3) {
+            dmtNode = new XmlNode("#"+root.getTextContent());
         }
 
         NodeList nodeList = root.getChildNodes();
+
 
         for (int count = 0; count < nodeList.getLength(); count++) {
             Node tempNode = nodeList.item(count);

@@ -1,0 +1,349 @@
+<ns:OME UUID="http://www.company.org/cum/sonoras" Creator="string" xmlns:ns="http://www.openmicroscopy.org/Schemas/OME/2016-06">
+  <!--Optional:-->
+  <ns:Rights>
+    <!--Optional:-->
+    <ns:RightsHolder>string</ns:RightsHolder>
+    <!--Optional:-->
+    <ns:RightsHeld>string</ns:RightsHeld>
+  </ns:Rights>
+  <!--You have a CHOICE of the next 2 items at this level-->
+  <!--Zero or more repetitions:-->
+  <ns:Project Name="string" ID="string">
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+    <!--Optional:-->
+    <ns:ExperimenterRef ID="string"/>
+    <!--Optional:-->
+    <ns:ExperimenterGroupRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:DatasetRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+  </ns:Project>
+  <!--Zero or more repetitions:-->
+  <ns:Dataset Name="string" ID="string">
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+    <!--Optional:-->
+    <ns:ExperimenterRef ID="string"/>
+    <!--Optional:-->
+    <ns:ExperimenterGroupRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:ImageRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+  </ns:Dataset>
+  <!--Zero or more repetitions:-->
+  <ns:Folder ID="string" Name="string">
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+    <!--Zero or more repetitions:-->
+    <ns:FolderRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:ImageRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:ROIRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+  </ns:Folder>
+  <!--Zero or more repetitions:-->
+  <ns:Experiment Type="Immunocytochemistry" ID="string">
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+    <!--Optional:-->
+    <ns:ExperimenterRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:MicrobeamManipulation ID="string" Type="Uncaging">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--1 or more repetitions:-->
+      <ns:ROIRef ID="string"/>
+      <ns:ExperimenterRef ID="string"/>
+      <!--Zero or more repetitions:-->
+      <ns:LightSourceSettings ID="string" Attenuation="1.5E2" Wavelength="1.5E2" WavelengthUnit="nm"/>
+    </ns:MicrobeamManipulation>
+  </ns:Experiment>
+  <!--Zero or more repetitions:-->
+  <ns:Plate ID="string" Name="string" Status="string" ExternalIdentifier="string" ColumnNamingConvention="number" RowNamingConvention="number" WellOriginX="1.5E2" WellOriginXUnit="reference frame" WellOriginY="1.5E2" WellOriginYUnit="reference frame" Rows="3" Columns="3" FieldIndex="3">
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+    <!--Zero or more repetitions:-->
+    <ns:Well ID="string" Column="3" Row="3" ExternalDescription="string" ExternalIdentifier="string" Type="string" Color="-1">
+      <!--Zero or more repetitions:-->
+      <ns:WellSample ID="string" PositionX="1.5E2" PositionXUnit="reference frame" PositionY="1.5E2" PositionYUnit="reference frame" Timepoint="2013-05-22T03:02:49+02:00" Index="3">
+        <!--Optional:-->
+        <ns:ImageRef ID="string"/>
+      </ns:WellSample>
+      <!--Optional:-->
+      <ns:ReagentRef ID="string"/>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:Well>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:PlateAcquisition ID="string" Name="string" EndTime="2002-11-05T09:01:03+01:00" StartTime="2002-06-24T17:46:32+02:00" MaximumFieldCount="3">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:WellSampleRef ID="string"/>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:PlateAcquisition>
+  </ns:Plate>
+  <!--Zero or more repetitions:-->
+  <ns:Screen ID="string" Name="string" ProtocolIdentifier="string" ProtocolDescription="string" ReagentSetDescription="string" ReagentSetIdentifier="string" Type="string">
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+    <!--Zero or more repetitions:-->
+    <ns:Reagent ID="string" Name="string" ReagentIdentifier="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:Reagent>
+    <!--Zero or more repetitions:-->
+    <ns:PlateRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+  </ns:Screen>
+  <!--Zero or more repetitions:-->
+  <ns:Experimenter ID="string" FirstName="string" MiddleName="string" LastName="string" Email="string" Institution="string" UserName="string">
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+  </ns:Experimenter>
+  <!--Zero or more repetitions:-->
+  <ns:ExperimenterGroup Name="string" ID="string">
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+    <!--Zero or more repetitions:-->
+    <ns:ExperimenterRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:Leader ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+  </ns:ExperimenterGroup>
+  <!--Zero or more repetitions:-->
+  <ns:Instrument ID="string">
+    <!--Optional:-->
+    <ns:Microscope Manufacturer="string" Model="string" SerialNumber="string" LotNumber="string" Type="Other"/>
+    <!--Zero or more repetitions:-->
+    <ns:LightSourceGroup Manufacturer="string" Model="string" SerialNumber="string" LotNumber="string" ID="string" Power="1.5E2" PowerUnit="mW">
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:LightSourceGroup>
+    <!--Zero or more repetitions:-->
+    <ns:Detector Manufacturer="string" Model="string" SerialNumber="string" LotNumber="string" Gain="1.5E2" Voltage="1.5E2" VoltageUnit="V" Offset="1.5E2" Zoom="1.5E2" AmplificationGain="1.5E2" ID="string" Type="AnalogVideo">
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:Detector>
+    <!--Zero or more repetitions:-->
+    <ns:Objective Manufacturer="string" Model="string" SerialNumber="string" LotNumber="string" ID="string" Correction="PlanFluor" Immersion="Multi" LensNA="1.5E2" NominalMagnification="1.5E2" CalibratedMagnification="1.5E2" WorkingDistance="1.5E2" WorkingDistanceUnit="µm" Iris="true">
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:Objective>
+    <!--Zero or more repetitions:-->
+    <ns:FilterSet Manufacturer="string" Model="string" SerialNumber="string" LotNumber="string" ID="string">
+      <!--Zero or more repetitions:-->
+      <ns:ExcitationFilterRef ID="string"/>
+      <!--Optional:-->
+      <ns:DichroicRef ID="string"/>
+      <!--Zero or more repetitions:-->
+      <ns:EmissionFilterRef ID="string"/>
+    </ns:FilterSet>
+    <!--Zero or more repetitions:-->
+    <ns:Filter Manufacturer="string" Model="string" SerialNumber="string" LotNumber="string" Type="ShortPass" FilterWheel="string" ID="string">
+      <!--Optional:-->
+      <ns:TransmittanceRange CutIn="1.5E2" CutInUnit="nm" CutOut="1.5E2" CutOutUnit="nm" CutInTolerance="1.5E2" CutInToleranceUnit="nm" CutOutTolerance="1.5E2" CutOutToleranceUnit="nm" Transmittance="1.5E2"/>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:Filter>
+    <!--Zero or more repetitions:-->
+    <ns:Dichroic Manufacturer="string" Model="string" SerialNumber="string" LotNumber="string" ID="string">
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:Dichroic>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+  </ns:Instrument>
+  <!--Zero or more repetitions:-->
+  <ns:Image ID="string" Name="string">
+    <!--Optional:-->
+    <ns:AcquisitionDate>2018-02-04T15:35:59+01:00</ns:AcquisitionDate>
+    <!--Optional:-->
+    <ns:ExperimenterRef ID="string"/>
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+    <!--Optional:-->
+    <ns:ExperimentRef ID="string"/>
+    <!--Optional:-->
+    <ns:ExperimenterGroupRef ID="string"/>
+    <!--Optional:-->
+    <ns:InstrumentRef ID="string"/>
+    <!--Optional:-->
+    <ns:ObjectiveSettings ID="string" CorrectionCollar="1.5E2" Medium="Water" RefractiveIndex="1.5E2"/>
+    <!--Optional:-->
+    <ns:ImagingEnvironment Temperature="1.5E2" TemperatureUnit="°C" AirPressure="1.5E2" AirPressureUnit="mbar" Humidity="1.5E2" CO2Percent="1.5E2">
+      <!--Optional:-->
+      <ns:Map>
+        <!--Zero or more repetitions:-->
+        <ns:M K="string">string</ns:M>
+      </ns:Map>
+    </ns:ImagingEnvironment>
+    <!--Optional:-->
+    <ns:StageLabel Name="string" X="1.5E2" XUnit="reference frame" Y="1.5E2" YUnit="reference frame" Z="1.5E2" ZUnit="reference frame"/>
+    <ns:Pixels ID="string" DimensionOrder="XYCTZ" Type="int32" SignificantBits="3" Interleaved="false" BigEndian="false" SizeX="3" SizeY="3" SizeZ="3" SizeC="3" SizeT="3" PhysicalSizeX="1.5E2" PhysicalSizeXUnit="µm" PhysicalSizeY="1.5E2" PhysicalSizeYUnit="µm" PhysicalSizeZ="1.5E2" PhysicalSizeZUnit="µm" TimeIncrement="1.5E2" TimeIncrementUnit="s">
+      <!--Zero or more repetitions:-->
+      <ns:Channel ID="string" Name="string" SamplesPerPixel="3" IlluminationType="Epifluorescence" PinholeSize="1.5E2" PinholeSizeUnit="µm" AcquisitionMode="STED" ContrastMethod="Darkfield" ExcitationWavelength="1.5E2" ExcitationWavelengthUnit="nm" EmissionWavelength="1.5E2" EmissionWavelengthUnit="nm" Fluor="string" NDFilter="1.5E2" PockelCellSetting="3" Color="-1">
+        <!--Optional:-->
+        <ns:LightSourceSettings ID="string" Attenuation="1.5E2" Wavelength="1.5E2" WavelengthUnit="nm"/>
+        <!--Optional:-->
+        <ns:DetectorSettings ID="string" Offset="1.5E2" Gain="1.5E2" Voltage="1.5E2" VoltageUnit="V" Zoom="1.5E2" ReadOutRate="1.5E2" ReadOutRateUnit="MHz" Binning="Other" Integration="3"/>
+        <!--Optional:-->
+        <ns:FilterSetRef ID="string"/>
+        <!--Zero or more repetitions:-->
+        <ns:AnnotationRef ID="string"/>
+        <!--Optional:-->
+        <ns:LightPath>
+          <!--Zero or more repetitions:-->
+          <ns:ExcitationFilterRef ID="string"/>
+          <!--Optional:-->
+          <ns:DichroicRef ID="string"/>
+          <!--Zero or more repetitions:-->
+          <ns:EmissionFilterRef ID="string"/>
+          <!--Zero or more repetitions:-->
+          <ns:AnnotationRef ID="string"/>
+        </ns:LightPath>
+      </ns:Channel>
+      <!--You have a CHOICE of the next 3 items at this level-->
+      <!--1 or more repetitions:-->
+      <ns:BinData Compression="none" BigEndian="false" Length="10">YXJjZQ==</ns:BinData>
+      <!--1 or more repetitions:-->
+      <ns:TiffData IFD="0" FirstZ="0" FirstT="0" FirstC="0" PlaneCount="3">
+        <!--Optional:-->
+        <ns:UUID FileName="string">http://www.corp.org/imperio/certo</ns:UUID>
+      </ns:TiffData>
+      <ns:MetadataOnly>anyType</ns:MetadataOnly>
+      <!--Zero or more repetitions:-->
+      <ns:Plane TheZ="3" TheT="3" TheC="3" DeltaT="1.5E2" DeltaTUnit="s" ExposureTime="1.5E2" ExposureTimeUnit="s" PositionX="1.5E2" PositionXUnit="reference frame" PositionY="1.5E2" PositionYUnit="reference frame" PositionZ="1.5E2" PositionZUnit="reference frame">
+        <!--You have a CHOICE of the next 1 items at this level-->
+        <ns:HashSHA1>717569737175616D717569737175616D71756973</ns:HashSHA1>
+        <!--Zero or more repetitions:-->
+        <ns:AnnotationRef ID="string"/>
+      </ns:Plane>
+    </ns:Pixels>
+    <!--Zero or more repetitions:-->
+    <ns:ROIRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:MicrobeamManipulationRef ID="string"/>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+  </ns:Image>
+  <!--Optional:-->
+  <ns:StructuredAnnotations>
+    <!--You have a CHOICE of the next 11 items at this level-->
+    <ns:XMLAnnotation ID="string" Namespace="http://www.company.gov/feta/ac" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>
+        <!--You may enter ANY elements at this point-->
+        <AnyElement/>
+      </ns:Value>
+    </ns:XMLAnnotation>
+    <ns:FileAnnotation ID="string" Namespace="http://www.sample.com/talia/pectore" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:BinaryFile FileName="string" Size="10" MIMEType="string">
+        <!--You have a CHOICE of the next 2 items at this level-->
+        <ns:External href="http://www.sample.gov/sciret/certo" SHA1="6461726564617265646172656461726564617265" Compression="none"/>
+        <ns:BinData Compression="none" BigEndian="false" Length="10">YmVsbGE=</ns:BinData>
+      </ns:BinaryFile>
+    </ns:FileAnnotation>
+    <ns:ListAnnotation ID="string" Namespace="http://www.company.com/faciat/magno" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+    </ns:ListAnnotation>
+    <ns:LongAnnotation ID="string" Namespace="http://www.my.com/et/regemque" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>10</ns:Value>
+    </ns:LongAnnotation>
+    <ns:DoubleAnnotation ID="string" Namespace="http://www.your.com/ventos/tenens" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>1.051732E7</ns:Value>
+    </ns:DoubleAnnotation>
+    <ns:CommentAnnotation ID="string" Namespace="http://www.my.org/rapidum/habenas" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>string</ns:Value>
+    </ns:CommentAnnotation>
+    <ns:BooleanAnnotation ID="string" Namespace="http://www.sample.org/cum/iovisque" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>true</ns:Value>
+    </ns:BooleanAnnotation>
+    <ns:TimestampAnnotation ID="string" Namespace="http://www.any.com/iunonis/coniunx" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>2009-07-28T21:14:45</ns:Value>
+    </ns:TimestampAnnotation>
+    <ns:TagAnnotation ID="string" Namespace="http://www.my.org/nimborum/aris" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>string</ns:Value>
+    </ns:TagAnnotation>
+    <ns:TermAnnotation ID="string" Namespace="http://www.company.com/montis/insuper" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>string</ns:Value>
+    </ns:TermAnnotation>
+    <ns:MapAnnotation ID="string" Namespace="http://www.test.com/gero/nimborum" Annotator="string">
+      <!--Optional:-->
+      <ns:Description>string</ns:Description>
+      <!--Zero or more repetitions:-->
+      <ns:AnnotationRef ID="string"/>
+      <ns:Value>
+        <!--Zero or more repetitions:-->
+        <ns:M K="string">string</ns:M>
+      </ns:Value>
+    </ns:MapAnnotation>
+  </ns:StructuredAnnotations>
+  <!--Zero or more repetitions:-->
+  <ns:ROI ID="string" Name="string">
+    <ns:Union>
+      <!--1 or more repetitions:-->
+      <ns:ShapeGroup FillColor="3" FillRule="EvenOdd" StrokeColor="3" StrokeWidth="1.5E2" StrokeWidthUnit="pixel" StrokeDashArray="string" Text="string" FontFamily="monospace" FontSize="3" FontSizeUnit="pt" FontStyle="BoldItalic" Locked="true" ID="string" TheZ="3" TheT="3" TheC="3">
+        <!--Optional:-->
+        <ns:Transform A00="1.5E2" A10="1.5E2" A01="1.5E2" A11="1.5E2" A02="1.5E2" A12="1.5E2"/>
+        <!--Zero or more repetitions:-->
+        <ns:AnnotationRef ID="string"/>
+      </ns:ShapeGroup>
+    </ns:Union>
+    <!--Zero or more repetitions:-->
+    <ns:AnnotationRef ID="string"/>
+    <!--Optional:-->
+    <ns:Description>string</ns:Description>
+  </ns:ROI>
+  <ns:BinaryOnly MetadataFile="string" UUID="http://www.any.gov/aris/tenens"/>
+</ns:OME>
