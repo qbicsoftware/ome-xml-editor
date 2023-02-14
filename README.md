@@ -8,6 +8,6 @@ by bioformats, but has flaws. Work in progress.
 - Added Basic functionality such as:
   - Reading any image inclusive its metadata
   - Editing the values of argument and text nodes in its xml
-  - exporting the pixel- and meta- data as .ome.tif
-  - 
+  - Exporting the pixel- and meta- data as .ome.tif
+  - A GUI that implements the said functionality
 ![](data/XML_Editor_14_02_23.png)
