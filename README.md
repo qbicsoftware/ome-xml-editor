@@ -11,3 +11,11 @@ by bioformats, but has flaws. Work in progress.
   - Exporting the pixel- and meta- data as .ome.tif
   - A GUI that implements the said functionality
 ![](data/XML_Editor_14_02_23.png)
+
+### Update 16.02.23
+
+- Improved the change history function
+- Added the ability to add new nodes (there are still some bugs)
+- Improved look and user experience of GUI
+
+![](data/XML_Editor_16_02_23.png)

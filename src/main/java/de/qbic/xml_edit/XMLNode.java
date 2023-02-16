@@ -3,13 +3,14 @@ package de.qbic.xml_edit;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.ArrayList;
 
-public class XmlNode extends DefaultMutableTreeNode {
+public class XMLNode extends DefaultMutableTreeNode {
     private ArrayList<String> attributes;
-    public XmlNode(DefaultMutableTreeNode defaultMutableTreeNode) {
+    private String nodeType;
+    public XMLNode(DefaultMutableTreeNode defaultMutableTreeNode) {
         super(defaultMutableTreeNode);
          attributes = new ArrayList<>();
     }
-    public XmlNode(String newNode) {
+    public XMLNode(String newNode) {
         super(newNode);
         attributes = new ArrayList<>();
     }

@@ -56,9 +56,9 @@ class XmlJTree extends JTree {
         }
     }
 
-    private XmlNode builtTreeNode(Node root) {
-        XmlNode dmtNode;
-        dmtNode = new XmlNode(root.getNodeName());
+    private XMLNode builtTreeNode(Node root) {
+        XMLNode dmtNode;
+        dmtNode = new XMLNode(root.getNodeName());
 
         if (root.getNodeType() == 1) {
 
@@ -71,8 +71,8 @@ class XmlJTree extends JTree {
                     Attr attr = (Attr) root.getAttributes().item(i);
                     String attrName = attr.getNodeName();
                     String attrValue = attr.getNodeValue();
-                    XmlNode atrNode = new XmlNode("@"+attrName);
-                    XmlNode valNode = new XmlNode(":"+attrValue);
+                    XMLNode atrNode = new XMLNode("@"+attrName);
+                    XMLNode valNode = new XMLNode(":"+attrValue);
                     atrNode.add(valNode);
                     dmtNode.add(atrNode);
                 }
@@ -82,7 +82,7 @@ class XmlJTree extends JTree {
             System.out.println("Node Type 2");
         }
         else if (root.getNodeType() == 3) {
-            dmtNode = new XmlNode("#"+root.getTextContent());
+            dmtNode = new XMLNode("#"+root.getTextContent());
         }
 
         NodeList nodeList = root.getChildNodes();

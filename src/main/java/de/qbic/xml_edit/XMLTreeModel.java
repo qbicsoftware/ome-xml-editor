@@ -7,11 +7,11 @@ import java.util.Vector;
 
 public class XMLTreeModel implements TreeModel {
 
-    private XmlNode root;
+    private XMLNode root;
     private Vector<TreeModelListener> treeModelListeners =
             new Vector<TreeModelListener>();
 
-    XMLTreeModel(XmlNode root) {
+    XMLTreeModel(XMLNode root) {
         this.root = root;
 
     }
@@ -23,19 +23,19 @@ public class XMLTreeModel implements TreeModel {
 
     @Override
     public Object getChild(Object parent, int index) {
-        XmlNode n = (XmlNode) parent;
+        XMLNode n = (XMLNode) parent;
         return n.getChildAt(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        XmlNode n = (XmlNode) parent;
+        XMLNode n = (XMLNode) parent;
         return n.getChildCount();
     }
 
     @Override
     public boolean isLeaf(Object node) {
-        XmlNode n = (XmlNode) node;
+        XMLNode n = (XMLNode) node;
         return n.isLeaf();
     }
 
@@ -47,8 +47,8 @@ public class XMLTreeModel implements TreeModel {
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        XmlNode p = (XmlNode) parent;
-        XmlNode c = (XmlNode) parent;
+        XMLNode p = (XMLNode) parent;
+        XMLNode c = (XMLNode) parent;
         return p.getIndex(c);
     }
 

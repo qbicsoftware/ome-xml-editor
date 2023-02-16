@@ -11,19 +11,23 @@ import org.xml.sax.SAXException;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.LinkedList;
 
 public class GUI extends javax.swing.JFrame{
+
+
     public static int SCREEN_WIDTH = 1000;
     public Editor edit;
     public static int SCREEN_HEIGHT = SCREEN_WIDTH*9/16;
@@ -36,19 +40,24 @@ public class GUI extends javax.swing.JFrame{
     private JPanel bottomPanel;    // container panel for the bottom
     private JScrollPane scrollPaneBottom; // makes the text scrollable
     private JScrollPane scrollPaneTop; // makes the text scrollable
-    private JTextField textField;     // the text
+    private NodedTextField textField;     // the text
     private JPanel contentPanelLower;      // under the text a container for all the input elements
     private JPanel contentPanelHigher;
-    private JButton addNodeButton;         // and a save  xml changes button
-    private JButton delNodeButton;         // and a save  xml changes button
-    private JButton saveButton;         // and a save  xml changes button
-    private JButton openSchemaButton;         // open new image file button
-    private JButton openImageButton;
-    private JButton validateXMLButton;         // validate the current xml button
-    private JButton exportButton;         // export xml and image to ome.tif button
+    private JMenuItem saveButton;         // and a save  xml changes button
+    private JMenuItem openSchemaButton;         // open new image file button
+    private JMenuItem printCurrentXML;
+    private JMenuItem validateXMLButton;         // validate the current xml button
+    private JMenuItem exportButton;         // export xml and image to ome.tif button
     private JPanel argumentPane;
     private JMenuBar mb;
     private JMenu file, settings, help;
+    private JMenuItem openImage;
+    private static JPanel selectedPanel;
+    private static JButton deleteButton;
+    int labelCount =0;
+
+    JButton addButton = new JButton("Add Node");
+
 
     Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
 
@@ -72,6 +81,13 @@ public class GUI extends javax.swing.JFrame{
         file = new JMenu("File");
         settings = new JMenu("Settings");
         help = new JMenu("Help");
+        openImage = new JMenuItem("Open Image");
+        printCurrentXML = new JMenuItem("Print Current XML");
+        exportButton = new JMenuItem("Export to OmeTiff");
+        openSchemaButton = new JMenuItem("Open Schema");
+        saveButton = new JMenuItem("Print Change Profile");
+        validateXMLButton = new JMenuItem("Show Schema");
+
         splitPane = new JSplitPane();
         splitPane.setName("XML-Editor");
         topPanel = new JPanel();
@@ -79,43 +95,22 @@ public class GUI extends javax.swing.JFrame{
         scrollPaneBottom = new JScrollPane();  // this scrollPane is used to make the text area scrollable
         contentPanelLower = new JPanel();
         contentPanelHigher = new JPanel();
-        textField = new JTextField();      // this text area will be put inside the scrollPane
+        textField = new NodedTextField();      // this text area will be put inside the scrollPane
         scrollPaneTop = new JScrollPane();  // this scrollPane is used to make the text area scrollable
         argumentPane = new JPanel();
-
-
-        saveButton = new JButton("Print Change Profile");
-        openSchemaButton = new JButton("Open Schema");
-        openImageButton = new JButton("Open Image");
-        validateXMLButton = new JButton("Show Schema");
-        exportButton = new JButton("Export to OmeTiff");
-        addNodeButton = new JButton("Add New Node");
-        delNodeButton = new JButton("Delete Node");
 
 
         // ADD ACTION LISTENERS ########################################################################################
         textField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                String new_text = textField.getText();
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) myTree.getLastSelectedPathComponent();
-                System.out.println(myTree.getAnchorSelectionPath() + "\t" + new_text);
-                edit.changeHistory.put(myTree.getAnchorSelectionPath().toString(), new_text);
-                node.setUserObject(new_text);
+                String newText = textField.getText();
+                makeHistoryEntry(textField.getNode(), "edit", newText);
+                textField.getNode().setUserObject(newText);
             }
         });
-
         saveButton.addActionListener(e -> {
             System.out.println(edit.changeHistory);
         });
-
-        addNodeButton.addActionListener(e -> {
-            System.out.println(edit.changeHistory);
-        });
-
-        delNodeButton.addActionListener(e -> {
-            System.out.println(edit.changeHistory);
-        });
-
         openSchemaButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             FileNameExtensionFilter filter = new FileNameExtensionFilter("XML file",
@@ -131,8 +126,7 @@ public class GUI extends javax.swing.JFrame{
                 }
             }
         });
-
-        openImageButton.addActionListener(e -> {
+        openImage.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -151,7 +145,13 @@ public class GUI extends javax.swing.JFrame{
                 }
             }
         });
-
+        printCurrentXML.addActionListener(e -> {
+            try {
+                edit.printOMEXML();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         validateXMLButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Show Schema");
@@ -170,7 +170,6 @@ public class GUI extends javax.swing.JFrame{
                 }
             }
         });
-
         exportButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Export to OmeTiff");
@@ -193,15 +192,6 @@ public class GUI extends javax.swing.JFrame{
         // SET DIMENSIONS ##############################################################################################
 
         textField.setSize(WIDTH, BUTTON_HEIGHT);
-        openImageButton.setPreferredSize(new Dimension(BUTTON_HEIGHT, BUTTON_HEIGHT));
-        openSchemaButton.setPreferredSize(new Dimension(BUTTON_HEIGHT, BUTTON_HEIGHT));
-        saveButton.setPreferredSize(new Dimension(BUTTON_HEIGHT, BUTTON_HEIGHT));
-        exportButton.setPreferredSize(new Dimension(BUTTON_HEIGHT, BUTTON_HEIGHT));
-        validateXMLButton.setPreferredSize(new Dimension(BUTTON_HEIGHT, BUTTON_HEIGHT));
-
-        addNodeButton.setPreferredSize(new Dimension(BUTTON_HEIGHT, BUTTON_HEIGHT));
-        delNodeButton.setPreferredSize(new Dimension(BUTTON_HEIGHT, BUTTON_HEIGHT));
-
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         contentPanelLower.setMaximumSize(new Dimension(Integer.MAX_VALUE, exportButton.getHeight() * 4));
 
@@ -215,139 +205,244 @@ public class GUI extends javax.swing.JFrame{
         argumentPane.setLayout(argPaneLayout);
 
         // SET BORDERS #################################################################################################
-        topPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.BLACK, 1),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        topPanel.setOpaque(true);
-        topPanel.setBackground(Color.WHITE);
-        topPanel.setBorder(BorderFactory.createTitledBorder("XML FILE VIEW"));
+        makeStandardBorder(topPanel);
+        makeStandardBorder(bottomPanel);
+        makeStandardBorder(contentPanelLower);
+        makeStandardBorder(argumentPane);
 
         // POPULATE COMPONENTS #########################################################################################
         getContentPane().add(splitPane);               // due to the GridLayout, our splitPane will now fill the whole window
         mb.add(file);
+        file.add(openImage);
+        file.add(printCurrentXML);
+        file.add(exportButton);
+        file.add(openSchemaButton);
         mb.add(settings);
         mb.add(help);
+        help.add(saveButton);
+        help.add(validateXMLButton);
+
         this.add(mb);
         this.setJMenuBar(mb);
         bottomPanel.add(scrollPaneBottom);                // first we add the scrollPane to the bottomPanel, so it is at the top
-        bottomPanel.add(contentPanelLower);                // then we add the inputPanel to the bottomPanel, so it under the scrollPane / textArea
+
         topPanel.add(scrollPaneTop);
-        topPanel.add(contentPanelHigher);
 
-        contentPanelHigher.add(addNodeButton);
-        contentPanelHigher.add(delNodeButton);
-
-        contentPanelLower.add(openImageButton);
-        contentPanelLower.add(openSchemaButton);
-        contentPanelLower.add(saveButton);
-        contentPanelLower.add(validateXMLButton);
-        contentPanelLower.add(exportButton);
-
-        // let's configure our splitPane:
         splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);  // we want it to split the window vertically
         splitPane.setDividerLocation(SCREEN_HEIGHT/2);                    // the initial position of the divider is 200 (our window is 400 pixels high)
         splitPane.setTopComponent(topPanel);                  // at the top we want our "topPanel"
         splitPane.setBottomComponent(bottomPanel);            // and at the bottom we want our "bottomPanel"
 
+        splitPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (selectedPanel != null) {
+                    selectedPanel.setBackground(null);
+                    selectedPanel.remove(deleteButton);
+                    selectedPanel.repaint();
+                }
+            }
+        });
+    }
+
+    public void makeStandardBorder(JPanel p) {
+        p.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        p.setOpaque(true);
+        p.setBackground(Color.WHITE);
+    }
+
+    public void makeHistoryEntry(DefaultMutableTreeNode originNode, String modification, String newText) {
+        if (modification == "edit") {
+            System.out.println("change \"Edit\" added to history");
+            String path = Arrays.toString(originNode.getPath());
+            LinkedList<String> location = new LinkedList<>();
+            location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
+
+            System.out.println("Path: " + path);
+            System.out.println("New Text: " + newText);
+            System.out.println("added new location: " + location.toString());
+
+            XMLChange change = new XMLChange(modification, location);
+            change.setNewContent(newText);
+            edit.changeHistory.add(change);
+        }
+        else System.out.println("No change was added");
+    }
+    public void makeHistoryEntry(DefaultMutableTreeNode originNode, String modification, DefaultMutableTreeNode toBeAdded) {
+        if (modification == "add") {
+            System.out.println("change \"Addition\" added to history");
+            String path = Arrays.toString(originNode.getPath());
+            LinkedList<String> location = new LinkedList<>();
+            location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
+
+            XMLChange change = new XMLChange(modification, location);
+            change.setNewContent(toBeAdded.getUserObject().toString());
+            edit.changeHistory.add(change);
+            if (toBeAdded.getChildCount()>0){
+                for (int c=0; c< toBeAdded.getChildCount(); c++){
+                    makeHistoryEntry(toBeAdded, "add", (XMLNode) toBeAdded.getChildAt(c));
+                }
+            }
+        }
+        else System.out.println("No change was added");
+    }
+    public void makeHistoryEntry(DefaultMutableTreeNode originNode, String modification) {
+        if (modification == "del") {
+            System.out.println("change \"Deletion\" added to history");
+            String path = Arrays.toString(originNode.getPath());
+            LinkedList<String> location = new LinkedList<>();
+            location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
+
+            XMLChange change = new XMLChange(modification, location);
+            edit.changeHistory.add(change);
+        }
     }
     public void makeTree(Document dom){
         myTree = new XmlJTree(dom);
         myTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
             public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
-                jTree1ValueChanged(evt);
+                jTree1ValueChanged();
             }
         });
         scrollPaneTop.setViewportView(myTree);
     }
-    public void jTree1ValueChanged(TreeSelectionEvent tse ) {
-        int labelCount =0;
+    public void jTree1ValueChanged() {
+        labelCount = 0;
         argumentPane.removeAll();
-        XmlNode node = (XmlNode) myTree.getLastSelectedPathComponent();
-        argumentPane.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.BLACK, 1),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        argumentPane.setOpaque(true);
-        argumentPane.setBackground(Color.WHITE);
-        argumentPane.setBorder(BorderFactory.createTitledBorder(node.getUserObject().toString()));
-
+        XMLNode node = (XMLNode) myTree.getLastSelectedPathComponent();
+        makeStandardBorder(argumentPane);
         if (node.getUserObject().toString().startsWith("@")) {
             DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getFirstChild();
             addLabeledTextField(node.getUserObject().toString(), child);
-            labelCount +=1;
         }
         else if (node.getUserObject().toString().startsWith("#")){
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
             addLabeledTextField(parent.getUserObject().toString(), node);
-            labelCount +=1;
         }
         else if (node.getUserObject().toString().startsWith(":")){
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
             addLabeledTextField(parent.getUserObject().toString(), node);
-            labelCount +=1;
         }
         else {
+            JPanel titlePanel = new JPanel();
+            titlePanel.setLayout(new BorderLayout());
+            JToggleButton titleButton = new JToggleButton(node.getUserObject().toString());
+            titleButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    AbstractButton abstractButton = (AbstractButton) e.getSource();
+                    boolean selected = abstractButton.getModel().isSelected();
+
+                    addButton.addActionListener(event -> {
+
+                        JTextField xField = new JTextField(5);
+                        JTextField yField = new JTextField(5);
+
+                        JPanel myPanel = new JPanel();
+                        myPanel.add(new JLabel("Name:"));
+                        myPanel.add(xField);
+                        myPanel.add(Box.createHorizontalStrut(15)); // a spacer
+                        myPanel.add(new JLabel(":Value:"));
+                        myPanel.add(yField);
+
+                        int confirmed = JOptionPane.showConfirmDialog(null, myPanel,
+                                "Please Enter Name and Value", JOptionPane.OK_CANCEL_OPTION);
+                        if (confirmed == JOptionPane.OK_OPTION) {
+                            DefaultMutableTreeNode newNodeLabel = new DefaultMutableTreeNode();
+                            DefaultMutableTreeNode newNodeValue = new DefaultMutableTreeNode();
+                            newNodeLabel.add(newNodeValue);
+                            newNodeLabel.setUserObject(xField.getText());
+                            newNodeValue.setUserObject(yField.getText());
+                            node.add(newNodeLabel);
+                            makeHistoryEntry(node, "add", newNodeLabel);
+
+
+                            addLabeledTextField(newNodeValue.getUserObject().toString(), newNodeLabel);
+                            SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
+                            scrollPaneBottom.setViewportView(argumentPane);
+                        }
+                    });
+
+                    if (selected) {
+                        titlePanel.add(addButton, BorderLayout.EAST);
+                        titlePanel.repaint();
+                        argumentPane.revalidate();
+                        argumentPane.repaint();
+
+                    }
+                    else if (!selected) {
+                        titlePanel.remove(addButton);
+                        titlePanel.repaint();
+                        argumentPane.revalidate();
+                        argumentPane.repaint();
+                    }
+                }
+            });
+            titlePanel.add(titleButton, BorderLayout.WEST);
+            argumentPane.add(titlePanel);
+            labelCount +=1;
             for (int c=0; c<node.getChildCount();c++) {
-                XmlNode child = (XmlNode) node.getChildAt(c);
+                XMLNode child = (XMLNode) node.getChildAt(c);
                 if (child.getUserObject().toString().startsWith("@")) {
                     DefaultMutableTreeNode childChild = (DefaultMutableTreeNode) child.getFirstChild();
                     addLabeledTextField(child.getUserObject().toString(), childChild);
-                    labelCount +=1;
                 }
                 else if (child.getUserObject().toString().startsWith(":")) {
                     addLabeledTextField(node.getUserObject().toString(), child);
-                    labelCount +=1;
                 }
                 else if (child.getUserObject().toString().startsWith("#")) {
                     addLabeledTextField(node.getUserObject().toString(), child);
-                    labelCount +=1;
                 }
             }
         }
-
         SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
         scrollPaneBottom.setViewportView(argumentPane);
         textField.setText((String) node.getUserObject());
     }
     private void addLabeledTextField(String labelText, DefaultMutableTreeNode selectedNode) {
-
         JLabel label = new JLabel(labelText);
         label.setPreferredSize(new Dimension(100, label.getPreferredSize().height));
-        JTextField textField = new JTextField(selectedNode.getUserObject().toString());
+        NodedTextField textField = new NodedTextField((XMLNode) selectedNode);
+        textField.setBorder(BorderFactory.createCompoundBorder(fieldBorder, new EmptyBorder(0, 10, 0, 0)));
         textField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                String new_text = textField.getText();
-                // System.out.println(myTree.getAnchorSelectionPath() + "\t" + new_text);
-                System.out.println(selectedNode.getPath().toString());
-                edit.changeHistory.put(myTree.getAnchorSelectionPath().toString(), new_text);
-                selectedNode.setUserObject(new_text);
+                String newText = textField.getText();
+                makeHistoryEntry(textField.getNode(),"edit" , newText);
+                textField.getNode().setUserObject(newText);
+                System.out.println("change detected");
             }
         });
-        textField.setBorder(BorderFactory.createCompoundBorder(fieldBorder, new EmptyBorder(0, 10, 0, 0)));
 
         label.setLabelFor(textField);
         label.setBorder(BorderFactory.createCompoundBorder(fieldBorder, new EmptyBorder(0, 0, 0, 10)));
+
         JPanel fieldPanel = new JPanel(new BorderLayout());
         fieldPanel.add(label, BorderLayout.WEST);
         fieldPanel.add(textField, BorderLayout.CENTER);
         fieldPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
         fieldPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                boolean clicked = false;
                 if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (selectedPanel != null) {
+                        selectedPanel.setBackground(null);
+                        selectedPanel.remove(deleteButton);
+                    }
                     JPanel clickedPanel = (JPanel) e.getSource();
                     clickedPanel.setBackground(Color.LIGHT_GRAY);
+                    selectedPanel = clickedPanel;
 
                     // Add a button to delete the labeled text field
-                    JButton deleteButton = new JButton("Delete");
+                    deleteButton = new JButton("Delete");
                     deleteButton.addActionListener(event -> {
                         argumentPane.remove(clickedPanel);
-                        argumentPane.revalidate();
-                        argumentPane.repaint();
+                        labelCount -= 1;
+                        SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
+                        scrollPaneBottom.setViewportView(argumentPane);
                     });
-
                     // Add the button to the right of the labeled text field
                     fieldPanel.add(deleteButton, BorderLayout.EAST);
                     fieldPanel.revalidate();
@@ -356,5 +451,6 @@ public class GUI extends javax.swing.JFrame{
             }
         });
         argumentPane.add(fieldPanel);
+        labelCount +=1;
     }
 }

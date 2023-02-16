@@ -1,5 +1,6 @@
 package de.qbic.xml_edit;
 
+import com.formdev.flatlaf.intellijthemes.FlatLightFlatIJTheme;
 import loci.common.DataTools;
 import loci.common.DebugTools;
 import loci.common.Location;
@@ -32,13 +33,16 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.StringTokenizer;
 
 public class Editor {
 
@@ -86,7 +90,7 @@ public class Editor {
     private String map = null;
     private String format = null;
     private String cachedir = null;
-    public LinkedHashMap changeHistory;
+    public LinkedList<XMLChange> changeHistory;
     public Document xml_doc;
 
     public Element xmlElement;
@@ -853,8 +857,8 @@ public class Editor {
                 DebugTools.setRootLevel("INFO");
             }
             xml = service.getOMEXML((MetadataRetrieve) ms);
-            LOGGER.info("First XML-Output");
-            LOGGER.info("{}", XMLTools.indentXML(xml, xmlSpaces, true));
+            //LOGGER.info("First XML-Output");
+            //LOGGER.info("{}", XMLTools.indentXML(xml, xmlSpaces, true));
 
 
             if (omexmlOnly) {
@@ -903,7 +907,7 @@ public class Editor {
         return pixelData;
     }
 
-    public void applyChange(LinkedList<String> query, String change, Node n) {
+    public void applyChange(LinkedList<String> query, String change, String modificationType, Node n, Document root) {
         System.out.println("Query: " + query.toString());
         System.out.println("change: " + change);
         System.out.println("Node: " + n.getNodeName());
@@ -911,56 +915,21 @@ public class Editor {
         boolean queryFound = false;
         // OME
         if (query.size() == 1) {
-            System.out.println("Got him! -------------------------------------");
-            System.out.println("Node Name: " + n.getNodeName());
-            System.out.println("Attributes: " + n.getAttributes().toString());
-            System.out.println("Node Value: " + n.getNodeValue());
-            System.out.println("Prefix: " + n.getPrefix());
-            System.out.println("Text content: " + n.getTextContent().toString());
-            System.out.println("Change: " + change);
-
-            // n.setNodeValue(change);
             if (change.contains("@")) {
                 String oldNodeName = query.get(0).replace("@", "").split(" = ")[0];
                 String oldNodeValue = query.get(0).replace("@", "").split(" = ")[1];
 
                 String newNodeName = change.replace("@", "").split(" = ")[0];
                 String newNodeValue = change.replace("@", "").split(" = ")[1];
-
-                System.out.println("--------------------- inner ----------------------");
-                System.out.println("Attribute Node: " + n.getAttributes().getNamedItem(oldNodeName).getNodeName());
-                System.out.println("Attribute Node: " + n.getAttributes().getNamedItem(oldNodeName).getNodeValue());
-                System.out.println("Attribute Node: " + n.getAttributes().getNamedItem(oldNodeName).getTextContent());
-
                 n.getAttributes().getNamedItem(oldNodeName).setNodeValue(newNodeValue);
-                xml_doc.renameNode(n.getAttributes().getNamedItem(oldNodeName), n.getAttributes().getNamedItem(oldNodeName).getNamespaceURI(), newNodeName);
 
-                System.out.println("-------------------- inner after ------------------------");
-                System.out.println("Attribute Node: " + n.getAttributes().getNamedItem(newNodeName).getNodeName());
-                System.out.println("Attribute Node: " + n.getAttributes().getNamedItem(newNodeName).getNodeValue());
-                System.out.println("Attribute Node: " + n.getAttributes().getNamedItem(newNodeName).getTextContent());
-
-                // xml_doc.renameNode(n, n.getNamespaceURI(), newNodeName);
+                root.renameNode(n.getAttributes().getNamedItem(oldNodeName),
+                        n.getAttributes().getNamedItem(oldNodeName).getNamespaceURI(),
+                        newNodeName);
             }
-
-
-            // n.setPrefix(change);
-            // n.setTextContent(change);
-
-            System.out.println("Any Change? -------------------------------------");
-            System.out.println("Node Name: " + n.getNodeName());
-            System.out.println("Attributes: " + n.getAttributes().toString());
-            System.out.println("Node Value: " + n.getNodeValue());
-            System.out.println("Prefix: " + n.getPrefix());
-            System.out.println("Text content: " + n.getTextContent().toString());
-
-
-
             return;
-            // add the change here
         }
         else {
-
             for (int c=0; c<n.getChildNodes().getLength(); c++) {
                 for (int i=0; i< c; i++) {
                     System.out.print("--");
@@ -971,7 +940,7 @@ public class Editor {
                     queryFound = true;
                     System.out.println("Query found");
                     query.remove(0);
-                    applyChange(query, change, n.getChildNodes().item(c));
+                    applyChange(query, change, modificationType, n.getChildNodes().item(c), root);
                     return;
                 }
             }
@@ -979,10 +948,45 @@ public class Editor {
         // query not in graph --> make new node containing the change
         if (queryFound == false) {
             System.out.println("Query couldnt be found, no change was made");
-            //         n.appendChild(xml_doc.createElement(change));
         }
+    }
 
+    public void applyChange(XMLChange change, Document root, Node n, LinkedList<String> query) {
+        System.out.println("---------------------------------------------------------------------------------------");
+        System.out.println("Remaining Query: " + query.toString());
+        System.out.println("Current Node: " + n.getNodeName());
 
+        // OME
+        if (query.size() == 0) {
+            System.out.println("Change was made:");
+            if (change.modificationType == "addition") {
+                Node newNode = (Node) new XMLNode(change.getNewContent());
+                n.appendChild(newNode);
+            }
+            else if (change.modificationType == "edit") {
+                n.setNodeValue(change.getNewContent());
+            }
+            else if (change.modificationType == "del") {
+                n.getParentNode().removeChild(n);
+            }
+            // WE are at the right place --> apply change here
+            return;
+        }
+        else {
+            // GO DEEPER
+            for (int c=0; c<n.getChildNodes().getLength(); c++) {
+                System.out.println("Next Query item: " + query.get(0).replace("@", ""));
+                System.out.println("Node Child: " + n.getChildNodes().item(c).getNodeName());
+                if (query.get(0).replace("@", "").equals(n.getChildNodes().item(c).getNodeName())) {
+                    System.out.println("Next Part found");
+                    query.remove(0);
+                    applyChange(change, root, n.getChildNodes().item(c), query);
+                    return;
+                }
+            }
+        }
+        // query not in graph --> make new node containing the change
+        System.out.println("Query couldnt be found, no change was made");
     }
     public void exportToOmeTiff(String path) throws Exception {
 
@@ -998,7 +1002,7 @@ public class Editor {
 
         System.out.println("XML SCHEMA: ");
         System.out.println(XMLTools.indentXML(omexmlMeta.getRoot().toString()));
-
+        /*
         Object change;
 
 
@@ -1009,6 +1013,12 @@ public class Editor {
 
             applyChange(query,(String) change, xml_doc);
 
+        }
+
+         */
+
+        for (XMLChange c : changeHistory) {
+            applyChange(c.getLocation(), c.getNewContent(), c.modificationType, xml_doc, xml_doc);
         }
 
         System.out.println("Second XML-Output");
@@ -1045,6 +1055,27 @@ public class Editor {
         System.out.println("[done]");
     }
 
+    public void printOMEXML() throws Exception {
+
+        // record metadata to OME-XML format
+        ServiceFactory factory = new ServiceFactory();
+        OMEXMLService service = factory.getInstance(OMEXMLService.class);
+        IMetadata omexmlMeta = service.createOMEXMLMetadata();
+
+        System.out.println("XML SCHEMA: ");
+        System.out.println(XMLTools.indentXML(omexmlMeta.getRoot().toString()));
+        Document example_xml_doc = xml_doc;
+
+        for (XMLChange c : changeHistory) {
+            System.out.println("apply Change: ");
+            applyChange(c, example_xml_doc, example_xml_doc, c.getLocation());
+        }
+
+        //System.out.println("###### Second XML-Output ################################################################");
+        //System.out.println(XMLTools.indentXML(XMLTools.getXML(example_xml_doc)));
+        myGUI.setVisible(true);
+    }
+
     public void readImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException {
         String[] args = new String[2];
         args[0] = path; // the id parameter
@@ -1066,7 +1097,7 @@ public class Editor {
         printOriginalMetadata();
         String xml = getOMEXML();
         xml_doc = XMLTools.parseDOM(xml);
-        changeHistory = new LinkedHashMap<>();
+        changeHistory = new LinkedList<>();
         myGUI.makeTree(xml_doc);
     }
     public void readSchema(String path) throws Exception {
@@ -1075,10 +1106,15 @@ public class Editor {
         xml_doc = db.parse(new File(path));
         String xml = XMLTools.getXML(xml_doc);
         System.out.println(xml);
-        changeHistory = new LinkedHashMap<>();
+        changeHistory = new LinkedList<>();
         myGUI.makeTree(xml_doc);
     }
     public void testEdit() {
+        try {
+            UIManager.setLookAndFeel( new FlatLightFlatIJTheme());
+        } catch( Exception ex ) {
+            System.err.println( "Failed to initialize theme. Using fallback." );
+        }
         myGUI = new GUI(this);
         myGUI.setVisible(true);
     }
