@@ -11,11 +11,12 @@ import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-class XmlJTree extends JTree {
+class XMLTree extends JTree {
 
     XMLTreeModel dtModel = null;
 
-    public XmlJTree(Document xml) {
+    public XMLTree(Document xml) {
+        this.setCellRenderer(new XMLTreeRenderer());
         if (xml != null)
             setTree(xml);
     }

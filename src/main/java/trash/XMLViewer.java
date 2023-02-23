@@ -1,4 +1,4 @@
-package de.qbic.xml_edit;
+package trash;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

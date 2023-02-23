@@ -1,4 +1,4 @@
-package de.qbic.xml_edit; // DONT CHANGE ANYTHING HERE = BACKUP FILE
+package trash;
 /*
  * #%L
  * Bio-Formats command line tools for reading and converting files

@@ -1,6 +1,5 @@
 package de.qbic.xml_edit;
 
-import com.formdev.flatlaf.intellijthemes.FlatLightFlatIJTheme;
 import loci.common.DataTools;
 import loci.common.DebugTools;
 import loci.common.Location;
@@ -22,10 +21,14 @@ import loci.formats.out.OMETiffWriter;
 import loci.formats.services.OMEXMLService;
 import loci.formats.services.OMEXMLServiceImpl;
 import loci.formats.tools.AsciiImage;
+import net.imagej.ImageJ;
+import net.imglib2.type.numeric.RealType;
 import ome.xml.meta.MetadataRoot;
 import ome.xml.meta.OMEXMLMetadataRoot;
 import ome.xml.model.OMEModel;
 import ome.xml.model.OMEModelImpl;
+import org.scijava.command.Command;
+import org.scijava.plugin.Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -33,10 +36,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -44,11 +47,12 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 
-public class Editor {
+@Plugin(type = Command.class, menuPath = "Plugins>XML-Editor")
+public class XMLEditor<T extends RealType<T>> implements Command {
 
     // -- Constants --
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageInfo.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XMLEditor.class);
     private static final String NEWLINE = System.getProperty("line.separator");
 
     // -- Fields --
@@ -907,77 +911,47 @@ public class Editor {
         return pixelData;
     }
 
-    public void applyChange(LinkedList<String> query, String change, String modificationType, Node n, Document root) {
-        System.out.println("Query: " + query.toString());
-        System.out.println("change: " + change);
-        System.out.println("Node: " + n.getNodeName());
-
-        boolean queryFound = false;
-        // OME
-        if (query.size() == 1) {
-            if (change.contains("@")) {
-                String oldNodeName = query.get(0).replace("@", "").split(" = ")[0];
-                String oldNodeValue = query.get(0).replace("@", "").split(" = ")[1];
-
-                String newNodeName = change.replace("@", "").split(" = ")[0];
-                String newNodeValue = change.replace("@", "").split(" = ")[1];
-                n.getAttributes().getNamedItem(oldNodeName).setNodeValue(newNodeValue);
-
-                root.renameNode(n.getAttributes().getNamedItem(oldNodeName),
-                        n.getAttributes().getNamedItem(oldNodeName).getNamespaceURI(),
-                        newNodeName);
-            }
-            return;
-        }
-        else {
-            for (int c=0; c<n.getChildNodes().getLength(); c++) {
-                for (int i=0; i< c; i++) {
-                    System.out.print("--");
-                }
-                System.out.println("XML Node Name: " + n.getChildNodes().item(c).getNodeName());
-                System.out.println("change Key first: " + query.get(0));
-                if (query.get(0).equals(n.getChildNodes().item(c).getNodeName())) {
-                    queryFound = true;
-                    System.out.println("Query found");
-                    query.remove(0);
-                    applyChange(query, change, modificationType, n.getChildNodes().item(c), root);
-                    return;
-                }
-            }
-        }
-        // query not in graph --> make new node containing the change
-        if (queryFound == false) {
-            System.out.println("Query couldnt be found, no change was made");
-        }
-    }
-
     public void applyChange(XMLChange change, Document root, Node n, LinkedList<String> query) {
         System.out.println("---------------------------------------------------------------------------------------");
         System.out.println("Remaining Query: " + query.toString());
         System.out.println("Current Node: " + n.getNodeName());
 
-        // OME
-        if (query.size() == 0) {
-            System.out.println("Change was made:");
-            if (change.modificationType == "addition") {
-                Node newNode = (Node) new XMLNode(change.getNewContent());
-                n.appendChild(newNode);
-            }
-            else if (change.modificationType == "edit") {
-                n.setNodeValue(change.getNewContent());
-            }
-            else if (change.modificationType == "del") {
-                n.getParentNode().removeChild(n);
-            }
-            // WE are at the right place --> apply change here
+        if (change.modificationType == "add" && query.size()==0 && change.getNewContent().startsWith("@")) {
+            String attrName = change.getNewContent().split("=")[0].replace("@", "");
+            String attrValue = change.getNewContent().split("=")[1].replace(":", "");
+            ((Element) n).setAttribute(attrName, attrValue);
+            System.out.println("Attributes old: " + n.getAttributes().getNamedItem(attrName));
             return;
+        }
+        else if (change.modificationType == "edit" && query.get(0).startsWith("@")) {
+            String oldNodeName = query.get(0).replace("@", "");
+            String newNodeValue = change.getNewContent();
+            System.out.println("Attributes old: " + n.getAttributes().getNamedItem(oldNodeName));
+            n.getAttributes().getNamedItem(oldNodeName).setNodeValue(newNodeValue);
+            System.out.println("Attributes new: " + n.getAttributes().getNamedItem(oldNodeName));
+            return;
+        }
+        else if (change.modificationType == "del" && query.get(0).startsWith("@")) {
+            ((Element) n).removeAttribute(query.get(0).replace("@", ""));
+            return;
+        }
+        else if (query.get(0).startsWith("#")) {
+            String newNodeValue = change.getNewContent();
+            System.out.println("Attributes old: " + n.getTextContent());
+            n.setTextContent(newNodeValue);
+            System.out.println("Attributes new: " + n.getTextContent());
+            return;
+        }
+        else if (query.get(0).startsWith(":")) {
+            return;
+
         }
         else {
             // GO DEEPER
             for (int c=0; c<n.getChildNodes().getLength(); c++) {
                 System.out.println("Next Query item: " + query.get(0).replace("@", ""));
                 System.out.println("Node Child: " + n.getChildNodes().item(c).getNodeName());
-                if (query.get(0).replace("@", "").equals(n.getChildNodes().item(c).getNodeName())) {
+                if (query.get(0).equals(n.getChildNodes().item(c).getNodeName())) {
                     System.out.println("Next Part found");
                     query.remove(0);
                     applyChange(change, root, n.getChildNodes().item(c), query);
@@ -1002,23 +976,12 @@ public class Editor {
 
         System.out.println("XML SCHEMA: ");
         System.out.println(XMLTools.indentXML(omexmlMeta.getRoot().toString()));
-        /*
-        Object change;
-
-
-        for (Object k: changeHistory.keySet()) {
-            change = changeHistory.get(k);
-            LinkedList<String> query = new LinkedList<String>();
-            query.addAll(Arrays.asList(k.toString().replace("[", "").replace("]", "").split(", ")));
-
-            applyChange(query,(String) change, xml_doc);
-
-        }
-
-         */
 
         for (XMLChange c : changeHistory) {
-            applyChange(c.getLocation(), c.getNewContent(), c.modificationType, xml_doc, xml_doc);
+            System.out.println("apply Change: ");
+            LinkedList<String> query = new LinkedList<>();
+            query.addAll(c.getLocation());
+            applyChange(c, xml_doc, xml_doc, query);
         }
 
         System.out.println("Second XML-Output");
@@ -1068,12 +1031,24 @@ public class Editor {
 
         for (XMLChange c : changeHistory) {
             System.out.println("apply Change: ");
-            applyChange(c, example_xml_doc, example_xml_doc, c.getLocation());
+            LinkedList<String> query = new LinkedList<>();
+            query.addAll(c.getLocation());
+            applyChange(c, example_xml_doc, example_xml_doc, query);
         }
 
-        //System.out.println("###### Second XML-Output ################################################################");
-        //System.out.println(XMLTools.indentXML(XMLTools.getXML(example_xml_doc)));
+        System.out.println("###### Second XML-Output ################################################################");
+        System.out.println(XMLTools.indentXML(XMLTools.getXML(example_xml_doc)));
         myGUI.setVisible(true);
+    }
+
+    public void readXML(String path) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        xml_doc = db.parse(new File(path));
+        String xml = XMLTools.getXML(xml_doc);
+        System.out.println(xml);
+        changeHistory = new LinkedList<>();
+        myGUI.makeTree(xml_doc);
     }
 
     public void readImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException {
@@ -1110,20 +1085,19 @@ public class Editor {
         myGUI.makeTree(xml_doc);
     }
     public void testEdit() {
-        try {
-            UIManager.setLookAndFeel( new FlatLightFlatIJTheme());
-        } catch( Exception ex ) {
-            System.err.println( "Failed to initialize theme. Using fallback." );
-        }
         myGUI = new GUI(this);
         myGUI.setVisible(true);
     }
 
     // -- SaveFileDialogExample method --
-
-    public static void main(String[] args) throws Exception {
+    @Override
+    public void run() {
         DebugTools.enableLogging("INFO");
-        new Editor().testEdit();
+        new XMLEditor().testEdit();
+    }
+    public static void main(String[] args) throws Exception {
+        final ImageJ ij = new ImageJ();
+        ij.command().run(XMLEditor.class, true);
     }
 
 }

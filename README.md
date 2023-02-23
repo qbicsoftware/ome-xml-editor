@@ -10,6 +10,7 @@ by bioformats, but has flaws. Work in progress.
   - Editing the values of argument and text nodes in its xml
   - Exporting the pixel- and meta- data as .ome.tif
   - A GUI that implements the said functionality
+
 ![](data/XML_Editor_14_02_23.png)
 
 ### Update 16.02.23

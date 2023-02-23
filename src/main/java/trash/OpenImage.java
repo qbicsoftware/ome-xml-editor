@@ -1,6 +1,4 @@
-// not Needed
-
-package de.qbic.xml_edit;
+package trash;// not Needed
 
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;

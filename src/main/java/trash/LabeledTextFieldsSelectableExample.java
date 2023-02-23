@@ -1,4 +1,5 @@
-package de.qbic.xml_edit;
+package trash;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -7,7 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class LabeledTextFieldsSelectableExample {
-
     private static JPanel selectedPanel;
     private static JButton deleteButton;
 

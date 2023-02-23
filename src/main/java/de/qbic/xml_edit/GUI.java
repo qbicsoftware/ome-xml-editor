@@ -29,11 +29,11 @@ public class GUI extends javax.swing.JFrame{
 
 
     public static int SCREEN_WIDTH = 1000;
-    public Editor edit;
+    public XMLEditor edit;
     public static int SCREEN_HEIGHT = SCREEN_WIDTH*9/16;
     public static int BUTTON_HEIGHT = 25;
     public Document xml;
-    public XmlJTree myTree;
+    public XMLTree myTree;
     // these are the components we need.
     private JSplitPane splitPane;  // split the window in top and bottom
     private JPanel topPanel;       // container panel for the top
@@ -54,18 +54,18 @@ public class GUI extends javax.swing.JFrame{
     private JMenuItem openImage;
     private static JPanel selectedPanel;
     private static JButton deleteButton;
+    private static ButtonGroup bg = new ButtonGroup();
     int labelCount =0;
 
-    JButton addButton = new JButton("Add Node");
-
-
+    private static JButton addButton = new JButton("Add new Node");
+    private static JButton delButton = new JButton("Delete this attribute");
     Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
 
 
-    public GUI(Editor edit){
+    public GUI(XMLEditor edit){
 
         this.edit = edit;
-        this.setTitle("XML-Editor");
+        this.setTitle("XML-XMLEditor");
         makeMenu();
         // first, lets create the containers:
         // the splitPane devides the window in two components (here: top and bottom)
@@ -89,7 +89,7 @@ public class GUI extends javax.swing.JFrame{
         validateXMLButton = new JMenuItem("Show Schema");
 
         splitPane = new JSplitPane();
-        splitPane.setName("XML-Editor");
+        splitPane.setName("XML-XMLEditor");
         topPanel = new JPanel();
         bottomPanel = new JPanel();
         scrollPaneBottom = new JScrollPane();  // this scrollPane is used to make the text area scrollable
@@ -251,7 +251,7 @@ public class GUI extends javax.swing.JFrame{
         p.setBackground(Color.WHITE);
     }
 
-    public void makeHistoryEntry(DefaultMutableTreeNode originNode, String modification, String newText) {
+    public void makeHistoryEntry(XMLNode originNode, String modification, String newText) {
         if (modification == "edit") {
             System.out.println("change \"Edit\" added to history");
             String path = Arrays.toString(originNode.getPath());
@@ -268,8 +268,19 @@ public class GUI extends javax.swing.JFrame{
         }
         else System.out.println("No change was added");
     }
-    public void makeHistoryEntry(DefaultMutableTreeNode originNode, String modification, DefaultMutableTreeNode toBeAdded) {
+    public void makeHistoryEntry(XMLNode originNode, String modification, XMLNode toBeAdded) {
         if (modification == "add") {
+            if (toBeAdded.getUserObject().toString().startsWith("@")) {
+                System.out.println("change \"Addition\" added to history");
+                String path = Arrays.toString(originNode.getPath());
+                LinkedList<String> location = new LinkedList<>();
+                location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
+                XMLChange change = new XMLChange(modification, location);
+                String newText = toBeAdded.getUserObject().toString()+ "=" +toBeAdded.getFirstChild().getUserObject().toString();
+                change.setNewContent(newText);
+                edit.changeHistory.add(change);
+                return;
+            }
             System.out.println("change \"Addition\" added to history");
             String path = Arrays.toString(originNode.getPath());
             LinkedList<String> location = new LinkedList<>();
@@ -286,19 +297,18 @@ public class GUI extends javax.swing.JFrame{
         }
         else System.out.println("No change was added");
     }
-    public void makeHistoryEntry(DefaultMutableTreeNode originNode, String modification) {
+    public void makeHistoryEntry(XMLNode originNode, String modification) {
         if (modification == "del") {
             System.out.println("change \"Deletion\" added to history");
             String path = Arrays.toString(originNode.getPath());
             LinkedList<String> location = new LinkedList<>();
             location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
-
             XMLChange change = new XMLChange(modification, location);
             edit.changeHistory.add(change);
         }
     }
     public void makeTree(Document dom){
-        myTree = new XmlJTree(dom);
+        myTree = new XMLTree(dom);
         myTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
             public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
                 jTree1ValueChanged();
@@ -311,95 +321,165 @@ public class GUI extends javax.swing.JFrame{
         argumentPane.removeAll();
         XMLNode node = (XMLNode) myTree.getLastSelectedPathComponent();
         makeStandardBorder(argumentPane);
+
         if (node.getUserObject().toString().startsWith("@")) {
-            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getFirstChild();
-            addLabeledTextField(node.getUserObject().toString(), child);
+            XMLNode child = node.getFirstChild();
+            // addLabeledTextField(node.getUserObject().toString(), child);
+            addAttribute(node.getUserObject().toString(), child);
         }
         else if (node.getUserObject().toString().startsWith("#")){
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-            addLabeledTextField(parent.getUserObject().toString(), node);
+            addAttribute(parent.getUserObject().toString(), node);
         }
         else if (node.getUserObject().toString().startsWith(":")){
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-            addLabeledTextField(parent.getUserObject().toString(), node);
+            addAttribute(parent.getUserObject().toString(), node);
         }
         else {
-            JPanel titlePanel = new JPanel();
-            titlePanel.setLayout(new BorderLayout());
-            JToggleButton titleButton = new JToggleButton(node.getUserObject().toString());
-            titleButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    AbstractButton abstractButton = (AbstractButton) e.getSource();
-                    boolean selected = abstractButton.getModel().isSelected();
-
-                    addButton.addActionListener(event -> {
-
-                        JTextField xField = new JTextField(5);
-                        JTextField yField = new JTextField(5);
-
-                        JPanel myPanel = new JPanel();
-                        myPanel.add(new JLabel("Name:"));
-                        myPanel.add(xField);
-                        myPanel.add(Box.createHorizontalStrut(15)); // a spacer
-                        myPanel.add(new JLabel(":Value:"));
-                        myPanel.add(yField);
-
-                        int confirmed = JOptionPane.showConfirmDialog(null, myPanel,
-                                "Please Enter Name and Value", JOptionPane.OK_CANCEL_OPTION);
-                        if (confirmed == JOptionPane.OK_OPTION) {
-                            DefaultMutableTreeNode newNodeLabel = new DefaultMutableTreeNode();
-                            DefaultMutableTreeNode newNodeValue = new DefaultMutableTreeNode();
-                            newNodeLabel.add(newNodeValue);
-                            newNodeLabel.setUserObject(xField.getText());
-                            newNodeValue.setUserObject(yField.getText());
-                            node.add(newNodeLabel);
-                            makeHistoryEntry(node, "add", newNodeLabel);
-
-
-                            addLabeledTextField(newNodeValue.getUserObject().toString(), newNodeLabel);
-                            SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
-                            scrollPaneBottom.setViewportView(argumentPane);
-                        }
-                    });
-
-                    if (selected) {
-                        titlePanel.add(addButton, BorderLayout.EAST);
-                        titlePanel.repaint();
-                        argumentPane.revalidate();
-                        argumentPane.repaint();
-
-                    }
-                    else if (!selected) {
-                        titlePanel.remove(addButton);
-                        titlePanel.repaint();
-                        argumentPane.revalidate();
-                        argumentPane.repaint();
-                    }
-                }
-            });
-            titlePanel.add(titleButton, BorderLayout.WEST);
-            argumentPane.add(titlePanel);
-            labelCount +=1;
-            for (int c=0; c<node.getChildCount();c++) {
-                XMLNode child = (XMLNode) node.getChildAt(c);
-                if (child.getUserObject().toString().startsWith("@")) {
-                    DefaultMutableTreeNode childChild = (DefaultMutableTreeNode) child.getFirstChild();
-                    addLabeledTextField(child.getUserObject().toString(), childChild);
-                }
-                else if (child.getUserObject().toString().startsWith(":")) {
-                    addLabeledTextField(node.getUserObject().toString(), child);
-                }
-                else if (child.getUserObject().toString().startsWith("#")) {
-                    addLabeledTextField(node.getUserObject().toString(), child);
-                }
-            }
+            addTitleButton(node);
         }
         SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
         scrollPaneBottom.setViewportView(argumentPane);
         textField.setText((String) node.getUserObject());
     }
-    private void addLabeledTextField(String labelText, DefaultMutableTreeNode selectedNode) {
+    public void addAttribute(String labelText, XMLNode node) {
+        JPanel attributePanel = new JPanel();
+        attributePanel.setLayout(new BorderLayout());
+        JToggleButton attrButton = new JToggleButton(labelText);
+        NodedTextField textField = new NodedTextField(node);
+        bg.add(attrButton);
+        textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                String newText = textField.getText();
+                makeHistoryEntry(textField.getNode(),"edit" , newText);
+                textField.getNode().setUserObject(newText);
+                System.out.println("change detected");
+            }
+        });
+        attrButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AbstractButton abstractButton = (AbstractButton) e.getSource();
+                boolean selected = abstractButton.getModel().isSelected();
+
+                delButton.addActionListener(event -> {
+                    makeHistoryEntry(node, "del");
+                    XMLNode attrNode = node;
+                    XMLNode parentNode = node.getParent();
+                    parentNode.remove(attrNode);
+                    argumentPane.remove(attributePanel);
+                    labelCount -= 1;
+                    SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
+                    scrollPaneBottom.setViewportView(argumentPane);
+                });
+                if (selected) {
+                    attributePanel.add(delButton, BorderLayout.EAST);
+                    attributePanel.repaint();
+                    argumentPane.revalidate();
+                    argumentPane.repaint();
+                }
+                else if (!selected) {
+                    attributePanel.repaint();
+                    argumentPane.revalidate();
+                    argumentPane.repaint();
+                }
+            }
+        });
+        attributePanel.setPreferredSize(new Dimension(400, 50));
+        attrButton.setPreferredSize(new Dimension(150, attrButton.getHeight()));
+        delButton.setPreferredSize(new Dimension(200, delButton.getHeight()));
+
+        attributePanel.add(attrButton, BorderLayout.WEST);
+        attributePanel.add(textField, BorderLayout.CENTER);
+        argumentPane.add(attributePanel);
+        labelCount +=1;
+    }
+    private void addTitleButton(XMLNode node) {
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BorderLayout());
+        JToggleButton titleButton = new JToggleButton(node.getUserObject().toString());
+        titleButton.setMinimumSize(new Dimension(BUTTON_HEIGHT*5, BUTTON_HEIGHT*5));
+        bg.add(titleButton);
+        titleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AbstractButton abstractButton = (AbstractButton) e.getSource();
+                boolean selected = abstractButton.getModel().isSelected();
+                addButton.addActionListener(event -> {
+                    JTextField AttrField = new JTextField(5);
+                    JTextField ValField = new JTextField(5);
+                    JPanel myPanel = new JPanel();
+                    myPanel.add(new JLabel("Attribute:"));
+                    myPanel.add(AttrField);
+                    myPanel.add(Box.createHorizontalStrut(15)); // a spacer
+                    myPanel.add(new JLabel(":Value:"));
+                    myPanel.add(ValField);
+                    int confirmed = JOptionPane.showConfirmDialog(null, myPanel,
+                            "Please Enter Attribute and Value", JOptionPane.OK_CANCEL_OPTION);
+                    if (confirmed == JOptionPane.OK_OPTION) {
+                        XMLNode newNodeAttr = new XMLNode();
+                        XMLNode newNodeValue = new XMLNode();
+                        newNodeAttr.add(newNodeValue);
+                        newNodeAttr.setUserObject("@"+AttrField.getText().replace("@", ""));
+                        newNodeValue.setUserObject(":"+ValField.getText().replace(":", ""));
+                        node.add(newNodeAttr);
+                        makeHistoryEntry(node, "add", (XMLNode) newNodeAttr);
+                        addAttribute(newNodeAttr.getUserObject().toString(), (XMLNode) newNodeValue);
+                        SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
+                        scrollPaneBottom.setViewportView(argumentPane);
+                    }
+                });
+                delButton.addActionListener(event -> {
+                    makeHistoryEntry(node, "del");
+                    XMLNode attrNode = node;
+                    XMLNode parentNode = node.getParent();
+                    parentNode.remove(attrNode);
+                    argumentPane.remove(titlePanel);
+                    labelCount -= 1;
+                    SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
+                    scrollPaneBottom.setViewportView(argumentPane);
+                });
+
+                if (selected) {
+                    titlePanel.add(delButton, BorderLayout.EAST);
+                    titlePanel.add(addButton, BorderLayout.WEST);
+                    titlePanel.repaint();
+                    argumentPane.revalidate();
+                    argumentPane.repaint();
+                }
+                else if (!selected) {
+                    titlePanel.remove(addButton);
+                    titlePanel.repaint();
+                    argumentPane.revalidate();
+                    argumentPane.repaint();
+                }
+            }
+        });
+        titleButton.setBorder(fieldBorder);
+        titlePanel.setPreferredSize(new Dimension(400, 50));
+        addButton.setPreferredSize(new Dimension(200, addButton.getHeight()));
+        delButton.setPreferredSize(new Dimension(200, delButton.getHeight()));
+        titleButton.setPreferredSize(new Dimension(titleButton.getWidth(), titleButton.getHeight()));
+
+        titlePanel.add(titleButton, BorderLayout.CENTER);
+        argumentPane.add(titlePanel);
+        labelCount +=1;
+        for (int c=0; c<node.getChildCount();c++) {
+            XMLNode child = (XMLNode) node.getChildAt(c);
+            if (child.getUserObject().toString().startsWith("@")) {
+                DefaultMutableTreeNode childChild = (DefaultMutableTreeNode) child.getFirstChild();
+                addAttribute(child.getUserObject().toString(), (XMLNode) childChild);
+            }
+            else if (child.getUserObject().toString().startsWith(":")) {
+                addAttribute(node.getUserObject().toString(), child);
+            }
+            else if (child.getUserObject().toString().startsWith("#")) {
+                addAttribute(node.getUserObject().toString(), child);
+            }
+        }
+
+    }
+    private void addLabeledTextField(String labelText, XMLNode selectedNode) {
         JLabel label = new JLabel(labelText);
         label.setPreferredSize(new Dimension(100, label.getPreferredSize().height));
         NodedTextField textField = new NodedTextField((XMLNode) selectedNode);
@@ -417,11 +497,11 @@ public class GUI extends javax.swing.JFrame{
         label.setBorder(BorderFactory.createCompoundBorder(fieldBorder, new EmptyBorder(0, 0, 0, 10)));
 
         JPanel fieldPanel = new JPanel(new BorderLayout());
+        fieldPanel.setSize(BUTTON_HEIGHT, BUTTON_HEIGHT);
+
+        makeStandardBorder(fieldPanel);
         fieldPanel.add(label, BorderLayout.WEST);
         fieldPanel.add(textField, BorderLayout.CENTER);
-        fieldPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         fieldPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -432,12 +512,20 @@ public class GUI extends javax.swing.JFrame{
                         selectedPanel.remove(deleteButton);
                     }
                     JPanel clickedPanel = (JPanel) e.getSource();
-                    clickedPanel.setBackground(Color.LIGHT_GRAY);
+                    clickedPanel.setBackground(Color.getHSBColor(180, 10, 10));
                     selectedPanel = clickedPanel;
 
                     // Add a button to delete the labeled text field
                     deleteButton = new JButton("Delete");
                     deleteButton.addActionListener(event -> {
+                        for (Component c :clickedPanel.getComponents()) {
+                            if (c.getClass()==NodedTextField.class) {
+                                makeHistoryEntry(((NodedTextField) c).getNode().getParent(), "del");
+                                XMLNode attrNode = ((NodedTextField) c).getNode().getParent();
+                                XMLNode parentNode = attrNode.getParent();
+                                parentNode.remove(attrNode);
+                            }
+                        }
                         argumentPane.remove(clickedPanel);
                         labelCount -= 1;
                         SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);

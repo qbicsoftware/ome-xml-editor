@@ -15,7 +15,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
 
-public class XsdToXmlConverter {
+public class XSDToXMLConverter {
     public static void main(String[] args) throws Exception {
         // Load the XSD file
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);

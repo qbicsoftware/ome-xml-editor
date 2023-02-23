@@ -1,4 +1,4 @@
-package de.qbic.xml_edit; /**
+package trash; /**
  * @(#)SaveFileDialogExample.java 1.0
  * This code is written by www.codejava.net
  *

@@ -14,6 +14,10 @@ public class XMLNode extends DefaultMutableTreeNode {
         super(newNode);
         attributes = new ArrayList<>();
     }
+    public XMLNode() {
+        super();
+        attributes = new ArrayList<>();
+    }
     public ArrayList<String> getAttributes() {
         return this.attributes ;
     }
@@ -27,5 +31,17 @@ public class XMLNode extends DefaultMutableTreeNode {
 
     public void addAttributes(String attr) {
         this.attributes.add(attr);
+    }
+
+    @Override
+    public XMLNode getFirstChild() {
+        return (XMLNode) super.getFirstChild();
+    }
+    @Override
+    public XMLNode getParent() {
+        return (XMLNode) super.getParent();
+    }
+    public String getType() {
+        return this.nodeType;
     }
 }
