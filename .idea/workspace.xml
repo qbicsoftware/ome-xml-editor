@@ -4,34 +4,123 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="first version of a prototype">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__jitk_jitk_tps_3_0_4_SNAPSHOT.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLTreeRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_googlecode_efficient_java_matrix_library_ejml_0_24.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_googlecode_efficient_java_matrix_library_ejml_0_25.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__jitk_jitk_tps_3_0_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__log4j_log4j_1_2_17.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__ome_bio_formats_tools_6_5_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__ome_bioformats_package_6_5_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__xalan_serializer_2_7_2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__xalan_xalan_2_7_2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__xml_apis_xml_apis_1_3_04.xml" beforeDir="false" />
+    <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="Clean up, tested as Fiji plugin">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_api_2_18_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_xmlbeans_xmlbeans_5_1_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/trash/XSDToXML.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/trash/XsdToXmlGenerator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/AffineTransform.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Annotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/AnnotationRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Arc.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/BasicAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/BinData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/BinaryFile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/BooleanAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Channel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ChannelRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/CommentAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Dataset.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/DatasetRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Detector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/DetectorSettings.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Dichroic.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/DichroicRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/DoubleAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Ellipse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Experiment.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ExperimentRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Experimenter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ExperimenterGroup.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ExperimenterGroupRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ExperimenterRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/External.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Filament.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/FileAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Filter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/FilterRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/FilterSet.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/FilterSetRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Folder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/FolderRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/FontFamily.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/GenericExcitationSource.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Image.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ImageRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ImagingEnvironment.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Instrument.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/InstrumentRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Label.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Laser.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Leader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/LightEmittingDiode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/LightPath.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/LightSource.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/LightSourceSettings.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Line.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ListAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/LongAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ManufacturerSpec.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Map.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/MapAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Marker.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Mask.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/MicrobeamManipulation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/MicrobeamManipulationRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Microscope.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/NamingConvention.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/NumericAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/OME.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ObjectFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Objective.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ObjectiveSettings.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/PixelType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Pixels.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Plane.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Plate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/PlateAcquisition.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Point.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Polygon.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Polyline.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Project.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ProjectRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Pump.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ROI.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ROIRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Reagent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/ReagentRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Rectangle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Reference.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Rights.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Screen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Settings.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Shape.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/StageLabel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/StructuredAnnotations.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/TagAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/TermAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/TextAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/TiffData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/TimestampAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/TransmittanceRange.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/TypeAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/UnitsAngle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/UnitsElectricPotential.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/UnitsPower.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/UnitsTemperature.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/Well.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/WellSample.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/WellSampleRef.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/XMLAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/org/openmicroscopy/schemas/ome/_2016_06/package-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/XML_metadata_editor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/XML_metadata_editor.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/ConvertToOmeTiff.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/ConvertToOmeTiff.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/Editor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLEditor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/FileExport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/FileExport.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/GUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/ImageInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/ImageInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/LabeledTextFieldsSelectableExample.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/LabeledTextFieldsSelectableExample.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/OpenImage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/OpenImage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/SaveFileDialogExample.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/SaveFileDialogExample.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLViewer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/XMLViewer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XmlJTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XsdToXmlConverter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XSDToXMLConverter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/old.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/old.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLEditor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLTreeRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XMLTreeRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit/XSDToXMLConverter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/trash/XSDToXMLConverter.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,11 +178,11 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/aaron/Documents/Work/HiWi/QBiC/Metadata_Curation/XML_metadata_editor/data&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/aaron/Downloads/github-copilot-intellij-1.2.3.2385.zip&quot;,
     &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propCompiler&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -102,6 +191,7 @@
       <recent name="$PROJECT_DIR$/src/main/java/de/qbic/xml_edit" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/src/main/java/trash" />
       <recent name="$PROJECT_DIR$/src/main/java" />
       <recent name="$PROJECT_DIR$/src/main/java/com/mycompany/imagej" />
@@ -147,12 +237,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="XMLViewer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="XMLViewer" />
+    <configuration name="XSDToXML" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="trash.XSDToXML" />
       <module name="XML_metadata_editor" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value=".*" />
+          <option name="PATTERN" value="trash.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -160,12 +250,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="XSDToXMLConverter" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="de.qbic.xml_edit.XSDToXMLConverter" />
+    <configuration name="XsdToXmlGenerator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="trash.XsdToXmlGenerator" />
       <module name="XML_metadata_editor" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value=".*" />
+          <option name="PATTERN" value="trash.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -235,10 +325,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.XMLEditor" />
+        <item itemvalue="Application.XSDToXML" />
+        <item itemvalue="Application.XsdToXmlGenerator" />
         <item itemvalue="Application.LabeledTextFieldsSelectableExample" />
         <item itemvalue="Application.LabeledTextFieldsExample" />
-        <item itemvalue="Application.XSDToXMLConverter" />
-        <item itemvalue="Application.XMLViewer" />
       </list>
     </recent_temporary>
   </component>
@@ -321,7 +411,14 @@
       <option name="project" value="LOCAL" />
       <updated>1676388154964</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Clean up, tested as Fiji plugin">
+      <created>1677156267287</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1677156267287</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -340,7 +437,8 @@
     <MESSAGE value="Create Test Plugin" />
     <MESSAGE value="Create maven structure" />
     <MESSAGE value="first version of a prototype" />
-    <option name="LAST_COMMIT_MESSAGE" value="first version of a prototype" />
+    <MESSAGE value="Clean up, tested as Fiji plugin" />
+    <option name="LAST_COMMIT_MESSAGE" value="Clean up, tested as Fiji plugin" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/XML_metadata_editor$Test2.ic" NAME="Test2 Coverage Results" MODIFIED="1670423461884" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">

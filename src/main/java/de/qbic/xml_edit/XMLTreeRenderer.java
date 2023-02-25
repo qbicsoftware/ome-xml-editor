@@ -21,11 +21,23 @@ public class XMLTreeRenderer extends DefaultTreeCellRenderer {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 
         if (node.getUserObject().toString().startsWith("@")) {
+            String text = String.format(SPAN_FORMAT, "green", node.getUserObject());
+            text += " [" + String.format(SPAN_FORMAT, "orange", "Argument") + "]";
+            this.setText("<html>" + text + "</html>");
+            this.setIcon(employeeIcon);
         }
         else if (node.getUserObject().toString().startsWith("#")) {
+            String text = String.format(SPAN_FORMAT, "red", node.getUserObject());
+            text += " [" + String.format(SPAN_FORMAT, "orange", "Text") + "]";
+            this.setText("<html>" + text + "</html>");
+            this.setIcon(employeeIcon);
 
         }
         else if (node.getUserObject().toString().startsWith(":")) {
+            String text = String.format(SPAN_FORMAT, "grey", node.getUserObject());
+            text += " [" + String.format(SPAN_FORMAT, "orange", "Value") + "]";
+            this.setText("<html>" + text + "</html>");
+            this.setIcon(employeeIcon);
 
         }
         else {

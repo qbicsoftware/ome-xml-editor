@@ -10,8 +10,6 @@ import org.xml.sax.SAXException;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
@@ -41,24 +39,25 @@ public class GUI extends javax.swing.JFrame{
     private JScrollPane scrollPaneBottom; // makes the text scrollable
     private JScrollPane scrollPaneTop; // makes the text scrollable
     private NodedTextField textField;     // the text
-    private JPanel contentPanelLower;      // under the text a container for all the input elements
     private JPanel contentPanelHigher;
     private JMenuItem saveButton;         // and a save  xml changes button
     private JMenuItem openSchemaButton;         // open new image file button
-    private JMenuItem printCurrentXML;
+    private JMenuItem showCurrentXML;
     private JMenuItem validateXMLButton;         // validate the current xml button
     private JMenuItem exportButton;         // export xml and image to ome.tif button
-    private JPanel argumentPane;
+    private JPanel argumentPanel;
     private JMenuBar mb;
     private JMenu file, settings, help;
     private JMenuItem openImage;
     private static JPanel selectedPanel;
+    private static JPanel titlePanel = new JPanel();
     private static JButton deleteButton;
+    private static JTabbedPane tabbedPane = new JTabbedPane();
     private static ButtonGroup bg = new ButtonGroup();
     int labelCount =0;
+    private static JButton addButton = new JButton("Add Node");
+    private static JButton delButton = new JButton("Delete");
 
-    private static JButton addButton = new JButton("Add new Node");
-    private static JButton delButton = new JButton("Delete this attribute");
     Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
 
 
@@ -82,7 +81,7 @@ public class GUI extends javax.swing.JFrame{
         settings = new JMenu("Settings");
         help = new JMenu("Help");
         openImage = new JMenuItem("Open Image");
-        printCurrentXML = new JMenuItem("Print Current XML");
+        showCurrentXML = new JMenuItem("Show Current XML");
         exportButton = new JMenuItem("Export to OmeTiff");
         openSchemaButton = new JMenuItem("Open Schema");
         saveButton = new JMenuItem("Print Change Profile");
@@ -93,12 +92,10 @@ public class GUI extends javax.swing.JFrame{
         topPanel = new JPanel();
         bottomPanel = new JPanel();
         scrollPaneBottom = new JScrollPane();  // this scrollPane is used to make the text area scrollable
-        contentPanelLower = new JPanel();
         contentPanelHigher = new JPanel();
         textField = new NodedTextField();      // this text area will be put inside the scrollPane
         scrollPaneTop = new JScrollPane();  // this scrollPane is used to make the text area scrollable
-        argumentPane = new JPanel();
-
+        argumentPanel = new JPanel();
 
         // ADD ACTION LISTENERS ########################################################################################
         textField.addActionListener(new java.awt.event.ActionListener() {
@@ -113,13 +110,10 @@ public class GUI extends javax.swing.JFrame{
         });
         openSchemaButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("XML file",
-                    "xml");
-            chooser.setFileFilter(filter);
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
-                    edit.readSchema(chooser.getSelectedFile().getAbsolutePath());
+                    edit.openSchema(chooser.getSelectedFile().getAbsolutePath());
                 }
                 catch (Exception ex) {
                     throw new RuntimeException(ex);
@@ -145,13 +139,16 @@ public class GUI extends javax.swing.JFrame{
                 }
             }
         });
-        printCurrentXML.addActionListener(e -> {
+
+        // Opens the Current XML in the topPanel of the GUI, in a new tab
+        showCurrentXML.addActionListener(e -> {
             try {
-                edit.printOMEXML();
+                edit.showCurrentXML();
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
+
         validateXMLButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Show Schema");
@@ -160,7 +157,6 @@ public class GUI extends javax.swing.JFrame{
                 File fileToSave = chooser.getSelectedFile();
 
                 try {
-                    edit.readSchema(fileToSave.getPath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -193,28 +189,23 @@ public class GUI extends javax.swing.JFrame{
 
         textField.setSize(WIDTH, BUTTON_HEIGHT);
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
-        contentPanelLower.setMaximumSize(new Dimension(Integer.MAX_VALUE, exportButton.getHeight() * 4));
 
         // SET LAYOUTS #################################################################################################
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS)); // BoxLayout.Y_AXIS will arrange the content vertically
         getContentPane().setLayout(new GridLayout());  // the default GridLayout is like a grid with 1 column and 1 row,
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+
         contentPanelHigher.setLayout(new BoxLayout(contentPanelHigher, BoxLayout.X_AXIS));
-        contentPanelLower.setLayout(new BoxLayout(contentPanelLower, BoxLayout.X_AXIS));
         SpringLayout argPaneLayout = new SpringLayout();
-        argumentPane.setLayout(argPaneLayout);
+        argumentPanel.setLayout(argPaneLayout);
 
         // SET BORDERS #################################################################################################
-        makeStandardBorder(topPanel);
-        makeStandardBorder(bottomPanel);
-        makeStandardBorder(contentPanelLower);
-        makeStandardBorder(argumentPane);
+        makeStandardBorder(argumentPanel);
 
         // POPULATE COMPONENTS #########################################################################################
         getContentPane().add(splitPane);               // due to the GridLayout, our splitPane will now fill the whole window
         mb.add(file);
         file.add(openImage);
-        file.add(printCurrentXML);
+        file.add(showCurrentXML);
         file.add(exportButton);
         file.add(openSchemaButton);
         mb.add(settings);
@@ -226,13 +217,13 @@ public class GUI extends javax.swing.JFrame{
         this.setJMenuBar(mb);
         bottomPanel.add(scrollPaneBottom);                // first we add the scrollPane to the bottomPanel, so it is at the top
 
-        topPanel.add(scrollPaneTop);
+
 
         splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);  // we want it to split the window vertically
         splitPane.setDividerLocation(SCREEN_HEIGHT/2);                    // the initial position of the divider is 200 (our window is 400 pixels high)
-        splitPane.setTopComponent(topPanel);                  // at the top we want our "topPanel"
-        splitPane.setBottomComponent(bottomPanel);            // and at the bottom we want our "bottomPanel"
 
+        splitPane.setTopComponent(tabbedPane);
+        splitPane.setBottomComponent(bottomPanel);            // and at the bottom we want our "bottomPanel"
         splitPane.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -244,11 +235,32 @@ public class GUI extends javax.swing.JFrame{
             }
         });
     }
+    // creates a new Tab
+    public void makeTitledBorder(JPanel p, String title) {
 
-    public void makeStandardBorder(JPanel p) {
-        p.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        // create a compound border with a line border and an empty border
+        Border line = BorderFactory.createLineBorder(Color.GRAY);
+        Border margin = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+        Border compound = BorderFactory.createCompoundBorder(line, margin);
+
+        // create a titled border with the specified title
+        Border titleBorder = BorderFactory.createTitledBorder(title);
+        Border compound2 = BorderFactory.createCompoundBorder(compound, titleBorder);
+
+        // set the border of this component
+        p.setBorder(compound2);
         p.setOpaque(true);
-        p.setBackground(Color.WHITE);
+    }
+    public void makeStandardBorder(JPanel p) {
+
+        // create a compound border with a line border and an empty border
+        Border line = BorderFactory.createLineBorder(Color.GRAY);
+        Border margin = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+        Border compound = BorderFactory.createCompoundBorder(line, margin);
+
+        // set the border of this component
+        p.setBorder(compound);
+        p.setOpaque(true);
     }
 
     public void makeHistoryEntry(XMLNode originNode, String modification, String newText) {
@@ -315,12 +327,55 @@ public class GUI extends javax.swing.JFrame{
             }
         });
         scrollPaneTop.setViewportView(myTree);
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(scrollPaneTop);
+        makeStandardBorder(topPanel);
+        tabbedPane.addTab("XML-Tree", topPanel);
     }
+    // gets called from XMLEditor.showCurrentXML() and creates a new tab with the current XML after changes were applied
+    public void showXMLTree(Document dom, String title) {
+        XMLTree currentTree = new XMLTree(dom);
+        currentTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                jTree1ValueChanged();
+            }
+        });
+        JScrollPane currentScrollPane = new JScrollPane();
+        currentScrollPane.setViewportView(currentTree);
+        tabbedPane.addTab(title, currentScrollPane);
+        // add close button to tab
+        int index = tabbedPane.getTabCount() - 1;
+        JPanel pnlTab = new JPanel(new GridBagLayout());
+        pnlTab.setOpaque(false);
+        JLabel lblTitle = new JLabel("Updated XML-Tree");
+        JButton btnClose = new JButton("x");
+
+        btnClose.setMargin(new Insets(0, 0, 0, 0));
+        btnClose.setPreferredSize(new Dimension(17, 17));
+        btnClose.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tabbedPane.remove(index);
+            }
+        });
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 2;
+        pnlTab.add(lblTitle, gbc);
+        gbc.gridx++;
+        gbc.weightx = 0;
+        pnlTab.add(btnClose, gbc);
+        tabbedPane.setTabComponentAt(index, pnlTab);
+    }
+
     public void jTree1ValueChanged() {
         labelCount = 0;
-        argumentPane.removeAll();
+        argumentPanel.removeAll();
+        argumentPanel.revalidate();
+        argumentPanel.repaint();
         XMLNode node = (XMLNode) myTree.getLastSelectedPathComponent();
-        makeStandardBorder(argumentPane);
+        makeStandardBorder(argumentPanel);
 
         if (node.getUserObject().toString().startsWith("@")) {
             XMLNode child = node.getFirstChild();
@@ -338,13 +393,13 @@ public class GUI extends javax.swing.JFrame{
         else {
             addTitleButton(node);
         }
-        SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
-        scrollPaneBottom.setViewportView(argumentPane);
+        SpringUtilities.makeCompactGrid(argumentPanel, labelCount, 1,5,5,5, 5);
+        scrollPaneBottom.setViewportView(argumentPanel);
         textField.setText((String) node.getUserObject());
     }
     public void addAttribute(String labelText, XMLNode node) {
         JPanel attributePanel = new JPanel();
-        attributePanel.setLayout(new BorderLayout());
+        attributePanel.setLayout(new BorderLayout(5,5));
         JToggleButton attrButton = new JToggleButton(labelText);
         NodedTextField textField = new NodedTextField(node);
         bg.add(attrButton);
@@ -367,36 +422,40 @@ public class GUI extends javax.swing.JFrame{
                     XMLNode attrNode = node;
                     XMLNode parentNode = node.getParent();
                     parentNode.remove(attrNode);
-                    argumentPane.remove(attributePanel);
+                    argumentPanel.remove(attributePanel);
                     labelCount -= 1;
-                    SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
-                    scrollPaneBottom.setViewportView(argumentPane);
+                    SpringUtilities.makeCompactGrid(argumentPanel, labelCount, 1,5,5,5, 5);
+                    scrollPaneBottom.setViewportView(argumentPanel);
                 });
                 if (selected) {
                     attributePanel.add(delButton, BorderLayout.EAST);
+                    // remove addButton from its Panel
+                    titlePanel.remove(addButton);
                     attributePanel.repaint();
-                    argumentPane.revalidate();
-                    argumentPane.repaint();
+                    argumentPanel.revalidate();
+                    argumentPanel.repaint();
                 }
                 else if (!selected) {
                     attributePanel.repaint();
-                    argumentPane.revalidate();
-                    argumentPane.repaint();
+                    argumentPanel.revalidate();
+                    argumentPanel.repaint();
                 }
             }
         });
         attributePanel.setPreferredSize(new Dimension(400, 50));
         attrButton.setPreferredSize(new Dimension(150, attrButton.getHeight()));
-        delButton.setPreferredSize(new Dimension(200, delButton.getHeight()));
+        delButton.setPreferredSize(new Dimension(150, delButton.getHeight()));
 
         attributePanel.add(attrButton, BorderLayout.WEST);
         attributePanel.add(textField, BorderLayout.CENTER);
-        argumentPane.add(attributePanel);
+        argumentPanel.add(attributePanel);
         labelCount +=1;
     }
     private void addTitleButton(XMLNode node) {
-        JPanel titlePanel = new JPanel();
-        titlePanel.setLayout(new BorderLayout());
+        titlePanel.removeAll();
+        titlePanel.revalidate();
+        titlePanel.repaint();
+        titlePanel.setLayout(new BorderLayout(5,5));
         JToggleButton titleButton = new JToggleButton(node.getUserObject().toString());
         titleButton.setMinimumSize(new Dimension(BUTTON_HEIGHT*5, BUTTON_HEIGHT*5));
         bg.add(titleButton);
@@ -406,27 +465,181 @@ public class GUI extends javax.swing.JFrame{
                 AbstractButton abstractButton = (AbstractButton) e.getSource();
                 boolean selected = abstractButton.getModel().isSelected();
                 addButton.addActionListener(event -> {
-                    JTextField AttrField = new JTextField(5);
-                    JTextField ValField = new JTextField(5);
-                    JPanel myPanel = new JPanel();
-                    myPanel.add(new JLabel("Attribute:"));
-                    myPanel.add(AttrField);
-                    myPanel.add(Box.createHorizontalStrut(15)); // a spacer
-                    myPanel.add(new JLabel(":Value:"));
-                    myPanel.add(ValField);
-                    int confirmed = JOptionPane.showConfirmDialog(null, myPanel,
-                            "Please Enter Attribute and Value", JOptionPane.OK_CANCEL_OPTION);
+
+                    // create optionPane that is a pane containing two panels.
+                    // A radio button panel on the left and a panel for each type of node on the right
+                    // The right panel is only visible when the corresponding radio button is selected
+                    JOptionPane optionPane = new JOptionPane();
+                    optionPane.setLayout(new BorderLayout(10, 10));
+                    optionPane.setPreferredSize(new Dimension(600, 150));
+
+                    // create left panel for radio buttons
+                    JPanel leftPanel = new JPanel();
+                    leftPanel.setLayout(new GridLayout(3, 1));
+                    leftPanel.setPreferredSize(new Dimension(200, 150));
+
+                    // create panel for the right part of the optionPane and create new SpringLayout
+                    JPanel rightPanel = new JPanel();
+                    SpringLayout rightPanelLayout = new SpringLayout();
+                    rightPanel.setLayout(rightPanelLayout);
+                    rightPanel.setPreferredSize(new Dimension(400, 150));
+
+                    // add leftPanel and rightPanel to optionPane
+                    optionPane.add(leftPanel, BorderLayout.WEST);
+                    optionPane.add(rightPanel, BorderLayout.CENTER);
+
+                    // make my titled border for both panels
+                    makeTitledBorder(leftPanel, "Choose Node Type");
+                    makeTitledBorder(rightPanel, "Node Details");
+
+                    // create radio buttons for "Attribute", "Text" and "Folder"
+                    JRadioButton attrRadio = new JRadioButton("Attribute");
+                    JRadioButton textRadio = new JRadioButton("Text");
+                    JRadioButton folderRadio = new JRadioButton("Folder");
+
+                    // set action command for each radio button
+                    attrRadio.setActionCommand("attribute");
+                    textRadio.setActionCommand("text");
+                    folderRadio.setActionCommand("folder");
+
+                    // add radio buttons to leftPanel
+                    leftPanel.add(attrRadio);
+                    leftPanel.add(textRadio);
+                    leftPanel.add(folderRadio);
+
+                    // group the radio buttons
+                    ButtonGroup group = new ButtonGroup();
+                    group.add(attrRadio);
+                    group.add(textRadio);
+                    group.add(folderRadio);
+
+                    // create textfields for each type of node
+                    JTextField attrField = new JTextField(5);
+                    JTextField valField = new JTextField(5);
+                    JTextField textField = new JTextField(5);
+                    JTextField folderField = new JTextField(5);
+
+                    // create label for each textfield
+                    JLabel attrLabel = new JLabel("Attribute:");
+                    JLabel valLabel = new JLabel("Value:");
+                    JLabel textLabel = new JLabel("Text:");
+                    JLabel folderLabel = new JLabel("Folder:");
+
+                    // set preferred width for each textfield to textfield width and height to 30
+                    attrField.setPreferredSize(new Dimension(attrField.getWidth(), 30));
+                    valField.setPreferredSize(new Dimension(valField.getWidth(), 30));
+                    textField.setPreferredSize(new Dimension(textField.getWidth(), 30));
+                    folderField.setPreferredSize(new Dimension(folderField.getWidth(), 30));
+
+                    // set preferred width for each label to 100 and height to 30
+                    attrLabel.setPreferredSize(new Dimension(100, 30));
+                    valLabel.setPreferredSize(new Dimension(100, 30));
+                    textLabel.setPreferredSize(new Dimension(100, 30));
+                    folderLabel.setPreferredSize(new Dimension(100, 30));
+
+                    // set labels for each textfield
+                    attrLabel.setLabelFor(attrField);
+                    valLabel.setLabelFor(valField);
+                    textLabel.setLabelFor(textField);
+                    folderLabel.setLabelFor(folderField);
+
+                    // set default selection
+                    attrRadio.setSelected(true);
+                    rightPanel.add(attrLabel);
+                    rightPanel.add(attrField);
+                    rightPanel.add(valLabel);
+                    rightPanel.add(valField);
+                    SpringUtilities.makeCompactGrid(rightPanel, 2, 2, 5, 5, 5, 5);
+
+                    // add actionlistener to radio buttons, upon selection, change the panel to the selected type
+                    attrRadio.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            // reset rightPanel
+                            rightPanel.removeAll();
+
+                            // add labels and textfields to rightPanel
+                            rightPanel.add(attrLabel);
+                            rightPanel.add(attrField);
+                            rightPanel.add(valLabel);
+                            rightPanel.add(valField);
+
+                            // Lay out the panel by defining SpringUtilities constraints
+                            SpringUtilities.makeCompactGrid(rightPanel, 2, 2, 5, 5, 5, 5);
+
+                            // revalidate and repaint
+                            rightPanel.revalidate();
+                            rightPanel.repaint();
+                        }
+                    });
+                    textRadio.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            // reset rightPanel
+                            rightPanel.removeAll();
+
+                            // add labels and textfields to rightPanel
+                            rightPanel.add(textLabel);
+                            rightPanel.add(textField);
+
+                            // Lay out the panel by defining SpringUtilities constraints
+                            SpringUtilities.makeCompactGrid(rightPanel, 1, 2, 5, 5, 5, 5);
+
+                            // revalidate and repaint
+                            rightPanel.revalidate();
+                            rightPanel.repaint();
+                        }
+                    });
+                    folderRadio.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            // reset rightPanel
+                            rightPanel.removeAll();
+
+                            // add labels and textfields to rightPanel
+                            rightPanel.add(folderLabel);
+                            rightPanel.add(folderField);
+
+                            // Lay out the panel by defining SpringUtilities constraints
+                            SpringUtilities.makeCompactGrid(rightPanel, 1, 2, 5, 5, 5, 5);
+
+                            // revalidate and repaint
+                            rightPanel.revalidate();
+                            rightPanel.repaint();
+                        }
+                    });
+
+                    int confirmed = JOptionPane.showConfirmDialog(null, optionPane,
+                            "Create new Node", JOptionPane.OK_CANCEL_OPTION);
+
                     if (confirmed == JOptionPane.OK_OPTION) {
-                        XMLNode newNodeAttr = new XMLNode();
-                        XMLNode newNodeValue = new XMLNode();
-                        newNodeAttr.add(newNodeValue);
-                        newNodeAttr.setUserObject("@"+AttrField.getText().replace("@", ""));
-                        newNodeValue.setUserObject(":"+ValField.getText().replace(":", ""));
-                        node.add(newNodeAttr);
-                        makeHistoryEntry(node, "add", (XMLNode) newNodeAttr);
-                        addAttribute(newNodeAttr.getUserObject().toString(), (XMLNode) newNodeValue);
-                        SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
-                        scrollPaneBottom.setViewportView(argumentPane);
+                        String selection = group.getSelection().getActionCommand();
+                        if (selection == "attribute") {
+                            XMLNode newNodeAttr = new XMLNode();
+                            XMLNode newNodeValue = new XMLNode();
+                            newNodeAttr.add(newNodeValue);
+                            newNodeAttr.setUserObject("@"+attrField.getText().replace("@", ""));
+                            newNodeValue.setUserObject(":"+valField.getText().replace(":", ""));
+                            node.add(newNodeAttr);
+                            makeHistoryEntry(node, "add", (XMLNode) newNodeAttr);
+                            addAttribute(newNodeAttr.getUserObject().toString(), (XMLNode) newNodeValue);
+                            SpringUtilities.makeCompactGrid(argumentPanel, labelCount, 1,5,5,5, 5);
+                            scrollPaneBottom.setViewportView(argumentPanel);
+                        }
+                        else if (selection == "text") {
+                            XMLNode newNode = new XMLNode();
+                            newNode.setUserObject(textField.getText());
+                            node.add(newNode);
+                            makeHistoryEntry(node, "add", (XMLNode) newNode);
+                            addAttribute(newNode.getUserObject().toString(), (XMLNode) newNode);
+                        }
+                        else if (selection == "folder") {
+                            XMLNode newNode = new XMLNode();
+                            newNode.setUserObject(folderField.getText());
+                            node.add(newNode);
+                            makeHistoryEntry(node, "add", (XMLNode) newNode);
+                            addTitleButton(newNode);
+                        }
                     }
                 });
                 delButton.addActionListener(event -> {
@@ -434,35 +647,35 @@ public class GUI extends javax.swing.JFrame{
                     XMLNode attrNode = node;
                     XMLNode parentNode = node.getParent();
                     parentNode.remove(attrNode);
-                    argumentPane.remove(titlePanel);
+                    argumentPanel.remove(titlePanel);
                     labelCount -= 1;
-                    SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
-                    scrollPaneBottom.setViewportView(argumentPane);
+                    SpringUtilities.makeCompactGrid(argumentPanel, labelCount, 1,5,5,5, 5);
+                    scrollPaneBottom.setViewportView(argumentPanel);
                 });
 
                 if (selected) {
                     titlePanel.add(delButton, BorderLayout.EAST);
                     titlePanel.add(addButton, BorderLayout.WEST);
                     titlePanel.repaint();
-                    argumentPane.revalidate();
-                    argumentPane.repaint();
+                    argumentPanel.revalidate();
+                    argumentPanel.repaint();
                 }
                 else if (!selected) {
                     titlePanel.remove(addButton);
                     titlePanel.repaint();
-                    argumentPane.revalidate();
-                    argumentPane.repaint();
+                    argumentPanel.revalidate();
+                    argumentPanel.repaint();
                 }
             }
         });
         titleButton.setBorder(fieldBorder);
         titlePanel.setPreferredSize(new Dimension(400, 50));
-        addButton.setPreferredSize(new Dimension(200, addButton.getHeight()));
-        delButton.setPreferredSize(new Dimension(200, delButton.getHeight()));
+        addButton.setPreferredSize(new Dimension(150, addButton.getHeight()));
+        delButton.setPreferredSize(new Dimension(150, delButton.getHeight()));
         titleButton.setPreferredSize(new Dimension(titleButton.getWidth(), titleButton.getHeight()));
 
         titlePanel.add(titleButton, BorderLayout.CENTER);
-        argumentPane.add(titlePanel);
+        argumentPanel.add(titlePanel);
         labelCount +=1;
         for (int c=0; c<node.getChildCount();c++) {
             XMLNode child = (XMLNode) node.getChildAt(c);
@@ -477,68 +690,5 @@ public class GUI extends javax.swing.JFrame{
                 addAttribute(node.getUserObject().toString(), child);
             }
         }
-
-    }
-    private void addLabeledTextField(String labelText, XMLNode selectedNode) {
-        JLabel label = new JLabel(labelText);
-        label.setPreferredSize(new Dimension(100, label.getPreferredSize().height));
-        NodedTextField textField = new NodedTextField((XMLNode) selectedNode);
-        textField.setBorder(BorderFactory.createCompoundBorder(fieldBorder, new EmptyBorder(0, 10, 0, 0)));
-        textField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                String newText = textField.getText();
-                makeHistoryEntry(textField.getNode(),"edit" , newText);
-                textField.getNode().setUserObject(newText);
-                System.out.println("change detected");
-            }
-        });
-
-        label.setLabelFor(textField);
-        label.setBorder(BorderFactory.createCompoundBorder(fieldBorder, new EmptyBorder(0, 0, 0, 10)));
-
-        JPanel fieldPanel = new JPanel(new BorderLayout());
-        fieldPanel.setSize(BUTTON_HEIGHT, BUTTON_HEIGHT);
-
-        makeStandardBorder(fieldPanel);
-        fieldPanel.add(label, BorderLayout.WEST);
-        fieldPanel.add(textField, BorderLayout.CENTER);
-
-        fieldPanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (selectedPanel != null) {
-                        selectedPanel.setBackground(null);
-                        selectedPanel.remove(deleteButton);
-                    }
-                    JPanel clickedPanel = (JPanel) e.getSource();
-                    clickedPanel.setBackground(Color.getHSBColor(180, 10, 10));
-                    selectedPanel = clickedPanel;
-
-                    // Add a button to delete the labeled text field
-                    deleteButton = new JButton("Delete");
-                    deleteButton.addActionListener(event -> {
-                        for (Component c :clickedPanel.getComponents()) {
-                            if (c.getClass()==NodedTextField.class) {
-                                makeHistoryEntry(((NodedTextField) c).getNode().getParent(), "del");
-                                XMLNode attrNode = ((NodedTextField) c).getNode().getParent();
-                                XMLNode parentNode = attrNode.getParent();
-                                parentNode.remove(attrNode);
-                            }
-                        }
-                        argumentPane.remove(clickedPanel);
-                        labelCount -= 1;
-                        SpringUtilities.makeCompactGrid(argumentPane, labelCount, 1,5,5,5, 5);
-                        scrollPaneBottom.setViewportView(argumentPane);
-                    });
-                    // Add the button to the right of the labeled text field
-                    fieldPanel.add(deleteButton, BorderLayout.EAST);
-                    fieldPanel.revalidate();
-                    fieldPanel.repaint();
-                }
-            }
-        });
-        argumentPane.add(fieldPanel);
-        labelCount +=1;
     }
 }

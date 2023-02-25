@@ -35,6 +35,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+import trash.XsdToXmlGenerator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -43,6 +44,8 @@ import javax.xml.transform.TransformerException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
@@ -1018,7 +1021,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         System.out.println("[done]");
     }
 
-    public void printOMEXML() throws Exception {
+    public void showCurrentXML() throws Exception {
 
         // record metadata to OME-XML format
         ServiceFactory factory = new ServiceFactory();
@@ -1035,11 +1038,39 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             query.addAll(c.getLocation());
             applyChange(c, example_xml_doc, example_xml_doc, query);
         }
-
+        myGUI.showXMLTree(example_xml_doc, "Current XML");
         System.out.println("###### Second XML-Output ################################################################");
         System.out.println(XMLTools.indentXML(XMLTools.getXML(example_xml_doc)));
         myGUI.setVisible(true);
     }
+    public void openSchema(String path) throws Exception {
+        Document xml = xsdToXML(path);
+        myGUI.makeTree(xml);
+    }
+    // reads a xsd schema from file and returns an example xml file
+    public Document xsdToXML(String path) throws ParserConfigurationException, IOException, SAXException, ServiceException, DependencyException {
+        String xsd;
+
+        try {
+            // Read in the XSD file as a string
+            xsd = new String(Files.readAllBytes(Paths.get(path)));
+        } catch (IOException e) {
+            System.out.println("Error reading XSD file: " + e.getMessage());
+            return null;
+        }
+
+        // Generate an example XML file from the XSD schema
+        String xml = XsdToXmlGenerator.generateXmlFromXsd(xsd);
+        System.out.println("XML SCHEMA: ");
+        System.out.println(XMLTools.indentXML(xml));
+
+        xml_doc = XMLTools.parseDOM(xml);
+        myGUI.showXMLTree(xml_doc, "XML Schema");
+        myGUI.setVisible(true);
+        return xml_doc;
+    }
+
+
 
     public void readXML(String path) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -1075,15 +1106,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         changeHistory = new LinkedList<>();
         myGUI.makeTree(xml_doc);
     }
-    public void readSchema(String path) throws Exception {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        xml_doc = db.parse(new File(path));
-        String xml = XMLTools.getXML(xml_doc);
-        System.out.println(xml);
-        changeHistory = new LinkedList<>();
-        myGUI.makeTree(xml_doc);
-    }
+
     public void testEdit() {
         myGUI = new GUI(this);
         myGUI.setVisible(true);

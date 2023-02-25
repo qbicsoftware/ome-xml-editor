@@ -89,7 +89,6 @@
             <url>https://maven.scijava.org/content/groups/public</url>
         </repository>
     </repositories>
-
     <dependencies>
         <dependency>
             <groupId>net.imagej</groupId>
@@ -110,5 +109,12 @@
             <artifactId>flatlaf-intellij-themes</artifactId>
             <version>3.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
+        <dependency>
+            <groupId>org.apache.xmlbeans</groupId>
+            <artifactId>xmlbeans</artifactId>
+            <version>5.1.1</version>
+        </dependency>
+
     </dependencies>
 </project>

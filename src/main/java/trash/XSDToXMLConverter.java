@@ -1,4 +1,4 @@
-package de.qbic.xml_edit;
+package trash;
 
 import loci.common.xml.XMLTools;
 import org.w3c.dom.Document;
