@@ -9,6 +9,7 @@ by bioformats, but has flaws. Work in progress.
 - "Syntax" highlighting of the xml
 - Cleaned up the GUI
 - Fixed maven dependencies, so that the plugin can be build and used from within fiji
+- The xml is now inside a tabbed pane
 
 ![](data/XML_Editor_25_02_23.png)
 
