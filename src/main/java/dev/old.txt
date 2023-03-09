@@ -1,0 +1,110 @@
+public class Main {
+    pu blic Document xml;
+
+    public Main(Document xml) {
+        this.xml = xml;
+        JFrame f = new JFrame();
+
+        f.setSize(300, 500);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JPanel mainPanel = new JPanel();
+        JPanel treePanel = new JPanel(new GridLayout(1, 1));
+
+        XmlJTree myTree = new XmlJTree(this.xml);
+
+        JTextField textField = new JTextField();
+        TreeCellEditor editor = new DefaultCellEditor(textField);
+        myTree.setEditable(true);
+        myTree.setCellEditor(editor);
+
+        f.add(new JScrollPane(myTree));
+
+
+        JButton button_file_chooser = new JButton("Choose file");
+        button_file_chooser.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("XML file",
+                    "xml");
+            chooser.setFileFilter(filter);
+            int returnVal = chooser.showOpenDialog(null);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                myTree.setPath(chooser.getSelectedFile().getAbsolutePath());
+            }
+        });
+
+
+        JButton button_file_saver = new JButton("Save file");
+        button_file_saver.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Save file");
+            int userSelection = chooser.showSaveDialog(f);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = chooser.getSelectedFile();
+
+                try {
+                    JTreeExporter.exportToXml(myTree, String.valueOf(fileToSave));
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+                DefaultMutableTreeNode myRoot = (DefaultMutableTreeNode) myTree.getModel().getRoot();
+                Enumeration en = myRoot.preorderEnumeration();
+                while(en.hasMoreElements()){
+                    System.out.println(en.nextElement());
+                }
+            }
+        });
+
+        treePanel.add(button_file_chooser);
+        treePanel.add(button_file_saver);
+        f.add(treePanel, BorderLayout.SOUTH);
+        f.setVisible(true);
+    }
+
+}
+
+package de.qbic.xmledit;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+public class JTreeExporter {
+    public static void exportToXml(JTree tree, String fileName) throws Exception {
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode)tree.getModel().getRoot();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.newDocument();
+        Element xmlRoot = doc.createElement("tree");
+        doc.appendChild(xmlRoot);
+        buildXmlTree(xmlRoot, root, doc);
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+        StreamResult result = new StreamResult(fileName);
+        transformer.transform(source, result);
+    }
+
+    private static void buildXmlTree(Element xmlNode, TreeNode treeNode, Document doc) {
+        if (treeNode == null) {
+            return;
+        }
+        Element xmlChild = doc.createElement("node");
+        xmlChild.setAttribute("name", treeNode.toString());
+        xmlNode.appendChild(xmlChild);
+        for (int i = 0; i < treeNode.getChildCount(); i++) {
+            TreeNode child = treeNode.getChildAt(i);
+            buildXmlTree(xmlChild, child, doc);
+        }
+    }
+}
+

@@ -12,6 +12,33 @@
         <relativePath />
     </parent>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>org.apache.xmlgraphics:batik-transcoder</include>
+                        </includes>
+                    </artifactSet>
+                    <!-- put your configurations here -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
     <groupId>de.qbic</groupId>        <!-- FIXME: Your organization groupId here -->
     <artifactId>Editor</artifactId> <!-- FIXME: Your project artifactId here   -->
     <version>1</version>
@@ -77,8 +104,8 @@
     </ciManagement>
 
     <properties>
-        <package-name>de.qbic.xml_edit</package-name>                   <!-- FIXME: Your project package prefix here -->
-        <main-class>de.qbic.xml_edit.XMLEditor</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
+        <package-name>de.qbic.xmledit</package-name>                   <!-- FIXME: Your project package prefix here -->
+        <main-class>de.qbic.xmledit.XMLEditor</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
         <license.licenseName>cc0</license.licenseName>                      <!-- FIXME: Your license-maven-plugin license code here -->
         <license.copyrightOwners>My Company, Inc.</license.copyrightOwners> <!-- FIXME: Your organization legal entity name here -->
     </properties>
@@ -89,6 +116,7 @@
             <url>https://maven.scijava.org/content/groups/public</url>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>net.imagej</groupId>
@@ -99,21 +127,31 @@
             <artifactId>bio-formats_plugins</artifactId>
             <version>6.1.1</version>
         </dependency>
+
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
             <version>3.0</version>
         </dependency>
         <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>3.0</version>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-transcoder</artifactId>
+            <version>1.16</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
         <dependency>
-            <groupId>org.apache.xmlbeans</groupId>
-            <artifactId>xmlbeans</artifactId>
-            <version>5.1.1</version>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.25.0-GA</version>
         </dependency>
 
     </dependencies>

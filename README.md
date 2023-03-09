@@ -3,6 +3,23 @@
 Fiji plugin, that allows the user to EDIT (not add tags) the metadata of ome-xml files. This is usefull for example for curating metadata that was auto generated
 by bioformats, but has flaws. Work in progress.
 
+### Update 09.03.23
+
+- Enabled Fiji support (again)
+- Change profile tab now automatically updates when a new change happens
+- The change history now automatically validates any change made and shows the result in the change history by changing the background color of the change
+- Added some basic functions for loading a schema and showing some element of it
+
+![](data/updateImges/XML_Editor_09_03_23.png)
+
+### Update 03.03.23
+
+- Improved the Ui
+- Added the ability to view and validate the change history
+- added the ability to load and export the change history
+
+![](data/updateImges/XML_Editor_03_03_23.png)
+
 ### Update 25.02.23
 
 - Improved the interaction when creating new nodes
@@ -11,7 +28,7 @@ by bioformats, but has flaws. Work in progress.
 - Fixed maven dependencies, so that the plugin can be build and used from within fiji
 - The xml is now inside a tabbed pane
 
-![](data/XML_Editor_25_02_23.png)
+![](data/updateImges/XML_Editor_25_02_23.png)
 
 ### Update 16.02.23
 
@@ -19,7 +36,7 @@ by bioformats, but has flaws. Work in progress.
 - Added the ability to add new nodes (there are still some bugs)
 - Improved look and user experience of GUI
 
-![](data/XML_Editor_16_02_23.png)
+![](data/updateImges/XML_Editor_16_02_23.png)
 
 ### Update 14.02.23:
 
@@ -29,5 +46,5 @@ by bioformats, but has flaws. Work in progress.
   - Exporting the pixel- and meta- data as .ome.tif
   - A GUI that implements the said functionality
 
-![](data/XML_Editor_14_02_23.png)
+![](data/updateImges/XML_Editor_14_02_23.png)
 
