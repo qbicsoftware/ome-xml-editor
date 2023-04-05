@@ -1,7 +1,19 @@
-# XML_metadata_editor
+# XML metadata editor
+
+---
 
 Fiji plugin, that allows the user to EDIT (not add tags) the metadata of ome-xml files. This is usefull for example for curating metadata that was auto generated
 by bioformats, but has flaws. Work in progress.
+
+### Update 05.04.23
+
+- Change History now shows what's wrong if the verification fails
+- Simplified Tree view possible (that doesn't show attribute nodes etc.)
+- Change history can be applied to a folder
+- Added an undo button, to revert changes
+- Tab now shows the name of the file
+
+![](data/updateImges/XML_Editor_05_04_23.png)
 
 ### Update 09.03.23
 

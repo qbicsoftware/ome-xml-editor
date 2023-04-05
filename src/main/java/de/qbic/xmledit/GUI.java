@@ -11,13 +11,16 @@ import loci.formats.FormatException;
 import loci.plugins.config.SpringUtilities;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
+import org.intellij.markdown.ast.ASTNode;
+import org.intellij.markdown.flavours.MarkdownFlavourDescriptor;
+import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor;
+import org.intellij.markdown.html.HtmlGenerator;
+import org.intellij.markdown.parser.MarkdownParser;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.plaf.basic.BasicTabbedPaneUI;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.awt.*;
@@ -27,22 +30,32 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.LinkedList;
 
 // CLASS
 public class GUI extends javax.swing.JFrame{
+
     // Constants
     static final Color PASTEL_RED = new Color(255, 153, 153);
     static final Color PASTEL_GREEN = new Color(153, 255, 153);
     static final Color PASTEL_BLUE = new Color(153, 153, 255);
+    static final Color DARK_GREEN = new Color(30, 150, 30);
+    static final Color DARK_BLUE = new Color(30, 30, 150);
+    static final Color DARK_RED = new Color(150, 30, 30);
     static final String CHANGE_SVG = "<svg width=\"800\" height=\"800\" viewBox=\"0 0 16 16\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"m13 0-3 3h2.3v9h1.4V3H16ZM5 5.7h6V4.3H5Zm0 3h6V7.3H5Zm0 3h6v-1.4H5ZM3.7 4H2.3v9H0l3 3 3-3H3.7Z\"/></svg>";
     static final String DEFAULT_SVG = "<svg width=\"800\" height=\"800\" viewBox=\"0 0 32 32\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M20.414 2H5v28h22V8.586ZM7 28V4h12v6h6v18Z\" style=\"fill:#c5c5c5\"/></svg>";
     static final String TREE_SVG = "<svg height=\"800\" width=\"800\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\"><path d=\"M21 24h-6v-6h6v6zm-4-2h2v-2h-2v2zm-2 0H6V8H3V0h8v8H8v4h7v2H8v6h7v2zM5 6h4V2H5v4zm16 10h-6v-6h6v6zm-4-2h2v-2h-2v2z\"/></svg>";
     static final String SETTINGS_SVG = "<svg width=\"800\" height=\"800\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" data-name=\"Line Color\"  class=\"icon line-color\"><circle cx=\"12\" cy=\"12\" r=\"3\" style=\"fill:none;stroke:#2ca9bc;stroke-linecap:round;stroke-linejoin:round;stroke-width:2\"/><path d=\"M20 10h-.59a1 1 0 0 1-.94-.67v0a1 1 0 0 1 .2-1.14l.41-.41a1 1 0 0 0 0-1.42l-1.42-1.43a1 1 0 0 0-1.42 0l-.41.41a1 1 0 0 1-1.14.2h0a1 1 0 0 1-.69-.95V4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v.59a1 1 0 0 1-.67.94h0a1 1 0 0 1-1.14-.2l-.41-.41a1 1 0 0 0-1.42 0L4.93 6.34a1 1 0 0 0 0 1.42l.41.41a1 1 0 0 1 .2 1.14v0a1 1 0 0 1-.94.67H4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h.59a1 1 0 0 1 .94.67v0a1 1 0 0 1-.2 1.14l-.41.41a1 1 0 0 0 0 1.42l1.41 1.41a1 1 0 0 0 1.42 0l.41-.41a1 1 0 0 1 1.14-.2h0a1 1 0 0 1 .67.94V20a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-.59a1 1 0 0 1 .67-.94h0a1 1 0 0 1 1.14.2l.41.41a1 1 0 0 0 1.42 0l1.41-1.41a1 1 0 0 0 0-1.42l-.41-.41a1 1 0 0 1-.2-1.14v0a1 1 0 0 1 .94-.67H20a1 1 0 0 0 1-1V11a1 1 0 0 0-1-1Z\" style=\"fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2\"/></svg>";
     static final String FILES_SVG = "<svg width=\"800\" height=\"800\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17.5 0h-9L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.7l1.3-1.43V4.5L17.5 0zm0 2.12 2.38 2.38H17.5V2.12zm-3 20.38h-12v-15H7v9.07L8.5 18h6v4.5zm6-6h-12v-15H16V6h4.5v10.5z\"/></svg>";
-    public static final int SCREEN_WIDTH = 1000;
-    public static final int BUTTON_HEIGHT = 25;
+    static final String HELP_SVG = "<svg width=\"800px\" height=\"800px\" viewBox=\"0 0 16 16\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" fill=\"none\" stroke=\"#000000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\">\n" +
+            "<circle cy=\"8\" cx=\"8\" r=\"6.25\"/>\n" +
+            "<path d=\"m5.75 6.75c0-1 1-2 2.25-2s2.25 1.0335 2.25 2c0 1.5-1.5 1.5-2.25 2m0 2.5v0\"/>\n" +
+            "</svg>";
+    static final String UNDO_SVG = "<svg width=\"800px\" height=\"800px\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\"><path stroke=\"#000000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 9v5h5m11 2c-.497-4.5-3.367-8-8-8-2.73 0-5.929 2.268-7.294 5.5\"/></svg>";
+    public static final int BASE_UNIT = 8;
+    public static final int SCREEN_WIDTH = 128*BASE_UNIT;
+    public static final int BUTTON_HEIGHT = 4*BASE_UNIT;
+    public static final int BUTTON_WIDTH = 20*BASE_UNIT;
     public static final int SCREEN_HEIGHT = SCREEN_WIDTH*9/16;
 
     // Variables
@@ -54,25 +67,31 @@ public class GUI extends javax.swing.JFrame{
     private JScrollPane scrollPaneBottom; // makes the text scrollable
     private JScrollPane scrollPaneTop; // makes the text scrollable
     private NodedTextField textField;     // the text
-    private JPanel contentPanelHigher;
     private JMenuItem openSchemaButton;
+    private JMenuItem undoChangeButton;
+    private JMenuItem applyChangesToFolderButton;
     private JMenuItem showCurrentXML;
     private JMenuItem showChangeButton;
     private JMenuItem loadChangeButton;
     private JMenuItem saveChangeButton;
     private JMenuItem validateChangeButton;
     private JMenuItem exportButton;
+    private JMenuItem howToUseButton;
+    private JMenuItem aboutButton;
+    private JCheckBoxMenuItem simplifiedTree;
     private JPanel editPanel;
     private JMenuBar mb;
-    private JMenu file, settings, changeHistoryMenu;
+    private JMenu file, settings, changeHistoryMenu, help;
     private JMenuItem openImage;
     private static JPanel titlePanel = new JPanel();
     private static JTabbedPane tabbedPane = new JTabbedPane();
-    private static JScrollPane changeHistoryPanel = new JScrollPane();;
+    private static JScrollPane changeHistoryPane = new JScrollPane();
     private static ButtonGroup bg = new ButtonGroup();
     private int labelCount =0;
     private static JButton addButton = new JButton("Add Node");
     private static JButton delButton = new JButton("Delete");
+    private static JTextArea validationErrors = new JTextArea();
+    private static JPanel changeHistoryWindowPanel = new JPanel();
     private XMLNode selectedNode;
     private XMLNode toBeDeletedNode;
     private Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
@@ -87,22 +106,43 @@ public class GUI extends javax.swing.JFrame{
     private void makeUI() {
         // INITIALIZE COMPONENTS #######################################################################################
         mb = new JMenuBar();
-        file = new JMenu("File");
-        settings = new JMenu("Settings");
-        changeHistoryMenu = new JMenu("Change History Menu");
-        openImage = new JMenuItem("Open Image");
-        showCurrentXML = new JMenuItem("Show Current XML");
-        exportButton = new JMenuItem("Export to OmeTiff");
-        openSchemaButton = new JMenuItem("Open Schema");
 
+        // Menu for the file
+        file = new JMenu("File");
+        // Menu for the settings
+        settings = new JMenu("Settings");
+        // Menu for the help
+        help = new JMenu("Help");
+        // Menu for the change history
+        changeHistoryMenu = new JMenu("Change History Menu");
+
+        // Button that opens the xml tree of an image
+        openImage = new JMenuItem("Open Image");
+        // Button that shows the current XML
+        showCurrentXML = new JMenuItem("Show Current XML");
+        // Button that exports the current XML to OmeTiff
+        exportButton = new JMenuItem("Export to OmeTiff");
+        // Button that opens the schema
+        openSchemaButton = new JMenuItem("Open Schema");
         // Button that adds a tab to the tabbed pane that shows the changes currently loaded in the change history
-        showChangeButton = new JMenuItem("Show Change Profile");
-        // Button that loads a change profile from a file
-        loadChangeButton = new JMenuItem("Load Change Profile");
-        // Button that saves the current change profile to a file
-        saveChangeButton = new JMenuItem("Save Change Profile");
+        showChangeButton = new JMenuItem("Show Change History");
+        // Button that loads a change History from a file
+        loadChangeButton = new JMenuItem("Load Change History");
+        // Button that saves the current change History to a file
+        saveChangeButton = new JMenuItem("Save Change History");
         // Button that validates the current change History
-        validateChangeButton = new JMenuItem("Validate Change Profile");
+        validateChangeButton = new JMenuItem("Validate Change History");
+        // Button that undoes the last change
+        undoChangeButton = new JMenuItem("Undo Last Change");
+        // Button that applies the current change history to all files in a folder
+        applyChangesToFolderButton = new JMenuItem("Apply History to Folder");
+        // Button that opens the tutorial
+        howToUseButton = new JMenuItem("How To Use");
+        // Button that add the about page to the tabbed pane
+        aboutButton = new JMenuItem("About XML-Editor");
+        // simplifiedTree checkbox
+        simplifiedTree = new JCheckBoxMenuItem("Simplified Tree");
+        simplifiedTree.setSelected(true);
 
         initializeAddButton();
         initializeDelButton();
@@ -112,22 +152,26 @@ public class GUI extends javax.swing.JFrame{
 
         bottomPanel = new JPanel();
         scrollPaneBottom = new JScrollPane();
-        contentPanelHigher = new JPanel();
         textField = new NodedTextField();
         scrollPaneTop = new JScrollPane();
+
+
         editPanel = new JPanel();
 
-        // set color for the tabbed pane when selected
-        UIManager.put("TabbedPane.focus", Color.BLACK);
-        // set color for the tabbed pane when not selected
+
+        tabbedPane.setUI(new MyTabbedPaneUI(BUTTON_HEIGHT));
+        tabbedPane.setFocusable(false);
 
 
-        tabbedPane.setUI(new BasicTabbedPaneUI() {
-            @Override
-            protected void paintContentBorder(Graphics g, int tabPlacement, int selectedIndex) {
-                // Do nothing to remove the content border
-            }
-        });
+        scrollPaneTop.setOpaque(true);
+        scrollPaneTop.setBackground(Color.WHITE);
+        scrollPaneTop.setForeground(Color.WHITE);
+        tabbedPane.setOpaque(true);
+        tabbedPane.setBackground(Color.WHITE);
+        tabbedPane.setForeground(Color.WHITE);
+        splitPane.setOpaque(true);
+        splitPane.setBackground(Color.WHITE);
+        splitPane.setForeground(Color.WHITE);
 
         // ADD ACTION LISTENERS ########################################################################################
         textField.addActionListener(new java.awt.event.ActionListener() {
@@ -135,65 +179,81 @@ public class GUI extends javax.swing.JFrame{
                 String newText = textField.getText();
                 try {
                     makeHistoryEntry(textField.getNode(), "edit", newText);
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                } catch (TransformerException e) {
-                    throw new RuntimeException(e);
-                } catch (SAXException e) {
+                } catch (MalformedURLException | TransformerException | SAXException e) {
                     throw new RuntimeException(e);
                 }
                 textField.getNode().setUserObject(newText);
             }
         });
 
-        // shouw change profile action listener
-        showChangeButton.addActionListener(e -> {
+        // undo the last change in the change history
+        undoChangeButton.addActionListener(e -> {
             try {
-                makeChangeHistoryTab();
-            } catch (TransformerException ex) {
-                throw new RuntimeException(ex);
-            } catch (ServiceException ex) {
-                throw new RuntimeException(ex);
-            } catch (DependencyException ex) {
-                throw new RuntimeException(ex);
-            } catch (MalformedURLException ex) {
-                throw new RuntimeException(ex);
-            } catch (SAXException ex) {
+                edit.undoChange();
+            } catch (MalformedURLException | TransformerException | SAXException ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        // save change profile action listener
+        // apply the current change history to all files in a folder
+        applyChangesToFolderButton.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Select Folder");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int userSelection = chooser.showOpenDialog(splitPane);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File folder = chooser.getSelectedFile();
+                try {
+                    System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+                    System.out.println("Folder: " + folder.getAbsolutePath());
+                    edit.applyChangesToFolder(folder.getAbsolutePath());
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        // show change profile action listener
+        showChangeButton.addActionListener(e -> {
+            try {
+                makeChangeHistoryTab();
+            } catch (TransformerException | ServiceException | DependencyException |
+                     MalformedURLException | SAXException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        // save change history action listener
         saveChangeButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Save Change Profile");
+            chooser.setDialogTitle("Save Change History");
             int userSelection = chooser.showSaveDialog(splitPane);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = chooser.getSelectedFile();
                 try {
-                    edit.saveChangeProfile(fileToSave.getAbsolutePath());
+                    edit.saveChangeHistory(fileToSave.getAbsolutePath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
 
-        // load change profile action listener
+        // load change history action listener
         loadChangeButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Load Change Profile");
+            chooser.setDialogTitle("Load Change history");
             int userSelection = chooser.showOpenDialog(splitPane);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToLoad = chooser.getSelectedFile();
                 try {
-                    edit.loadChangeProfile(fileToLoad.getAbsolutePath());
+                    edit.loadChangeHistory(fileToLoad.getAbsolutePath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
 
-        // validate change profile action listener
+        // validate change history action listener
         validateChangeButton.addActionListener(e -> {
             try {
                 edit.validateChangeHistory();
@@ -211,21 +271,33 @@ public class GUI extends javax.swing.JFrame{
                 }
             });
 
+        // Opens the tutorial
+        howToUseButton.addActionListener(e -> {
+            try {
+                edit.openTutorial();
+            }
+            catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        // opens the about page
+        aboutButton.addActionListener(e -> {
+            try {
+                edit.openAbout();
+            }
+            catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
         openImage.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     edit.openImage(chooser.getSelectedFile().getAbsolutePath());
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (FormatException ex) {
-                    throw new RuntimeException(ex);
-                } catch (ServiceException ex) {
-                    throw new RuntimeException(ex);
-                } catch (ParserConfigurationException ex) {
-                    throw new RuntimeException(ex);
-                } catch (SAXException ex) {
+                } catch (IOException | FormatException | ServiceException |
+                         ParserConfigurationException | SAXException ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -246,15 +318,30 @@ public class GUI extends javax.swing.JFrame{
             int userSelection = chooser.showSaveDialog(splitPane);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = chooser.getSelectedFile();
-
                 try {
                     edit.exportToOmeTiff(fileToSave.getPath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
-                DefaultMutableTreeNode myRoot = (DefaultMutableTreeNode) myTree.getModel().getRoot();
-                Enumeration en = myRoot.preorderEnumeration();
-                while(en.hasMoreElements()){
+            }
+            });
+
+        // Add an action listener to the JCheckBoxMenuItem
+        simplifiedTree.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get the source of the event
+                JCheckBoxMenuItem source = (JCheckBoxMenuItem) e.getSource();
+                // Get the selection state of the checkbox
+                boolean selected = source.isSelected();
+                // Perform some action based on the selection state
+                if (selected) {
+                    edit.simplified = true;
+                    edit.updateTree();
+                }
+                else {
+                    edit.simplified = false;
+                    edit.updateTree();
                 }
             }
         });
@@ -267,11 +354,10 @@ public class GUI extends javax.swing.JFrame{
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS)); // BoxLayout.Y_AXIS will arrange the content vertically
         getContentPane().setLayout(new GridLayout());  // the default GridLayout is like a grid with 1 column and 1 row,
 
-        contentPanelHigher.setLayout(new BoxLayout(contentPanelHigher, BoxLayout.X_AXIS));
         SpringLayout argPaneLayout = new SpringLayout();
         editPanel.setLayout(argPaneLayout);
 
-        changeHistoryPanel.setLayout(new ScrollPaneLayout());
+        changeHistoryPane.setLayout(new ScrollPaneLayout());
 
         // SET BORDERS #################################################################################################
         makeStandardBorder(editPanel);
@@ -286,25 +372,48 @@ public class GUI extends javax.swing.JFrame{
         loadChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
         saveChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
         validateChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
+        applyChangesToFolderButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
+
+        undoChangeButton.setIcon(loadSvgAsImageIcon(UNDO_SVG));
+
+        howToUseButton.setIcon(loadSvgAsImageIcon(HELP_SVG));
+        aboutButton.setIcon(loadSvgAsImageIcon(HELP_SVG));
 
         file.setIcon(loadSvgAsImageIcon(FILES_SVG));
         changeHistoryMenu.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
         settings.setIcon(loadSvgAsImageIcon(SETTINGS_SVG));
+        help.setIcon(loadSvgAsImageIcon(HELP_SVG));
 
         // POPULATE COMPONENTS #########################################################################################
         getContentPane().add(splitPane);
+
+        // add menu to menu bar
         mb.add(file);
+        mb.add(settings);
+        mb.add(changeHistoryMenu);
+        mb.add(help);
+
+        // add menu items to file menu
         file.add(openImage);
         file.add(showCurrentXML);
         file.add(exportButton);
         file.add(openSchemaButton);
-        mb.add(settings);
-        mb.add(changeHistoryMenu);
+
+        // add menu items to settings menu
+        settings.add(simplifiedTree);
+        // add menu items to change history menu
         changeHistoryMenu.add(showChangeButton);
         changeHistoryMenu.add(loadChangeButton);
         changeHistoryMenu.add(saveChangeButton);
         changeHistoryMenu.add(validateChangeButton);
+        changeHistoryMenu.add(undoChangeButton);
+        changeHistoryMenu.add(applyChangesToFolderButton);
 
+        // add menu item to tutorial menu
+        help.add(howToUseButton);
+        help.add(aboutButton);
+
+        // add menu bar to frame
         this.add(mb);
         this.setJMenuBar(mb);
         bottomPanel.add(scrollPaneBottom);
@@ -312,62 +421,40 @@ public class GUI extends javax.swing.JFrame{
         splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
         splitPane.setDividerLocation(SCREEN_HEIGHT/2);
         splitPane.setTopComponent(tabbedPane);
-        tabbedPane.setUI(new BasicTabbedPaneUI() {
-            @Override
-            protected int calculateTabHeight(int tabPlacement, int tabIndex, int fontHeight) {
-                return BUTTON_HEIGHT;
-            }
-        });
         splitPane.setBottomComponent(bottomPanel);
+
     }
-    public void makeChangeHistoryTabDeprecated(){
-        // create a new Panel that shows all the changes currently loaded in the change history
-        JPanel changeHistoryPanel = new JPanel();
-
-        // give it a spring layout
-        changeHistoryPanel.setLayout(new SpringLayout());
-
-        // get the change history
-        LinkedList<XMLChange> changeHistory = edit.getChangeHistory();
-
-        // Create Header entrys for the list of changes, so the user knows which entry is what
-        JPanel headerPanel = makeChangePanel();
-        headerPanel.setPreferredSize(new Dimension(changeHistoryPanel.getWidth(), BUTTON_HEIGHT));
-        changeHistoryPanel.add(headerPanel);
-
-        // iterate over the change history
-        for (XMLChange c : changeHistory) {
-            JPanel changePanel = makeChangePanel(c);
-            changePanel.setPreferredSize(new Dimension(changeHistoryPanel.getWidth(), BUTTON_HEIGHT));
-            changeHistoryPanel.add(changePanel);
-
-            if (c.getValidity()) {
-                changePanel.setBackground(Color.GREEN);
-            }
-            else if (!c.getValidity()) {
-                changePanel.setBackground(Color.RED);
-            }
-            else {
-            }
-        }
-        // get the number of rows in the change history panel
-        int rows = changeHistoryPanel.getComponentCount();
-
-        // create a SpringUtilities object to make the layout look nice
-        changeHistoryPanel.setSize(new Dimension(changeHistoryPanel.getWidth(), rows * BUTTON_HEIGHT));
-        SpringUtilities.makeCompactGrid(changeHistoryPanel, rows, 1, 6, 6, 6, 6);
-
-        // add the change panel to the tabbed pane
-        makeNewTab(changeHistoryPanel, "Change Profile", CHANGE_SVG);
+    public JComponent renderMarkdown(String md) {
+        final String src = md;
+        final MarkdownFlavourDescriptor flavour = new GFMFlavourDescriptor();
+        final ASTNode parsedTree = new MarkdownParser(flavour).buildMarkdownTreeFromString(src);
+        final String html = new HtmlGenerator(src, parsedTree, flavour, false).generateHtml();
+        JEditorPane editor = new JEditorPane();
+        JScrollPane scrollPane = new JScrollPane(editor);
+        editor.setContentType("text/html");
+        editor.setText(html);
+        return scrollPane;
     }
-
     public void makeChangeHistoryTab() throws TransformerException, ServiceException, DependencyException, MalformedURLException, SAXException {
         // get the change history
         LinkedList<XMLChange> changeHistory = edit.getChangeHistory();
+        // create changer history window panel
 
+        changeHistoryWindowPanel.setLayout(new BoxLayout(changeHistoryWindowPanel, BoxLayout.Y_AXIS));
+        // add the change history pane to the change history window panel
+        changeHistoryWindowPanel.add(changeHistoryPane);
         // Create Header entrys for the list of changes, so the user knows which entry is what
         JTable table = makeHistoryTable();
         XMLTableModel model = (XMLTableModel) table.getModel();
+        // add a textfield to the change history panel to display validation errors
+        validationErrors.setEditable(false);
+        validationErrors.setLineWrap(true);
+        validationErrors.setWrapStyleWord(true);
+        validationErrors.setSize(WIDTH, BUTTON_HEIGHT);
+        // add a border to the validation errors textfield
+        makeStandardBorder(validationErrors);
+        // add the validation errors to the change history window panel
+        changeHistoryWindowPanel.add(validationErrors);
 
         // iterate over the change history and remember the index
         edit.validateChangeHistory();
@@ -376,20 +463,26 @@ public class GUI extends javax.swing.JFrame{
             model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNewValue()});
             if (c.getValidity()) {
                 model.setRowColor(index, PASTEL_GREEN);
+                validationErrors.setText("No validation errors in most recent change found.");
+                // set the text color to green
+                validationErrors.setForeground(DARK_GREEN);
             }
             else if (!c.getValidity()) {
                 model.setRowColor(index, PASTEL_RED);
+                validationErrors.setText(c.getValidationError());
+                // set the text color to red
+                validationErrors.setForeground(DARK_RED);
             }
             else {
                 model.setRowColor(index, PASTEL_BLUE);
             }
             index++;
         }
-        changeHistoryPanel.add(table);
-        changeHistoryPanel.setViewportView(table);
+        changeHistoryPane.add(table);
+        changeHistoryPane.setViewportView(table);
 
         // add the change panel to the tabbed pane
-        makeNewTab(changeHistoryPanel, "Change Profile", CHANGE_SVG);
+        makeNewTab(changeHistoryWindowPanel, "Change History", CHANGE_SVG);
     }
 
     public void updateChangeHistoryTab() throws MalformedURLException, TransformerException, SAXException {
@@ -407,17 +500,24 @@ public class GUI extends javax.swing.JFrame{
             model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNewValue()});
             if (c.getValidity()) {
                 model.setRowColor(index, PASTEL_GREEN);
+                validationErrors.setText("No validation errors in most recent change found.");
+                // set the text color to green
+                validationErrors.setForeground(DARK_GREEN);
+
             }
             else if (!c.getValidity()) {
                 model.setRowColor(index, PASTEL_RED);
+                validationErrors.setText(c.getValidationError());
+                // set the text color to red
+                validationErrors.setForeground(DARK_RED);
             }
             else {
                 model.setRowColor(index, PASTEL_BLUE);
             }
             index++;
         }
-        changeHistoryPanel.add(table);
-        changeHistoryPanel.setViewportView(table);
+        changeHistoryPane.add(table);
+        changeHistoryPane.setViewportView(table);
     }
 
     public JTable makeHistoryTable() {
@@ -518,7 +618,7 @@ public class GUI extends javax.swing.JFrame{
     public void makeTitledBorder(JPanel p, String title) {
         // create a compound border with a line border and an empty border
         Border line = BorderFactory.createLineBorder(Color.GRAY);
-        Border margin = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+        Border margin = BorderFactory.createEmptyBorder(BASE_UNIT, BASE_UNIT, BASE_UNIT, BASE_UNIT);
         Border compound = BorderFactory.createCompoundBorder(line, margin);
 
         // create a titled border with the specified title
@@ -527,18 +627,18 @@ public class GUI extends javax.swing.JFrame{
 
         // set the border of this component
         p.setBorder(compound2);
-        p.setOpaque(false);
+        p.setOpaque(true);
     }
 
     public void makeStandardBorder(JComponent p) {
         // create a compound border with a line border and an empty border
         Border line = BorderFactory.createLineBorder(Color.GRAY);
-        Border margin = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+        Border margin = BorderFactory.createEmptyBorder(BASE_UNIT, BASE_UNIT, BASE_UNIT, BASE_UNIT);
         Border compound = BorderFactory.createCompoundBorder(line, margin);
 
         // set the border of this component
         p.setBorder(compound);
-        p.setOpaque(false);
+        p.setOpaque(true);
     }
 
     public void makeHistoryEntry(XMLNode originNode, String modification, String newText) throws MalformedURLException, TransformerException, SAXException {
@@ -603,10 +703,16 @@ public class GUI extends javax.swing.JFrame{
             updateChangeHistoryTab();
         }
     }
-    public void makeTree(Document dom){
-        // create a new XMLTree from the DOM
-        myTree = new XMLTree(dom);
+    public void makeSimplisticTree(Document dom) {
 
+    }
+    public void makeTree(Document dom, boolean simplified, String title) {
+        // create a new XMLTree from the DOM
+        myTree = new XMLTree(dom, simplified);
+        myTree.setOpaque(true);
+        myTree.setShowsRootHandles(false);
+        myTree.putClientProperty("JTree.lineStyle", "None");
+        myTree.setDragEnabled(true);
         // add a listener to the jTree
         myTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
             public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
@@ -618,16 +724,32 @@ public class GUI extends javax.swing.JFrame{
 
         // add the jTree to a new panel and add it to the tabbedPane
         scrollPaneTop.setViewportView(myTree);
-        // scrollPaneTop.setFocusable(false);
-        JPanel newTabPanel = new JPanel();
-        newTabPanel.setLayout(new BoxLayout(newTabPanel, BoxLayout.Y_AXIS));
-        newTabPanel.add(scrollPaneTop);
-        makeStandardBorder(newTabPanel);
-        makeNewTab(newTabPanel, "XML-Tree", TREE_SVG);
+
+        makeNewTab(scrollPaneTop, title, TREE_SVG);
+    }
+
+    public void updateTree(Document dom, boolean simplified){
+        // create a new XMLTree from the DOM
+        myTree = new XMLTree(dom, simplified);
+        myTree.setOpaque(true);
+        myTree.setShowsRootHandles(false);
+        myTree.putClientProperty("JTree.lineStyle", "None");
+        myTree.setDragEnabled(true);
+        // add a listener to the jTree
+        myTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                // get the selected node
+                selectedNode = (XMLNode) myTree.getLastSelectedPathComponent();
+                updateEditPanel();
+            }
+        });
+
+        // add the jTree to a new panel and add it to the tabbedPane
+        scrollPaneTop.setViewportView(myTree);
     }
 
     public void showXMLTree(Document dom, String title) {
-        XMLTree currentTree = new XMLTree(dom);
+        XMLTree currentTree = new XMLTree(dom, false);
         currentTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
             public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
                 // get the selected node
@@ -640,16 +762,14 @@ public class GUI extends javax.swing.JFrame{
         makeNewTab(currentScrollPane, title, TREE_SVG);
     }
 
-    public void makeNewTab(JComponent p, String title, String svgCode) {;
+    public void makeNewTab(JComponent p, String title, String svgCode) {
         if (svgCode == null) {
             svgCode = DEFAULT_SVG;
         }
-        // add panel to tabbed pane
-        p.setOpaque(false);
+        // p.setOpaque(false);
         // p.setFocusable(false);
-        p.setSize(p.getWidth(), BUTTON_HEIGHT-5);
+        p.setSize(p.getWidth(), BUTTON_HEIGHT);
         tabbedPane.addTab(title, p);
-        // tabbedPane.setFocusable(false);
         // get index of new tab
         int index = tabbedPane.getTabCount() - 1;
         MouseListener close = new MouseAdapter() {
@@ -666,26 +786,6 @@ public class GUI extends javax.swing.JFrame{
         tabbedPane.setTabComponentAt(index, closeButton);
         // put newly created tab in front
         tabbedPane.setSelectedIndex(index);
-    }
-
-    public void makeNewTab(JComponent p, String title) {
-        // add panel to tabbed pane
-        p.setOpaque(false);
-        tabbedPane.addTab(title, p);
-        // get index of new tab
-        int index = tabbedPane.getTabCount() - 1;
-        MouseListener close = new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                tabbedPane.remove(index);
-                //your code to remove component
-                //I use this way , because I use other methods of control than normal: tab.remove(int index);
-            }
-        };
-        final CloseButton closeButton = new CloseButton(title,  loadSvgAsImageIcon(DEFAULT_SVG), close);
-        closeButton.setOpaque(false);
-        // set panel as tab component
-        tabbedPane.setTabComponentAt(index, closeButton);
     }
 
     public ImageIcon loadSvgAsImageIcon(String svgCode) {
@@ -726,39 +826,55 @@ public class GUI extends javax.swing.JFrame{
         else {
             addElementButton();
         }
-
-        SpringUtilities.makeCompactGrid(editPanel, labelCount, 1,5,5,5, 5);
+        JPanel spacer = new JPanel();
+        labelCount++;
+        editPanel.add(spacer);
+        spacer.setPreferredSize(new Dimension(0, spacer.getHeight()));
+        SpringUtilities.makeCompactGrid(editPanel, labelCount, 1,0,0,0, 0);
         scrollPaneBottom.setViewportView(editPanel);
     }
 
+    /**
+     * Adds a title button to the editPanel
+     */
     private void addElementButton() {
         // reset the titlePanel
         titlePanel.removeAll();
         titlePanel.revalidate();
         titlePanel.repaint();
-        titlePanel.setLayout(new BorderLayout(5,5));
-        titlePanel.setPreferredSize(new Dimension(400, BUTTON_HEIGHT));
-
+        // create the title Panel
+        titlePanel.setLayout(new BorderLayout(0,0));
         // create a new title button in the editPanel, if clicked an add and a delete button will pop up
         JToggleButton titleButton = new JToggleButton(selectedNode.getUserObject().toString());
         titleButton.setBorder(fieldBorder);
-        addButton.setPreferredSize(new Dimension(150, addButton.getHeight()));
-        delButton.setPreferredSize(new Dimension(150, delButton.getHeight()));
-        titleButton.setPreferredSize(new Dimension(titleButton.getWidth(), titleButton.getHeight()));
+        // set the preferred size of the title button to the width of the title panel and the height of the standard button height
+        Dimension d = new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT);
+        addButton.setPreferredSize(d);
+        delButton.setPreferredSize(d);
+        titleButton.setPreferredSize(d);
+        titlePanel.setPreferredSize(d);
+        // sett the maximum size of the title button (and add and del button) to the width of the title panel and the height of the standard button height
+        titleButton.setMaximumSize(d);
+        addButton.setMaximumSize(d);
+        delButton.setMaximumSize(d);
+        titlePanel.setMaximumSize(d);
+        // set the minimum size of the title button (and add and del button) to the width of the title panel and the height of the standard button height
+        titleButton.setMinimumSize(d);
+        addButton.setMinimumSize(d);
+        delButton.setMinimumSize(d);
+        titlePanel.setMinimumSize(d);
+        // add the title button to the title panel
         titlePanel.add(titleButton, BorderLayout.CENTER);
         editPanel.add(titlePanel);
         labelCount +=1;
-
         // add to button group so only one attribute / title can be selected at a time
         bg.add(titleButton);
-
         // add a listener to the button to detect selection and show the add and delete button
         titleButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // set the to be deleted node to the currently selected element node
                 toBeDeletedNode = selectedNode;
-
                 // add the buttons to the title panel
                 titlePanel.add(delButton, BorderLayout.EAST);
                 titlePanel.add(addButton, BorderLayout.WEST);
@@ -786,52 +902,53 @@ public class GUI extends javax.swing.JFrame{
     private void addAttributeButton(String labelText, XMLNode node) {;
         // add a new attribute to the editPanel consisting of a label, a textfield and a delete button in a new panel
         JPanel attributePanel = new JPanel();
-        attributePanel.setLayout(new BorderLayout(5,5));
+        attributePanel.setLayout(new BorderLayout(0,0));
         JToggleButton attrButton = new JToggleButton(labelText);
+        // set the unselected background color of the button to gray
+        attrButton.setBackground(Color.LIGHT_GRAY);
         NodedTextField textField = new NodedTextField(node);
-
         // add to button group so only one attribute can be selected at a time
         bg.add(attrButton);
-
         // add a listener to the textfield to detect changes
         textField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 String newText = textField.getText();
                 try {
                     makeHistoryEntry(textField.getNode(),"edit" , newText);
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                } catch (TransformerException e) {
-                    throw new RuntimeException(e);
-                } catch (SAXException e) {
+                } catch (MalformedURLException | TransformerException | SAXException e) {
                     throw new RuntimeException(e);
                 }
                 textField.getNode().setUserObject(newText);
                 System.out.println("change detected");
             }
         });
-
         // add a listener to the button to detect selection and show the delete button
         attrButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // remove the add button from the titlePanel
                 titlePanel.remove(addButton);
-
                 // set the to be deleted node to the currently selected attribute
                 toBeDeletedNode = node.getParent();
-
                 // add the delete button to the attributePanel
                 attributePanel.add(delButton, BorderLayout.EAST);
                 attributePanel.revalidate();
                 attributePanel.repaint();
             }
         });
-
         // set the size of the buttons and the textfield
-        attributePanel.setPreferredSize(new Dimension(400, BUTTON_HEIGHT));
-        attrButton.setPreferredSize(new Dimension(150, attrButton.getHeight()));
-        delButton.setPreferredSize(new Dimension(150, delButton.getHeight()));
+        Dimension d = new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT);
+        attributePanel.setPreferredSize(d);
+        attrButton.setPreferredSize(d);
+        delButton.setPreferredSize(d);
+        // set the minimum size of the buttons and the textfield
+        attributePanel.setMinimumSize(d);
+        attrButton.setMinimumSize(d);
+        delButton.setMinimumSize(d);
+        // set the maximum size of the buttons and the textfield
+        attributePanel.setMaximumSize(d);
+        attrButton.setMaximumSize(d);
+        delButton.setMaximumSize(d);
 
         // add the components to the panel and the panel to the editPanel
         attributePanel.add(attrButton, BorderLayout.WEST);
@@ -845,7 +962,7 @@ public class GUI extends javax.swing.JFrame{
     private void addTextButton(String labelText, XMLNode node) {
         // add a new text to the editPanel consisting of a label, a textfield and a delete button in a new panel
         JPanel textPanel = new JPanel();
-        textPanel.setLayout(new BorderLayout(5,5));
+        textPanel.setLayout(new BorderLayout(0,0));
         JToggleButton textButton = new JToggleButton(labelText);
         NodedTextField textField = new NodedTextField(node);
 
@@ -858,11 +975,7 @@ public class GUI extends javax.swing.JFrame{
                 String newText = textField.getText();
                 try {
                     makeHistoryEntry(textField.getNode(),"edit" , newText);
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                } catch (TransformerException e) {
-                    throw new RuntimeException(e);
-                } catch (SAXException e) {
+                } catch (MalformedURLException | TransformerException | SAXException e) {
                     throw new RuntimeException(e);
                 }
                 textField.getNode().setUserObject(newText);
@@ -888,9 +1001,18 @@ public class GUI extends javax.swing.JFrame{
         });
 
         // set the size of the buttons and the textfield
-        textPanel.setPreferredSize(new Dimension(400, BUTTON_HEIGHT));
-        textButton.setPreferredSize(new Dimension(150, textButton.getHeight()));
-        delButton.setPreferredSize(new Dimension(150, delButton.getHeight()));
+        Dimension d = new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT);
+        textPanel.setPreferredSize(d);
+        textButton.setPreferredSize(d);
+        delButton.setPreferredSize(d);
+        // set the minimum size of the buttons and the textfield
+        textPanel.setMinimumSize(d);
+        textButton.setMinimumSize(d);
+        delButton.setMinimumSize(d);
+        // set the maximum size of the buttons and the textfield
+        textPanel.setMaximumSize(d);
+        textButton.setMaximumSize(d);
+        delButton.setMaximumSize(d);
 
         // add the components to the panel and the panel to the editPanel
         textPanel.add(textButton, BorderLayout.WEST);
@@ -967,12 +1089,6 @@ public class GUI extends javax.swing.JFrame{
             valField.setPreferredSize(new Dimension(valField.getWidth(), BUTTON_HEIGHT));
             textField.setPreferredSize(new Dimension(textField.getWidth(), BUTTON_HEIGHT));
             elementField.setPreferredSize(new Dimension(elementField.getWidth(), BUTTON_HEIGHT));
-
-            // set preferred width for each label to 100 and height to 30
-            attrLabel.setPreferredSize(new Dimension(100, BUTTON_HEIGHT));
-            valLabel.setPreferredSize(new Dimension(100, BUTTON_HEIGHT));
-            textLabel.setPreferredSize(new Dimension(100, BUTTON_HEIGHT));
-            elementLabel.setPreferredSize(new Dimension(100, BUTTON_HEIGHT));
 
             // set labels for each textfield
             attrLabel.setLabelFor(attrField);
@@ -1087,11 +1203,7 @@ public class GUI extends javax.swing.JFrame{
                     // add the new node to the change history
                     try {
                         makeHistoryEntry(selectedNode, "add", (XMLNode) newTextNode);
-                    } catch (MalformedURLException e) {
-                        throw new RuntimeException(e);
-                    } catch (TransformerException e) {
-                        throw new RuntimeException(e);
-                    } catch (SAXException e) {
+                    } catch (MalformedURLException | SAXException | TransformerException e) {
                         throw new RuntimeException(e);
                     }
 
@@ -1110,11 +1222,7 @@ public class GUI extends javax.swing.JFrame{
                     // add the new node to the change history
                     try {
                         makeHistoryEntry(selectedNode, "add", (XMLNode) newElementNode);
-                    } catch (MalformedURLException e) {
-                        throw new RuntimeException(e);
-                    } catch (TransformerException e) {
-                        throw new RuntimeException(e);
-                    } catch (SAXException e) {
+                    } catch (MalformedURLException | TransformerException | SAXException e) {
                         throw new RuntimeException(e);
                     }
 
@@ -1148,11 +1256,7 @@ public class GUI extends javax.swing.JFrame{
             // remove the node from the tree
             try {
                 makeHistoryEntry(toBeDeletedNode, "del");
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            } catch (TransformerException e) {
-                throw new RuntimeException(e);
-            } catch (SAXException e) {
+            } catch (MalformedURLException | TransformerException | SAXException e) {
                 throw new RuntimeException(e);
             }
             XMLNode parentNode = toBeDeletedNode.getParent();

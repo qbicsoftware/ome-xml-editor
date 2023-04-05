@@ -22,6 +22,7 @@
                     <artifactSet>
                         <includes>
                             <include>org.apache.xmlgraphics:batik-transcoder</include>
+                            <include>org.jetbrains:markdown</include>
                         </includes>
                     </artifactSet>
                     <!-- put your configurations here -->
@@ -37,7 +38,6 @@
             </plugin>
         </plugins>
     </build>
-
 
     <groupId>de.qbic</groupId>        <!-- FIXME: Your organization groupId here -->
     <artifactId>Editor</artifactId> <!-- FIXME: Your project artifactId here   -->
@@ -152,6 +152,11 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>3.25.0-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>markdown</artifactId>
+            <version>0.1.45</version>
         </dependency>
 
     </dependencies>

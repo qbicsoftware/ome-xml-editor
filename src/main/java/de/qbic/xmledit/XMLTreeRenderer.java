@@ -14,13 +14,21 @@ public class XMLTreeRenderer extends DefaultTreeCellRenderer {
         employeeIcon = (ImageIcon) this.getIcon();
     }
 
+
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
                                                   boolean leaf, int row, boolean hasFocus) {
         super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-
+        /*
+        JTextArea textArea = new JTextArea(node.getUserObject().toString());
+        JPanel component = new JPanel();
+        // set Border
+        component.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        component.add(textArea);
+        */
         if (node.getUserObject().toString().startsWith("@")) {
+
             String text = String.format(SPAN_FORMAT, "green", node.getUserObject());
             text += " [" + String.format(SPAN_FORMAT, "orange", "Attribute") + "]";
             this.setText("<html>" + text + "</html>");
@@ -34,6 +42,7 @@ public class XMLTreeRenderer extends DefaultTreeCellRenderer {
 
         }
         else if (node.getUserObject().toString().startsWith(":")) {
+            this.remove(this);
             String text = String.format(SPAN_FORMAT, "grey", node.getUserObject());
             text += " [" + String.format(SPAN_FORMAT, "orange", "Value") + "]";
             this.setText("<html>" + text + "</html>");

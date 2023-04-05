@@ -10,6 +10,8 @@ public class XMLChange {
     private XMLNode myNode;
     private boolean valid;
 
+    private String validationError = null;
+
     XMLChange(String mod, LinkedList<String> loc) {
         setChangeType(mod);
         setLocation(loc);
@@ -47,4 +49,13 @@ public class XMLChange {
     public boolean getValidity(){
         return this.valid;
     }
+    // getValidationError() returns a string with the error message
+    public String getValidationError(){
+        return this.validationError;
+    }
+    // setValidationError() sets the error message
+    public void setValidationError(String error){
+        this.validationError = error;
+    }
+
 }

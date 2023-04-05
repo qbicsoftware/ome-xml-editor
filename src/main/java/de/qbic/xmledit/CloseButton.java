@@ -3,8 +3,6 @@ package de.qbic.xmledit;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
@@ -89,7 +87,6 @@ public class CloseButton extends JPanel {
     private class ButtonTab extends JButton {
 
         public ButtonTab() {
-            setOpaque(false);
             setPreferredSize(new Dimension(ICON_WIDTH, ICON_HEIGHT));
             setToolTipText("Close");
 
@@ -98,8 +95,8 @@ public class CloseButton extends JPanel {
             setFocusable(false);
             setBorderPainted(false);
 
-            addMouseListener(listener);
             setRolloverEnabled(true);
+
         }
 
         @Override
@@ -118,7 +115,7 @@ public class CloseButton extends JPanel {
             g2.setColor(new Color(126, 118, 91));
 
             if (getModel().isRollover()) {
-                g2.setColor(Color.WHITE);
+                g2.setColor(Color.RED);
             }
 
             int delta = 3;
@@ -127,25 +124,4 @@ public class CloseButton extends JPanel {
             g2.dispose();
         }
     }
-
-    private final MouseListener listener = new MouseAdapter() {
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            Component component = e.getComponent();
-            if (component instanceof AbstractButton) {
-                AbstractButton button = (AbstractButton) component;
-                button.setContentAreaFilled(true);
-                button.setBackground(new Color(215, 65, 35));
-            }
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            Component component = e.getComponent();
-            if (component instanceof AbstractButton) {
-                AbstractButton button = (AbstractButton) component;
-                button.setContentAreaFilled(false); //transparent
-            }
-        }
-    };
 }

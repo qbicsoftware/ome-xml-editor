@@ -8,39 +8,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.swing.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 class XMLTree extends JTree {
 
     XMLTreeModel dtModel = null;
 
-    public XMLTree(Document xml) {
-        this.setCellRenderer(new XMLTreeRenderer());
+    public XMLTree(Document xml, boolean simplified) {
+        if (simplified) {
+            this.setCellRenderer(new XMLTreeRendererSimplified());
+        } else {
+            this.setCellRenderer(new XMLTreeRenderer());
+        }
         if (xml != null)
             setTree(xml);
     }
-
-
-    public void setPath(String filePath) {
-        Node root;
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(filePath);
-            root = doc.getDocumentElement();
-            System.out.println(root.getNodeName());
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Can't parse file", "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (root != null) {
-            dtModel = new XMLTreeModel(builtTreeNode(root.getFirstChild()));
-            this.setModel(dtModel);
-        }
-    }
-
 
     public void setTree(Document xml) {
         Node root;

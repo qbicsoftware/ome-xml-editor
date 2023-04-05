@@ -81,6 +81,7 @@
           <artifactSet>
             <includes>
               <include>org.apache.xmlgraphics:batik-transcoder</include>
+              <include>org.jetbrains:markdown</include>
             </includes>
           </artifactSet>
         </configuration>

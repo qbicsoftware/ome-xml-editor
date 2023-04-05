@@ -5,7 +5,6 @@ package de.qbic.xmledit;
 
 // Imports
 
-import loci.common.DataTools;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;
@@ -39,8 +38,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.awt.image.BufferedImage;
@@ -52,6 +49,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // Class
 @Plugin(type = Command.class, menuPath = "Plugins>XML-Editor")
@@ -81,6 +81,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     private boolean omexmlOnly = false;
     private boolean validate = true;
     private boolean flat = true;
+    public boolean simplified = true;
     private String omexmlVersion = null;
     private int start = 0;
     private int end = Integer.MAX_VALUE;
@@ -102,27 +103,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
 
     // -- ImageInfo methods --
     public void createReader() {
-        if (reader != null) return; // reader was set programmatically
-        if (format != null) {
-            // create reader of a specific format type
-            try {
-                Class<?> c = Class.forName("loci.formats.in." + format + "Reader");
-                reader = (IFormatReader) c.newInstance();
-            }
-            catch (ClassNotFoundException exc) {
-                LOGGER.warn("Unknown reader: {}", format);
-                LOGGER.debug("", exc);
-            }
-            catch (InstantiationException exc) {
-                LOGGER.warn("Cannot instantiate reader: {}", format);
-                LOGGER.debug("", exc);
-            }
-            catch (IllegalAccessException exc) {
-                LOGGER.warn("Cannot access reader: {}", format);
-                LOGGER.debug("", exc);
-            }
-        }
-        if (reader == null) reader = new ImageReader();
+        reader = new ImageReader();
         baseReader = reader;
     }
     public void configureReaderPreInit() throws FormatException, IOException {
@@ -217,10 +198,8 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         LOGGER.info("Reading{} pixel data ({}-{})",
                 new Object[] {seriesLabel, start, end});
 
-        int sizeX = reader.getSizeX();
-        int sizeY = reader.getSizeY();
-        if (width == 0) width = sizeX;
-        if (height == 0) height = sizeY;
+        width = reader.getSizeX();
+        height = reader.getSizeY();
 
         int pixelType = reader.getPixelType();
 
@@ -231,55 +210,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             if (!fastBlit) {
                 images[i - start] = thumbs ? biReader.openThumbImage(i) :
                         biReader.openImage(i, xCoordinate, yCoordinate, width, height);
-            }
-            else {
-                byte[] b = thumbs ? reader.openThumbBytes(i) :
-                        reader.openBytes(i, xCoordinate, yCoordinate, width, height);
-                Object pix = DataTools.makeDataArray(b,
-                        FormatTools.getBytesPerPixel(pixelType),
-                        FormatTools.isFloatingPoint(pixelType),
-                        reader.isLittleEndian());
-                Double min = null, max = null;
-
-                if (autoscale) {
-                    Double[] planeMin = minMaxCalc.getPlaneMinimum(i);
-                    Double[] planeMax = minMaxCalc.getPlaneMaximum(i);
-                    if (planeMin != null && planeMax != null) {
-                        min = planeMin[0];
-                        max = planeMax[0];
-                        for (int j=1; j<planeMin.length; j++) {
-                            if (planeMin[j].doubleValue() < min.doubleValue()) {
-                                min = planeMin[j];
-                            }
-                            if (planeMax[j].doubleValue() > max.doubleValue()) {
-                                max = planeMax[j];
-                            }
-                        }
-                    }
-                }
-                else if (normalize) {
-                    min = Double.valueOf(0);
-                    max = Double.valueOf(1);
-                }
-
-                if (normalize) {
-                    if (pix instanceof float[]) {
-                        pix = DataTools.normalizeFloats((float[]) pix);
-                    }
-                    else if (pix instanceof double[]) {
-                        pix = DataTools.normalizeDoubles((double[]) pix);
-                    }
-                }
-                if (thumbs) {
-                    images[i - start] = AWTImageTools.makeImage(ImageTools.make24Bits(pix,
-                                    sizeX, sizeY, reader.isInterleaved(), false, min, max),
-                            sizeX, sizeY, FormatTools.isSigned(pixelType));
-                }
-                else {
-                    images[i - start] = AWTImageTools.makeImage(ImageTools.make24Bits(pix,
-                                    width, height, reader.isInterleaved(), false, min, max),
-                            width, height, FormatTools.isSigned(pixelType));
-                }
             }
             if (images[i - start] == null) {
                 LOGGER.warn("\t************ Failed to read plane #{} ************", i);
@@ -311,9 +241,10 @@ public class XMLEditor<T extends RealType<T>> implements Command {
                 }
             }
         }
+
         long e = System.currentTimeMillis();
 
-        LOGGER.info("[done]");
+        LOGGER.info("Deone reading pixel data");
 
         // output timing results
         float sec = (e - s) / 1000f;
@@ -350,15 +281,10 @@ public class XMLEditor<T extends RealType<T>> implements Command {
                 DebugTools.setRootLevel("INFO");
             }
             xml = service.getOMEXML((MetadataRetrieve) ms);
-            //LOGGER.info("First XML-Output");
-            //LOGGER.info("{}", XMLTools.indentXML(xml, xmlSpaces, true));
-
 
             if (omexmlOnly) {
                 DebugTools.setRootLevel("OFF");
             }
-
-
         }
         else {
             LOGGER.info("The metadata could not be converted to OME-XML.");
@@ -372,14 +298,57 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         }
         return xml;
     }
+    /**
+     * gets all files in the directory and returns them as a set
+     * @param dir the directory to get the files from
+     * @return a set of all files in the directory
+     */
+    public Set<String> getFilesInDir(String dir) {
+        return Stream.of(new File(dir).listFiles())
+                .filter(file -> !file.isDirectory())
+                .map(File::getName)
+                .collect(Collectors.toSet());
+    }
+    /**
+     * Applys the current change history to all valid files in the selected folder
+     * @param path the path to the folder
+     */
+    public void applyChangesToFolder(String path) throws Exception {
+        System.out.println("Inside applyChangesToFolder");
+        // loop over all valid files in the folder
+        for (String file : getFilesInDir(path)) {
+            System.out.println("###############################################################");
+            System.out.println("Current File: " + file);
+            applyChangesToFile(path + "/" + file);
+        }
+        System.out.println("Done");
+    }
+    /**
+     * Applys the current change history to the selected file
+     * @param path the path to the file
+     */
+    public void applyChangesToFile(String path) throws Exception {
+        System.out.println("Inside applyChangesToFile");
+        loadFile(path);
+        if (validateChangeHistory()) {
+            exportToOmeTiff(path);
+        }
+    }
+    public void applyChanges(Document dom) {
+        System.out.println("Inside applyChanges");
+        for (XMLChange c : changeHistory) {
+            LinkedList<String> query = new LinkedList<>();
+            query.addAll(c.getLocation());
+            applyChange(c, dom, dom, query);
+        }
+    }
     public void applyChange(XMLChange change, Document root, Node n, LinkedList<String> query) {
-        System.out.println("-----------------------------------------------------------------------------------------");
+        System.out.println("---------------------------------------------------------------------");
         System.out.println("Current Node: " + n.getNodeName());
         System.out.println("Remaining Query: " + query.toString());
 
         // If the query is empty, we are at the node where the new node should be added
         if (change.changeType == "add" && query.size()==0) {
-            System.out.println("Adding new Node");
 
             if (change.getNewValue().startsWith("@")) {
                 // Adding a new Attribute node and its value
@@ -408,7 +377,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         }
         // if the query has only left 1 item, then we are at the node to be edited
         else if (change.changeType == "edit" && query.size()<=2) {
-            System.out.println("Editing Node");
 
             if (query.get(0).startsWith("@")) {
                 // Editing an Attribute node
@@ -441,7 +409,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // If the query is empty, we are at the node that is to be deleted
         else if (change.changeType == "del") {
             if (query.size()>0){
-                System.out.println("Deleting Node: " + n.getNodeName());
                 if (query.get(0).startsWith("@")) {
                     // Deleting an Attribute node
                     System.out.println("deleting attribute");
@@ -479,96 +446,85 @@ public class XMLEditor<T extends RealType<T>> implements Command {
                 }
             }
         }
-
-
         // query not in graph --> print error
         System.out.println("Query couldnt be found, no change was made");
     }
-    public void exportToOmeTiff(String outPath) throws Exception {
-
-        int dot = outPath.lastIndexOf(".");
-        String outId = (dot >= 0 ? outPath.substring(0, dot) : outPath) + ".ome.tif";
-        System.out.println("Converting " + outPath + " to " + outId + " ");
-
+    /**
+     * Exports the current metadata to an OME-TIFF file
+     * @param path the path to the file
+     */
+    public void exportToOmeTiff(String path) throws Exception {
+        System.out.println("Inside exportToOmeTiff");
+        System.out.println("Path: " + path);
+        // define output path
+        int dot = path.lastIndexOf(".");
+        String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.tif";
         // record metadata to OME-XML format
         ServiceFactory factory = new ServiceFactory();
         OMEXMLService service = factory.getInstance(OMEXMLService.class);
         IMetadata omexmlMeta = service.createOMEXMLMetadata();
-
-
-        System.out.println("XML SCHEMA: ");
-        System.out.println(XMLTools.indentXML(omexmlMeta.getRoot().toString()));
-
-        for (XMLChange c : changeHistory) {
-            System.out.println("apply Change: " + c.changeType);
-            LinkedList<String> query = new LinkedList<>();
-            query.addAll(c.getLocation());
-            applyChange(c, xml_doc, xml_doc, query);
-            System.out.println("One Change applied");
-            // validate XML
-            System.out.println(XMLTools.validateXML(XMLTools.getXML(xml_doc)));
-            System.out.println(XMLTools.indentXML(XMLTools.getXML(xml_doc)));
-        }
+        // apply changes to metadata
+        applyChanges(xml_doc);
+        // set metadata
         xmlElement = xml_doc.getDocumentElement();
         OMEModel xmlModel = new OMEModelImpl();
+        // catch verifcation errors and print them
         MetadataRoot mdr = new OMEXMLMetadataRoot(xmlElement, xmlModel);
-        omexmlMeta.setRoot(mdr);
 
-        BufferedImageWriter biwriter = new BufferedImageWriter(new OMETiffWriter());
+        omexmlMeta.setRoot(mdr);
+        // define writer
+        OMETiffWriter writer = new OMETiffWriter();
+        BufferedImageWriter biwriter = new BufferedImageWriter(writer);
+        // read pixels
         reader.setId(id);
         BufferedImage[] pixelData = readPixels2();
-
-
-        /*
-        writer.setMetadataRetrieve(omexmlMeta);
-        writer.setId("test.ome.tif");
-
-        byte[][] imageInByte = getByteArrays(pixelData);
-        System.out.println("byte length: " + imageInByte.length);
-        for (int p=0; p<imageInByte.length;p++) {
-            writer.saveBytes(p, imageInByte[p]);
-        }
-         */
-
+        reader.close();
+        // write pixels
         biwriter.setMetadataRetrieve(omexmlMeta);
-        biwriter.setId(outId);
-
+        System.out.println("Writing to: " + outPath);
+        biwriter.setId(outPath);
         for (int i = 0; i < pixelData.length; i++) {
             biwriter.saveImage(i, pixelData[i]);
         }
-
+        // close writer
+        writer.close();
         biwriter.close();
+        // refocus gui
+        myGUI.setVisible(true);
         System.out.println("[done]");
+
     }
     public void showCurrentXML() throws Exception {
-        // record metadata to OME-XML format
-        ServiceFactory factory = new ServiceFactory();
-        OMEXMLService service = factory.getInstance(OMEXMLService.class);
-        IMetadata omexmlMeta = service.createOMEXMLMetadata();
-
-        System.out.println("XML SCHEMA: ");
-        System.out.println(XMLTools.indentXML(omexmlMeta.getRoot().toString()));
         Document example_xml_doc = (Document) xml_doc.cloneNode(true);
 
-        for (XMLChange c : changeHistory) {
-            System.out.println("apply Change: " + c.changeType);
-            LinkedList<String> query = new LinkedList<>();
-            query.addAll(c.getLocation());
-            applyChange(c, example_xml_doc, example_xml_doc, query);
-        }
+        applyChanges(example_xml_doc);
+
         System.out.println(XMLTools.indentXML(XMLTools.getXML(example_xml_doc)));
         System.out.println("All Changes applied");
-        myGUI.showXMLTree(example_xml_doc, "Current XML");
+        myGUI.showXMLTree(example_xml_doc, example_xml_doc.getNodeName());
         myGUI.setVisible(true);
     }
+    public void openTutorial() throws IOException {
+        String path = "/home/aaron/Documents/Work/HiWi/QBiC/Metadata_Curation/XML_metadata_editor/data/resources/HowToUse.md";
+        String md = new String(Files.readAllBytes(Paths.get(path)));
+        myGUI.makeNewTab(myGUI.renderMarkdown(md), "How To Use", myGUI.HELP_SVG);
+    }
+
+    public void openAbout() throws IOException {
+        String path = "/home/aaron/Documents/Work/HiWi/QBiC/Metadata_Curation/XML_metadata_editor/README.md";
+        String md = new String(Files.readAllBytes(Paths.get(path)));
+        myGUI.makeNewTab(myGUI.renderMarkdown(md), "About XML-Editor", myGUI.HELP_SVG);
+    }
+
     public LinkedList<XMLChange> getChangeHistory() {
         return changeHistory;
     }
 
-    public void validateChangeHistory() throws TransformerException, MalformedURLException, SAXException {
+    public boolean validateChangeHistory() throws TransformerException {
+        System.out.println("- - - - - - - - - -");
         Document example_xml_doc = (Document) xml_doc.cloneNode(true);
+        boolean validityOfHistory = true;
         for (XMLChange c : changeHistory) {
-            System.out.println("apply Change: " + c.changeType);
             LinkedList<String> query = new LinkedList<>();
             query.addAll(c.getLocation());
             applyChange(c, example_xml_doc, example_xml_doc, query);
@@ -579,11 +535,23 @@ public class XMLEditor<T extends RealType<T>> implements Command {
                 c.setValidity(true);
             } else {
                 c.setValidity(false);
+                validityOfHistory = false;
+                // get validation error by catching the exception
+                try {
+                    Element xmlExampleElement = example_xml_doc.getDocumentElement();
+                    OMEModel xmlModel = new OMEModelImpl();
+                    // catch verification errors and print them
+                    MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
+                } catch (Exception e) {
+                    c.setValidationError(e.getMessage());
+                }
             }
         }
+        System.out.println("- - - - - - - - - -");
+        return validityOfHistory;
     }
 
-    public void saveChangeProfile(String path){
+    public void saveChangeHistory(String path){
         // save each change as a new line to file
         // each line contains the modification type, the location and the new content seperated by tabs
         // for identification the file is called path/ + change + date + time + .txt
@@ -598,7 +566,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             e.printStackTrace();
         }
     }
-    public void loadChangeProfile(String path) throws Exception {
+    public void loadChangeHistory(String path) throws Exception {
         // load each change from file
         // each line contains the modification type, the location and the new content seperated by tabs
         // for identification the file is called path/ + change + date + time + .txt
@@ -618,19 +586,17 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         XMLSchemaEditor schemaEditor = new XMLSchemaEditor();
         String xmlString = schemaEditor.createExampleXML();
         Document xmlDoc = XMLTools.parseDOM(xmlString);
-        myGUI.makeTree(xmlDoc);
+        // myGUI.makeTree(xmlDoc, simplified);
     }
-    public void openXML(String path) throws ParserConfigurationException, IOException, SAXException, TransformerException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        xml_doc = db.parse(new File(path));
-        String xml = XMLTools.getXML(xml_doc);
-        System.out.println(xml);
-        changeHistory = new LinkedList<>();
-        myGUI.makeTree(xml_doc);
+    public void updateTree() {
+        // define a new xml document
+        Document new_xml_doc = (Document) xml_doc.cloneNode(true);
+        // apply all changes to the original xml
+        applyChanges(new_xml_doc);
+        // update the tree
+        myGUI.updateTree(new_xml_doc, simplified);
     }
-
-    public void openImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException {
+    public void loadFile(String path) throws IOException, ServiceException, FormatException, ParserConfigurationException, SAXException {
         String[] args = new String[2];
         args[0] = path; // the id parameter
         args[1] = "-omexml-only";
@@ -639,7 +605,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         id = path;
 
         createReader();
-
         configureReaderPreInit();
         reader.setId(path);
         configureReaderPostInit();
@@ -649,7 +614,35 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         String xml = getOMEXML();
         reader.close();
         xml_doc = XMLTools.parseDOM(xml);
-        myGUI.makeTree(xml_doc);
+    }
+    public void openImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException {
+        loadFile(path);
+        // make title from path
+        String title = path.substring(path.lastIndexOf("/") + 1);
+
+        if (myGUI.myTree != null) {
+            myGUI.updateTree(xml_doc, simplified);
+        }
+        else {
+            myGUI.makeTree(xml_doc, simplified, title);
+        }
+    }
+    public void undoChange() throws MalformedURLException, TransformerException, SAXException {
+        if (changeHistory.size() > 0) {
+            // remove the last change from the history
+            changeHistory.removeLast();
+            // define a new xml document
+            Document new_xml_doc = (Document) xml_doc.cloneNode(true);
+            // apply all changes to the original xml
+            for (XMLChange c : changeHistory) {
+                System.out.println("apply Change: " + c.changeType);
+                LinkedList<String> query = new LinkedList<>();
+                query.addAll(c.getLocation());
+                applyChange(c, new_xml_doc, new_xml_doc, query);
+            }
+            myGUI.updateTree(new_xml_doc, simplified);
+            myGUI.updateChangeHistoryTab();
+        }
     }
     public void testEdit() {
         changeHistory = new LinkedList<>();
