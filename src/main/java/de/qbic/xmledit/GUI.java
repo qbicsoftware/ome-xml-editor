@@ -90,7 +90,7 @@ public class GUI extends javax.swing.JFrame{
     private int labelCount =0;
     private static JButton addButton = new JButton("Add Node");
     private static JButton delButton = new JButton("Delete");
-    private static JTextArea validationErrors = new JTextArea();
+    private static JTextArea validationErrorsField = new JTextArea();
     private static JPanel changeHistoryWindowPanel = new JPanel();
     private XMLNode selectedNode;
     private XMLNode toBeDeletedNode;
@@ -436,10 +436,7 @@ public class GUI extends javax.swing.JFrame{
         return scrollPane;
     }
     public void makeChangeHistoryTab() throws TransformerException, ServiceException, DependencyException, MalformedURLException, SAXException {
-        // get the change history
-        LinkedList<XMLChange> changeHistory = edit.getChangeHistory();
         // create changer history window panel
-
         changeHistoryWindowPanel.setLayout(new BoxLayout(changeHistoryWindowPanel, BoxLayout.Y_AXIS));
         // add the change history pane to the change history window panel
         changeHistoryWindowPanel.add(changeHistoryPane);
@@ -447,75 +444,54 @@ public class GUI extends javax.swing.JFrame{
         JTable table = makeHistoryTable();
         XMLTableModel model = (XMLTableModel) table.getModel();
         // add a textfield to the change history panel to display validation errors
-        validationErrors.setEditable(false);
-        validationErrors.setLineWrap(true);
-        validationErrors.setWrapStyleWord(true);
-        validationErrors.setSize(WIDTH, BUTTON_HEIGHT);
+        validationErrorsField.setEditable(false);
+        validationErrorsField.setLineWrap(true);
+        validationErrorsField.setWrapStyleWord(true);
+        validationErrorsField.setSize(WIDTH, BUTTON_HEIGHT);
         // add a border to the validation errors textfield
-        makeStandardBorder(validationErrors);
+        makeStandardBorder(validationErrorsField);
         // add the validation errors to the change history window panel
-        changeHistoryWindowPanel.add(validationErrors);
-
-        // iterate over the change history and remember the index
-        edit.validateChangeHistory();
-        int index = 0;
-        for (XMLChange c : changeHistory) {
-            model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNewValue()});
-            if (c.getValidity()) {
-                model.setRowColor(index, PASTEL_GREEN);
-                validationErrors.setText("No validation errors in most recent change found.");
-                // set the text color to green
-                validationErrors.setForeground(DARK_GREEN);
-            }
-            else if (!c.getValidity()) {
-                model.setRowColor(index, PASTEL_RED);
-                validationErrors.setText(c.getValidationError());
-                // set the text color to red
-                validationErrors.setForeground(DARK_RED);
-            }
-            else {
-                model.setRowColor(index, PASTEL_BLUE);
-            }
-            index++;
-        }
+        changeHistoryWindowPanel.add(validationErrorsField);
+        addChangesToTable(model);
         changeHistoryPane.add(table);
         changeHistoryPane.setViewportView(table);
 
         // add the change panel to the tabbed pane
         makeNewTab(changeHistoryWindowPanel, "Change History", CHANGE_SVG);
     }
-
-    public void updateChangeHistoryTab() throws MalformedURLException, TransformerException, SAXException {
+    public void addChangesToTable(XMLTableModel model) throws TransformerException {
         // get the change history
         LinkedList<XMLChange> changeHistory = edit.getChangeHistory();
-
-        // Create Header entrys for the list of changes, so the user knows which entry is what
-        JTable table = makeHistoryTable();
-        XMLTableModel model = (XMLTableModel) table.getModel();
-
-        // iterate over the change history and remember the index
         edit.validateChangeHistory();
         int index = 0;
         for (XMLChange c : changeHistory) {
             model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNewValue()});
             if (c.getValidity()) {
                 model.setRowColor(index, PASTEL_GREEN);
-                validationErrors.setText("No validation errors in most recent change found.");
+                validationErrorsField.setText("No validation errors in most recent change found.");
                 // set the text color to green
-                validationErrors.setForeground(DARK_GREEN);
+                validationErrorsField.setForeground(DARK_GREEN);
 
             }
             else if (!c.getValidity()) {
                 model.setRowColor(index, PASTEL_RED);
-                validationErrors.setText(c.getValidationError());
+                validationErrorsField.setText(c.getValidationError());
                 // set the text color to red
-                validationErrors.setForeground(DARK_RED);
+                validationErrorsField.setForeground(DARK_RED);
             }
             else {
                 model.setRowColor(index, PASTEL_BLUE);
             }
             index++;
         }
+    }
+
+    public void updateChangeHistoryTab() throws TransformerException {
+        // Create Header entrys for the list of changes, so the user knows which entry is what
+        JTable table = makeHistoryTable();
+        XMLTableModel model = (XMLTableModel) table.getModel();
+        // iterate over the change history and remember the index
+        addChangesToTable(model);
         changeHistoryPane.add(table);
         changeHistoryPane.setViewportView(table);
     }
@@ -551,7 +527,12 @@ public class GUI extends javax.swing.JFrame{
         });
         return table;
     }
+    /* Reports errors that occur in a little pop-up in the gui.
+     */
+    public void reportError(String exception) {
+        JOptionPane.showMessageDialog(this, "Error: " + exception, "Error", JOptionPane.ERROR_MESSAGE);
 
+    }
     public JPanel makeChangePanel(XMLChange c){
         // create a panel for each change
         JPanel changePanel = new JPanel();

@@ -29,6 +29,7 @@ import ome.xml.meta.MetadataRoot;
 import ome.xml.meta.OMEXMLMetadataRoot;
 import ome.xml.model.OMEModel;
 import ome.xml.model.OMEModelImpl;
+import ome.xml.model.enums.EnumerationException;
 import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;
 import org.slf4j.Logger;
@@ -453,24 +454,37 @@ public class XMLEditor<T extends RealType<T>> implements Command {
      * Exports the current metadata to an OME-TIFF file
      * @param path the path to the file
      */
-    public void exportToOmeTiff(String path) throws Exception {
+    public void exportToOmeTiff(String path) throws IOException, FormatException {
         System.out.println("Inside exportToOmeTiff");
         System.out.println("Path: " + path);
         // define output path
         int dot = path.lastIndexOf(".");
         String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.tif";
         // record metadata to OME-XML format
-        ServiceFactory factory = new ServiceFactory();
-        OMEXMLService service = factory.getInstance(OMEXMLService.class);
-        IMetadata omexmlMeta = service.createOMEXMLMetadata();
-        // apply changes to metadata
-        applyChanges(xml_doc);
-        // set metadata
-        xmlElement = xml_doc.getDocumentElement();
-        OMEModel xmlModel = new OMEModelImpl();
-        // catch verifcation errors and print them
-        MetadataRoot mdr = new OMEXMLMetadataRoot(xmlElement, xmlModel);
+        ServiceFactory factory = null;
+        IMetadata omexmlMeta = null;
+        try {
+            factory = new ServiceFactory();
+            OMEXMLService service = factory.getInstance(OMEXMLService.class);
+            omexmlMeta = service.createOMEXMLMetadata();
+        } catch (DependencyException e) {
+            myGUI.reportError(e.toString());
+        } catch (ServiceException e) {
+            myGUI.reportError(e.toString());
+        }
 
+        // apply changes to metadata
+        Document new_xml_doc = (Document) xml_doc.cloneNode(true);
+        applyChanges(new_xml_doc);
+        // set metadata
+        xmlElement = new_xml_doc.getDocumentElement();
+        OMEModel xmlModel = new OMEModelImpl();
+        MetadataRoot mdr = null;
+        try {
+            mdr = new OMEXMLMetadataRoot(xmlElement, xmlModel);
+        } catch (EnumerationException e) {
+            myGUI.reportError(e.toString());
+        }
         omexmlMeta.setRoot(mdr);
         // define writer
         OMETiffWriter writer = new OMETiffWriter();
@@ -523,32 +537,25 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     public boolean validateChangeHistory() throws TransformerException {
         System.out.println("- - - - - - - - - -");
         Document example_xml_doc = (Document) xml_doc.cloneNode(true);
-        boolean validityOfHistory = true;
+        boolean changeHistoryValidity= true;
         for (XMLChange c : changeHistory) {
             LinkedList<String> query = new LinkedList<>();
             query.addAll(c.getLocation());
             applyChange(c, example_xml_doc, example_xml_doc, query);
-            boolean val = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), "/home/aaron/Documents/Work/HiWi/QBiC/Metadata_Curation/XML_metadata_editor/data/ome.xsd");
-            System.out.println("Validation: " + val);
-            System.out.println(XMLTools.validateXML(XMLTools.getXML(example_xml_doc)));
-            if (val) {
+            try {
+                Element xmlExampleElement = example_xml_doc.getDocumentElement();
+                OMEModel xmlModel = new OMEModelImpl();
+                // catch verification errors and print them
+                MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
                 c.setValidity(true);
-            } else {
+            } catch (Exception e) {
                 c.setValidity(false);
-                validityOfHistory = false;
-                // get validation error by catching the exception
-                try {
-                    Element xmlExampleElement = example_xml_doc.getDocumentElement();
-                    OMEModel xmlModel = new OMEModelImpl();
-                    // catch verification errors and print them
-                    MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
-                } catch (Exception e) {
-                    c.setValidationError(e.getMessage());
-                }
+                c.setValidationError(e.getMessage());
             }
+            changeHistoryValidity = changeHistory.getLast().getValidity();
         }
         System.out.println("- - - - - - - - - -");
-        return validityOfHistory;
+        return changeHistoryValidity;
     }
 
     public void saveChangeHistory(String path){
