@@ -47,10 +47,8 @@ public class GUI extends javax.swing.JFrame{
     static final String TREE_SVG = "<svg height=\"800\" width=\"800\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\"><path d=\"M21 24h-6v-6h6v6zm-4-2h2v-2h-2v2zm-2 0H6V8H3V0h8v8H8v4h7v2H8v6h7v2zM5 6h4V2H5v4zm16 10h-6v-6h6v6zm-4-2h2v-2h-2v2z\"/></svg>";
     static final String SETTINGS_SVG = "<svg width=\"800\" height=\"800\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" data-name=\"Line Color\"  class=\"icon line-color\"><circle cx=\"12\" cy=\"12\" r=\"3\" style=\"fill:none;stroke:#2ca9bc;stroke-linecap:round;stroke-linejoin:round;stroke-width:2\"/><path d=\"M20 10h-.59a1 1 0 0 1-.94-.67v0a1 1 0 0 1 .2-1.14l.41-.41a1 1 0 0 0 0-1.42l-1.42-1.43a1 1 0 0 0-1.42 0l-.41.41a1 1 0 0 1-1.14.2h0a1 1 0 0 1-.69-.95V4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v.59a1 1 0 0 1-.67.94h0a1 1 0 0 1-1.14-.2l-.41-.41a1 1 0 0 0-1.42 0L4.93 6.34a1 1 0 0 0 0 1.42l.41.41a1 1 0 0 1 .2 1.14v0a1 1 0 0 1-.94.67H4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h.59a1 1 0 0 1 .94.67v0a1 1 0 0 1-.2 1.14l-.41.41a1 1 0 0 0 0 1.42l1.41 1.41a1 1 0 0 0 1.42 0l.41-.41a1 1 0 0 1 1.14-.2h0a1 1 0 0 1 .67.94V20a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-.59a1 1 0 0 1 .67-.94h0a1 1 0 0 1 1.14.2l.41.41a1 1 0 0 0 1.42 0l1.41-1.41a1 1 0 0 0 0-1.42l-.41-.41a1 1 0 0 1-.2-1.14v0a1 1 0 0 1 .94-.67H20a1 1 0 0 0 1-1V11a1 1 0 0 0-1-1Z\" style=\"fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2\"/></svg>";
     static final String FILES_SVG = "<svg width=\"800\" height=\"800\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17.5 0h-9L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.7l1.3-1.43V4.5L17.5 0zm0 2.12 2.38 2.38H17.5V2.12zm-3 20.38h-12v-15H7v9.07L8.5 18h6v4.5zm6-6h-12v-15H16V6h4.5v10.5z\"/></svg>";
-    static final String HELP_SVG = "<svg width=\"800px\" height=\"800px\" viewBox=\"0 0 16 16\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" fill=\"none\" stroke=\"#000000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\">\n" +
-            "<circle cy=\"8\" cx=\"8\" r=\"6.25\"/>\n" +
-            "<path d=\"m5.75 6.75c0-1 1-2 2.25-2s2.25 1.0335 2.25 2c0 1.5-1.5 1.5-2.25 2m0 2.5v0\"/>\n" +
-            "</svg>";
+    static final String HELP_SVG = "<svg width=\"800px\" height=\"800px\" viewBox=\"0 0 16 16\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" fill=\"none\" stroke=\"#000000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\">\n<circle cy=\"8\" cx=\"8\" r=\"6.25\"/>\n<path d=\"m5.75 6.75c0-1 1-2 2.25-2s2.25 1.0335 2.25 2c0 1.5-1.5 1.5-2.25 2m0 2.5v0\"/>\n</svg>";
+    static final String FEEDBACK_SVG = "<svg fill=\"#000000\" width=\"800px\" height=\"800px\" viewBox=\"0 0 30 30\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M20.5 9s-.3 0-.4.2l-5.4 5.5-.6.3c-.2 0-.4 0-.6-.3L11 12.2c-.6-.5-1.3.2-.8.7l2.4 2.4c.4.4 1 .6 1.4.6.5 0 1-.2 1.4-.6L21 10c.2-.4 0-1-.5-1zm-19-8C.7 1 0 1.7 0 2.5v19c0 .8.7 1.5 1.5 1.5H5v4.5c0 .3 0 .6.2 1 0 .2.4.4.6.5.6 0 1-.2 1.6-.7l5.3-5.3h15.8c.8 0 1.5-.7 1.5-1.5v-19c0-.8-.7-1.5-1.5-1.5zm0 1h27c.3 0 .5.2.5.5v19c0 .3-.2.5-.5.5H12.1l-5.4 5.7c-.5.5-.6 0-.6-.2v-5c0-.3-.2-.5-.5-.5h-4c-.3 0-.5-.2-.5-.5v-19c0-.3.2-.5.5-.5z\"/></svg>";
     static final String UNDO_SVG = "<svg width=\"800px\" height=\"800px\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\"><path stroke=\"#000000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 9v5h5m11 2c-.497-4.5-3.367-8-8-8-2.73 0-5.929 2.268-7.294 5.5\"/></svg>";
     public static final int BASE_UNIT = 8;
     public static final int SCREEN_WIDTH = 128*BASE_UNIT;
@@ -210,6 +208,7 @@ public class GUI extends javax.swing.JFrame{
                     System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
                     System.out.println("Folder: " + folder.getAbsolutePath());
                     edit.applyChangesToFolder(folder.getAbsolutePath());
+                    giveFeedback();
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -327,7 +326,7 @@ public class GUI extends javax.swing.JFrame{
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = chooser.getSelectedFile();
                 try {
-                    edit.exportToOmeTiff(fileToSave.getPath());
+                    edit.exportToOmeTiff(fileToSave.getPath(), edit.xml_doc);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -537,73 +536,52 @@ public class GUI extends javax.swing.JFrame{
         });
         return table;
     }
+    /**
+     * Creates a new table in a new tab that shows the user which files from the specified folder
+     * (apply change to folder) have been changed and which have not.
+     *
+     */
+    public void giveFeedback() {
+        // create the array of column names for the table
+        String[] columnNames = {"File Name", "Changed?"};
+        // create a default table model with no data
+        XMLTableModel model = new XMLTableModel(columnNames, 0);
+        // create a JTable with the model
+        JTable table = new JTable(model);
+        // make the table cells editable
+        table.setDefaultEditor(Object.class, null);
+        table.setDefaultRenderer(Object.class, new XMLTableRenderer());
+        // add a mouse listener to handle clicks on the table
+        table.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                // get the row and column of the clicked cell
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+
+                // get the value of the clicked cell
+                Object value = model.getValueAt(row, col);
+
+                // do something with the value (for example, print it)
+                System.out.println("Clicked on: " + value);
+
+            }
+        });
+        // create a new panel for the table
+        JPanel tablePanel = new JPanel();
+        // create a scroll pane for the table
+        JScrollPane scrollPane = new JScrollPane(table);
+        // set viewport view to the table
+        scrollPane.setViewportView(table);
+        // add the scroll pane to the panel
+        tablePanel.add(scrollPane);
+        // add the panel to the tabbed pane
+        makeNewTab(tablePanel, "Feedback", FEEDBACK_SVG);
+    }
     /* Reports errors that occur in a little pop-up in the gui.
      */
     public void reportError(String exception) {
         JOptionPane.showMessageDialog(this, "Error: " + exception, "Error", JOptionPane.ERROR_MESSAGE);
 
-    }
-    public JPanel makeChangePanel(XMLChange c){
-        // create a panel for each change
-        JPanel changePanel = new JPanel();
-
-        // give it a spring layout
-        SpringLayout layout = new SpringLayout();
-        changePanel.setLayout(layout);
-
-        // create labels for the type of change, the location of the change and the new value and add them to the change panel
-        JLabel changeTypeLabel = new JLabel(c.getChangeType());
-        JLabel locationLabel = new JLabel(String.valueOf(c.getLocation()));
-        JLabel newValueLabel = new JLabel(c.getNewValue());
-
-        // add the labels to the change panel
-        changePanel.add(changeTypeLabel);
-        changePanel.add(locationLabel);
-        changePanel.add(newValueLabel);
-
-        // set constraints for the labels
-        SpringUtilities.makeGrid(changePanel, 1, 3, 6, 6, 6, 6);
-
-        // set width of the label to 1/3 of the width of the change panel and the height equal the height of the change panel
-        changeTypeLabel.setPreferredSize(new Dimension(changePanel.getWidth() / 3, changePanel.getHeight()));
-        locationLabel.setPreferredSize(new Dimension(changePanel.getWidth() / 3, changePanel.getHeight()));
-        newValueLabel.setPreferredSize(new Dimension(changePanel.getWidth() / 3, changePanel.getHeight()));
-
-        // add the change panel to the change history panel
-        // makeStandardBorder(changePanel);
-        return changePanel;
-    }
-
-    public JPanel makeChangePanel(){
-        // create a panel for each change
-        JPanel changePanel = new JPanel();
-
-        // give it a spring layout
-        SpringLayout layout = new SpringLayout();
-        changePanel.setLayout(layout);
-
-        // create labels for the type of change, the location of the change and the new value and add them to the change panel
-        JLabel changeTypeLabel = new JLabel("Change Type");
-        JLabel locationLabel = new JLabel("Location");
-        JLabel newValueLabel = new JLabel("New Value");
-
-        // add the labels to the change panel
-        changePanel.add(changeTypeLabel);
-        changePanel.add(locationLabel);
-        changePanel.add(newValueLabel);
-
-        // set constraints for the labels
-        SpringUtilities.makeGrid(changePanel, 1, 3, 6, 6, 6, 6);
-
-        // set width of the label to 1/3 of the width of the change panel and the height equal the height of the change panel
-        changeTypeLabel.setPreferredSize(new Dimension(changePanel.getWidth() / 3, changePanel.getHeight()));
-        locationLabel.setPreferredSize(new Dimension(changePanel.getWidth() / 3, changePanel.getHeight()));
-        newValueLabel.setPreferredSize(new Dimension(changePanel.getWidth() / 3, changePanel.getHeight()));
-
-        // add the change panel to the change history panel
-        makeStandardBorder(changePanel);
-
-        return changePanel;
     }
 
     public void makeTitledBorder(JPanel p, String title) {
@@ -717,7 +695,6 @@ public class GUI extends javax.swing.JFrame{
         scrollPaneTop.setViewportView(myTree);
 
         makeNewTab(scrollPaneTop, title, TREE_SVG);
-        // edit.validateChangeHistory();
     }
 
     public void updateTree(Document dom, boolean simplified){

@@ -330,9 +330,12 @@ public class XMLEditor<T extends RealType<T>> implements Command {
      */
     public void applyChangesToFile(String path) throws Exception {
         System.out.println("Inside applyChangesToFile");
-        loadFile(path);
+        Document newXMLDom =  loadFile(path);
         if (validateChangeHistory()) {
-            exportToOmeTiff(path);
+            exportToOmeTiff(path, newXMLDom);
+        }
+        else {
+            System.out.println("Change history is not valid for file: " + path);
         }
     }
     public void applyChanges(Document dom) {
@@ -454,7 +457,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
      * Exports the current metadata to an OME-TIFF file
      * @param path the path to the file
      */
-    public void exportToOmeTiff(String path) throws IOException, FormatException {
+    public void exportToOmeTiff(String path, Document newXML) throws IOException, FormatException {
         System.out.println("Inside exportToOmeTiff");
         System.out.println("Path: " + path);
         // define output path
@@ -467,14 +470,12 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             factory = new ServiceFactory();
             OMEXMLService service = factory.getInstance(OMEXMLService.class);
             omexmlMeta = service.createOMEXMLMetadata();
-        } catch (DependencyException e) {
-            myGUI.reportError(e.toString());
-        } catch (ServiceException e) {
+        } catch (DependencyException | ServiceException e) {
             myGUI.reportError(e.toString());
         }
 
         // apply changes to metadata
-        Document new_xml_doc = (Document) xml_doc.cloneNode(true);
+        Document new_xml_doc = (Document) newXML.cloneNode(true);
         applyChanges(new_xml_doc);
         // set metadata
         xmlElement = new_xml_doc.getDocumentElement();
@@ -521,13 +522,13 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     public void openTutorial() throws IOException {
         String path = "./data/resources/HowToUse.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
-        myGUI.makeNewTab(myGUI.renderMarkdown(md), "How To Use", myGUI.HELP_SVG);
+        myGUI.makeNewTab(myGUI.renderMarkdown(md), "How To Use", GUI.HELP_SVG);
     }
 
     public void openAbout() throws IOException {
         String path = "./README.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
-        myGUI.makeNewTab(myGUI.renderMarkdown(md), "About XML-Editor", myGUI.HELP_SVG);
+        myGUI.makeNewTab(myGUI.renderMarkdown(md), "About XML-Editor", GUI.HELP_SVG);
     }
 
     public LinkedList<XMLChange> getChangeHistory() {
@@ -603,7 +604,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // update the tree
         myGUI.updateTree(new_xml_doc, simplified);
     }
-    public void loadFile(String path) throws IOException, ServiceException, FormatException, ParserConfigurationException, SAXException {
+    public Document loadFile(String path) throws IOException, ServiceException, FormatException, ParserConfigurationException, SAXException {
         String[] args = new String[2];
         args[0] = path; // the id parameter
         args[1] = "-omexml-only";
@@ -620,13 +621,20 @@ public class XMLEditor<T extends RealType<T>> implements Command {
 
         String xml = getOMEXML();
         reader.close();
-        xml_doc = XMLTools.parseDOM(xml);
+        return XMLTools.parseDOM(xml);
     }
     public void openImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException, TransformerException {
-        loadFile(path);
+
         // make title from path
         String title = path.substring(path.lastIndexOf("/") + 1);
-        myGUI.makeNewTreeTab(xml_doc, simplified, title);
+        xml_doc = loadFile(path);
+        Document new_xml_doc = (Document) xml_doc.cloneNode(true);
+        if (changeHistory != null) {
+            applyChanges(new_xml_doc);
+            myGUI.updateChangeHistoryTab();
+        }
+        myGUI.makeNewTreeTab(new_xml_doc, simplified, title);
+
     }
     public void undoChange() throws MalformedURLException, TransformerException, SAXException {
         if (changeHistory.size() > 0) {
