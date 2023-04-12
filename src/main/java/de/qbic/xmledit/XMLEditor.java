@@ -622,17 +622,11 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         reader.close();
         xml_doc = XMLTools.parseDOM(xml);
     }
-    public void openImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException {
+    public void openImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException, TransformerException {
         loadFile(path);
         // make title from path
         String title = path.substring(path.lastIndexOf("/") + 1);
-
-        if (myGUI.myTree != null) {
-            myGUI.updateTree(xml_doc, simplified);
-        }
-        else {
-            myGUI.makeTree(xml_doc, simplified, title);
-        }
+        myGUI.makeNewTreeTab(xml_doc, simplified, title);
     }
     public void undoChange() throws MalformedURLException, TransformerException, SAXException {
         if (changeHistory.size() > 0) {
@@ -655,6 +649,14 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         changeHistory = new LinkedList<>();
         myGUI = new GUI(this);
         myGUI.setVisible(true);
+    }
+    public void resetChangeHistory() {
+        changeHistory = new LinkedList<>();
+        try {
+            myGUI.updateChangeHistoryTab();
+        } catch (MalformedURLException | TransformerException | SAXException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void run() {

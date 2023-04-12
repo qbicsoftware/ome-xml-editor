@@ -35,7 +35,7 @@ import java.util.LinkedList;
 // CLASS
 public class GUI extends javax.swing.JFrame{
 
-    // Constants
+    // Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     static final Color PASTEL_RED = new Color(255, 153, 153);
     static final Color PASTEL_GREEN = new Color(153, 255, 153);
     static final Color PASTEL_BLUE = new Color(153, 153, 255);
@@ -58,7 +58,7 @@ public class GUI extends javax.swing.JFrame{
     public static final int BUTTON_WIDTH = 20*BASE_UNIT;
     public static final int SCREEN_HEIGHT = SCREEN_WIDTH*9/16;
 
-    // Variables
+    // Variables %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     public Document xml;
     public XMLEditor edit;
     public XMLTree myTree;
@@ -69,6 +69,7 @@ public class GUI extends javax.swing.JFrame{
     private NodedTextField textField;     // the text
     private JMenuItem openSchemaButton;
     private JMenuItem undoChangeButton;
+    private JMenuItem resetChangeHistoryButton;
     private JMenuItem applyChangesToFolderButton;
     private JMenuItem showCurrentXML;
     private JMenuItem showChangeButton;
@@ -104,7 +105,7 @@ public class GUI extends javax.swing.JFrame{
     }
 
     private void makeUI() {
-        // INITIALIZE COMPONENTS #######################################################################################
+        // INITIALIZE COMPONENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         mb = new JMenuBar();
 
         // Menu for the file
@@ -136,6 +137,8 @@ public class GUI extends javax.swing.JFrame{
         undoChangeButton = new JMenuItem("Undo Last Change");
         // Button that applies the current change history to all files in a folder
         applyChangesToFolderButton = new JMenuItem("Apply History to Folder");
+        // Button that resets the change history
+        resetChangeHistoryButton = new JMenuItem("Reset Change History");
         // Button that opens the tutorial
         howToUseButton = new JMenuItem("How To Use");
         // Button that add the about page to the tabbed pane
@@ -211,6 +214,11 @@ public class GUI extends javax.swing.JFrame{
                     throw new RuntimeException(ex);
                 }
             }
+        });
+
+        // reset the change history
+        resetChangeHistoryButton.addActionListener(e -> {
+            edit.resetChangeHistory();
         });
 
         // show change profile action listener
@@ -297,7 +305,7 @@ public class GUI extends javax.swing.JFrame{
                 try {
                     edit.openImage(chooser.getSelectedFile().getAbsolutePath());
                 } catch (IOException | FormatException | ServiceException |
-                         ParserConfigurationException | SAXException ex) {
+                         ParserConfigurationException | SAXException | TransformerException ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -373,6 +381,7 @@ public class GUI extends javax.swing.JFrame{
         saveChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
         validateChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
         applyChangesToFolderButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
+        resetChangeHistoryButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
 
         undoChangeButton.setIcon(loadSvgAsImageIcon(UNDO_SVG));
 
@@ -408,6 +417,7 @@ public class GUI extends javax.swing.JFrame{
         changeHistoryMenu.add(validateChangeButton);
         changeHistoryMenu.add(undoChangeButton);
         changeHistoryMenu.add(applyChangesToFolderButton);
+        changeHistoryMenu.add(resetChangeHistoryButton);
 
         // add menu item to tutorial menu
         help.add(howToUseButton);
@@ -687,7 +697,7 @@ public class GUI extends javax.swing.JFrame{
     public void makeSimplisticTree(Document dom) {
 
     }
-    public void makeTree(Document dom, boolean simplified, String title) {
+    public void makeNewTreeTab(Document dom, boolean simplified, String title) throws TransformerException {
         // create a new XMLTree from the DOM
         myTree = new XMLTree(dom, simplified);
         myTree.setOpaque(true);
@@ -707,6 +717,7 @@ public class GUI extends javax.swing.JFrame{
         scrollPaneTop.setViewportView(myTree);
 
         makeNewTab(scrollPaneTop, title, TREE_SVG);
+        // edit.validateChangeHistory();
     }
 
     public void updateTree(Document dom, boolean simplified){
