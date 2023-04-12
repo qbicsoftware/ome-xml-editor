@@ -654,7 +654,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         changeHistory = new LinkedList<>();
         try {
             myGUI.updateChangeHistoryTab();
-        } catch (MalformedURLException | TransformerException | SAXException e) {
+        } catch (TransformerException e) {
             throw new RuntimeException(e);
         }
     }
