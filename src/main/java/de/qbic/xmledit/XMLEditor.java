@@ -519,13 +519,13 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         myGUI.setVisible(true);
     }
     public void openTutorial() throws IOException {
-        String path = "/home/aaron/Documents/Work/HiWi/QBiC/Metadata_Curation/XML_metadata_editor/data/resources/HowToUse.md";
+        String path = "./data/resources/HowToUse.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
         myGUI.makeNewTab(myGUI.renderMarkdown(md), "How To Use", myGUI.HELP_SVG);
     }
 
     public void openAbout() throws IOException {
-        String path = "/home/aaron/Documents/Work/HiWi/QBiC/Metadata_Curation/XML_metadata_editor/README.md";
+        String path = "./README.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
         myGUI.makeNewTab(myGUI.renderMarkdown(md), "About XML-Editor", myGUI.HELP_SVG);
     }
