@@ -1,46 +1,126 @@
 package de.qbic.xmledit;
 
+import javax.swing.tree.TreeNode;
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class XMLChange {
+public class XMLChange implements Serializable {
+    private static final long serialVersionUID = 1L;
     private LinkedList<String> location;
     public String oldContent;
-    private String newValue;
+    public LinkedList<XMLNode> nodePath = new LinkedList<>();
+    private XMLNode toBeChangedNode;
     public String changeType;
+    private String ID;
     private XMLNode myNode;
+    public String nodeType = "element";
     private boolean valid;
 
     private String validationError = null;
 
-    XMLChange(String mod, LinkedList<String> loc) {
+    XMLChange(String mod, XMLNode newN) {
+        System.out.println("- - - - Creating new XMLChange - - - -");
         setChangeType(mod);
-        setLocation(loc);
+        setToBeChangedNode(newN);
+        if (newN.getType().equals("element") && changeType.equals("add")) {
+            nodePath.removeLast();
+        }
     }
-    XMLChange(String mod, LinkedList<String> loc, String newContent) {
-        setChangeType(mod);
-        setLocation(loc);
-        setNewValue(newContent);
+    public void setID(String id){
+        this.ID = id;
     }
-    public void setNewValue(String newC){
-        this.newValue = newC;
+    public String getID(){
+        return this.ID;
+    }
+    public void setToBeChangedNode(XMLNode newN){
+        this.toBeChangedNode = newN;
+        System.out.println("To be changed node: " + toBeChangedNode.getUserObject());
+        setNodeType(toBeChangedNode.getType());
+        setNodePath(toBeChangedNode.getPath());
     }
 
-    public String getNewValue() {
-        return newValue;
+    public XMLNode getToBeChangedNode() {
+        return toBeChangedNode;
     }
 
     public LinkedList<String> getLocation() {
+        /*
+        String path = Arrays.toString(nodePath);
+        LinkedList<String> location = new LinkedList<>();
+        location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
+        setLocation(location);
+
+        if (nodePath.getType().equals("element")) {
+            for (XMLNode c : originNode.getChildren()){
+                if (c.getUserObject() == "ID") {
+                    change.setID(c.getFirstChild().getUserObject().toString());
+                    System.out.println("ID: " + c.getFirstChild().getUserObject().toString());
+                }
+            }
+        }
+        */
         return location;
     }
-
-    public void setLocation(LinkedList<String> location) {
-        this.location = location;
+    /**
+     * Translates the Location of the change into a query, Since the node structure of the dom and
+     * the XMKNode are different, the query is not the same as the location. For example an
+     * attribute is not a normal node in the dom, but it is in the XMLNode structure. This
+     * influences where a change needs to be applied.
+     */
+    public LinkedList<String> getQuery(){
+        LinkedList<String> query = new LinkedList<>();
+        switch (this.changeType) {
+            case "add":
+                query.addAll(this.location);
+                break;
+            case "modify":
+                switch (this.getNodeType()) {
+                    case "element":
+                        query.addAll(this.location);
+                        break;
+                    case "attribute":
+                    case "text":
+                        query.addAll(this.location);
+                        query.removeLast();
+                        break;
+                }
+            case "delete":
+                switch (this.getNodeType()) {
+                    case "element":
+                        query.addAll(this.location);
+                        break;
+                    case "attribute":
+                    case "text":
+                        query.addAll(this.location);
+                        query.removeLast();
+                        break;
+                }
+        }
+        System.out.println("Query: " + query);
+        System.out.println("Location: " + this.location);
+        return query;
     }
     public String getChangeType(){
         return this.changeType;
     }
     public void setChangeType(String changeType){
-        this.changeType = changeType;
+        if (changeType.equals("add") || changeType.equals("delete") || changeType.equals("modify")){
+            this.changeType = changeType;
+            System.out.println("Change type: " + changeType);
+        } else {
+            System.out.println("Invalid change type");
+        }
+    }
+    public void setNodeType(String type){
+        if (type.equals("element") || type.equals("attribute") || type.equals("text") || type.equals("value")) {
+            this.nodeType = type;
+            System.out.println("Node type: " + type);
+        } else {
+            System.out.println("Invalid node type");
+        }
+    }
+    public String getNodeType(){
+        return this.nodeType;
     }
 
     public void setValidity(boolean valid){
@@ -57,5 +137,17 @@ public class XMLChange {
     public void setValidationError(String error){
         this.validationError = error;
     }
-
+    public void setNodePath(TreeNode[] treePath){
+        System.out.print("Node path:");
+        for (TreeNode n : treePath){
+            if (((XMLNode) n).getType().equals("element")){
+                nodePath.add((XMLNode) n);
+                System.out.print(" " + n);
+            }
+        }
+        System.out.println();
+    }
+    public LinkedList<XMLNode> getNodePath(){
+        return this.nodePath;
+    }
 }

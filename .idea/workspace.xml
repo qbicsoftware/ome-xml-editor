@@ -5,9 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="tested as Fiji plugin, 05.04.23">
+      <change afterPath="$PROJECT_DIR$/data/updateImges/XML_Editor_20_04_23.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/FeedbackStore.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/GUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLChange.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLChange.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLEditor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRendererSimplified.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRendererSimplified.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/old.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/old.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -348,7 +357,14 @@
       <option name="project" value="LOCAL" />
       <updated>1681295904818</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="tested as Fiji plugin, 05.04.23">
+      <created>1681306323323</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1681306323323</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

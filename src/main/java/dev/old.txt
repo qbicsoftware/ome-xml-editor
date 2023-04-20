@@ -108,3 +108,93 @@ public class JTreeExporter {
     }
 }
 
+        /*
+        if (change.changeType == "add" && remainingQuery.size()==0) {
+
+            if (change.getNewValue().startsWith("@")) {
+                // Adding a new Attribute node and its value
+                System.out.println("adding new attribute");
+
+                String attrName = change.getNewValue().split("=")[0].replace("@", "");
+                String attrValue = change.getNewValue().split("=")[1].replace(":", "");
+                ((Element) currentNode).setAttribute(attrName, attrValue);
+                return;
+            }
+            else if (change.getNewValue().startsWith("#")) {
+                // Adding a new Text Node
+                System.out.println("adding new text");
+
+                String newNodeValue = change.getNewValue().replace("#", "");
+                currentNode.setTextContent(newNodeValue);
+                return;
+            }
+            else {
+                // Adding a new Element Node
+                System.out.println("adding new element");
+
+                currentNode.appendChild(root.createElement(change.getNewValue()));
+                return;
+            }
+        }
+        // if the remainingQuery has only left 1 item, then we are at the node to be edited
+        else if (change.changeType == "modify" && remainingQuery.size()<=2) {
+
+            if (remainingQuery.get(0).startsWith("@")) {
+                // Editing an Attribute node
+                System.out.println("editing attribute");
+
+                String oldNodeName = remainingQuery.get(0).replace("@", "");
+                String newNodeValue = change.getNewValue();
+                currentNode.getAttributes().getNamedItem(oldNodeName).setNodeValue(newNodeValue);
+                return;
+            }
+            else if (remainingQuery.get(0).startsWith(":")) {
+                // Editing the value of an attribute node
+                System.out.println("editing value");
+                return;
+            }
+            else if (remainingQuery.get(0).startsWith("#")) {
+                // Editing a Text Node
+                System.out.println("editing text");
+
+                String newNodeValue = change.getNewValue();
+                currentNode.setTextContent(newNodeValue);
+                return;
+            }
+            else if (remainingQuery.size()==0) {
+                // Editing an Element Node
+                System.out.println("editing element");
+                return;
+            }
+        }
+        // If the remainingQuery is empty, we are at the node that is to be deleted
+        else if (change.changeType == "delete") {
+            if (remainingQuery.size()>0){
+                if (remainingQuery.get(0).startsWith("@")) {
+                    // Deleting an Attribute node
+                    System.out.println("deleting attribute");
+                    String oldNodeName = remainingQuery.get(0).replace("@", "");
+                    currentNode.getAttributes().removeNamedItem(oldNodeName);
+                    return;
+                }
+                else if (remainingQuery.get(0).startsWith(":")) {
+                    // Deleting the value of an attribute node
+                    System.out.println("deleting value");
+                    String oldNodeName = remainingQuery.get(0).replace(":", "");
+                    return;
+                }
+                else if (remainingQuery.get(0).startsWith("#")) {
+                    // Deleting a Text Node
+                    currentNode.setTextContent("");
+                    System.out.println("deleting text");
+                    return;
+                }
+            }
+            else if (remainingQuery.size()==0){
+                // Deleting an Element Node
+                currentNode.getParentNode().removeChild(currentNode);
+                System.out.println("deleting element");
+                return;
+            }
+        }
+        */

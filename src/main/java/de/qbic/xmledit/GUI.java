@@ -29,8 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.TimerTask;
 
 // CLASS
 public class GUI extends javax.swing.JFrame{
@@ -94,6 +94,7 @@ public class GUI extends javax.swing.JFrame{
     private XMLNode selectedNode;
     private XMLNode toBeDeletedNode;
     private Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
+    public XMLTableModel feedBackTableModel;
 
     public GUI(XMLEditor edit){
         this.edit = edit;
@@ -179,7 +180,7 @@ public class GUI extends javax.swing.JFrame{
             public void actionPerformed(ActionEvent event) {
                 String newText = textField.getText();
                 try {
-                    makeHistoryEntry(textField.getNode(), "edit", newText);
+                    makeNewChange("edit", textField.getNode());
                 } catch (MalformedURLException | TransformerException | SAXException e) {
                     throw new RuntimeException(e);
                 }
@@ -207,8 +208,9 @@ public class GUI extends javax.swing.JFrame{
                 try {
                     System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
                     System.out.println("Folder: " + folder.getAbsolutePath());
-                    edit.applyChangesToFolder(folder.getAbsolutePath());
                     giveFeedback();
+                    edit.applyChangesToFolder(folder.getAbsolutePath());
+
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -263,7 +265,7 @@ public class GUI extends javax.swing.JFrame{
         // validate change history action listener
         validateChangeButton.addActionListener(e -> {
             try {
-                edit.validateChangeHistory();
+                edit.validateChangeHistory(edit.xml_doc);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -471,10 +473,10 @@ public class GUI extends javax.swing.JFrame{
     public void addChangesToTable(XMLTableModel model) throws TransformerException {
         // get the change history
         LinkedList<XMLChange> changeHistory = edit.getChangeHistory();
-        edit.validateChangeHistory();
+        edit.validateChangeHistory(edit.xml_doc);
         int index = 0;
         for (XMLChange c : changeHistory) {
-            model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNewValue()});
+            model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getToBeChangedNode()});
             if (c.getValidity()) {
                 model.setRowColor(index, PASTEL_GREEN);
                 validationErrorsField.setText("No validation errors in most recent change found.");
@@ -543,11 +545,11 @@ public class GUI extends javax.swing.JFrame{
      */
     public void giveFeedback() {
         // create the array of column names for the table
-        String[] columnNames = {"File Name", "Changed?"};
+        String[] columnNames = {"File Name", "Validation", "Exported"};
         // create a default table model with no data
-        XMLTableModel model = new XMLTableModel(columnNames, 0);
+        feedBackTableModel = new XMLTableModel(columnNames, 0);
         // create a JTable with the model
-        JTable table = new JTable(model);
+        JTable table = new JTable(feedBackTableModel);
         // make the table cells editable
         table.setDefaultEditor(Object.class, null);
         table.setDefaultRenderer(Object.class, new XMLTableRenderer());
@@ -559,7 +561,7 @@ public class GUI extends javax.swing.JFrame{
                 int col = table.columnAtPoint(e.getPoint());
 
                 // get the value of the clicked cell
-                Object value = model.getValueAt(row, col);
+                Object value = feedBackTableModel.getValueAt(row, col);
 
                 // do something with the value (for example, print it)
                 System.out.println("Clicked on: " + value);
@@ -567,15 +569,41 @@ public class GUI extends javax.swing.JFrame{
             }
         });
         // create a new panel for the table
-        JPanel tablePanel = new JPanel();
+        JPanel feedbackTablePanel = new JPanel();
+        // set the layout of the panel to a box layout
+        feedbackTablePanel.setLayout(new BoxLayout(feedbackTablePanel, BoxLayout.Y_AXIS));
+        // set dimensions of the panel
+        feedbackTablePanel.setPreferredSize(new Dimension(feedbackTablePanel.getWidth(), feedbackTablePanel.getHeight()));
         // create a scroll pane for the table
-        JScrollPane scrollPane = new JScrollPane(table);
+        JScrollPane feedbackScrollPane = new JScrollPane(table);
+        // set dimensions of the scroll pane
+        feedbackScrollPane.setPreferredSize(new Dimension(feedbackScrollPane.getWidth(), feedbackScrollPane.getHeight()));
         // set viewport view to the table
-        scrollPane.setViewportView(table);
+        feedbackScrollPane.setViewportView(table);
         // add the scroll pane to the panel
-        tablePanel.add(scrollPane);
+        feedbackTablePanel.add(feedbackScrollPane);
         // add the panel to the tabbed pane
-        makeNewTab(tablePanel, "Feedback", FEEDBACK_SVG);
+        makeNewTab(feedbackTablePanel, "Feedback", FEEDBACK_SVG);
+    }
+    /**
+     * Creates a new table in a new tab that shows the user which files from the specified folder
+     * (apply change to folder) have been changed and which have not.
+     *
+     */
+    public void addFeedback(FeedbackStore feedbackStore) {
+        String fileName = feedbackStore.getFilePath().substring(feedbackStore.getFilePath().lastIndexOf(File.separator) + 1);
+        feedBackTableModel.addRow(new Object[]{fileName, Boolean.toString(feedbackStore.getValidity()), Boolean.toString(feedbackStore.getExported())});
+        if (feedbackStore.getValidity() & feedbackStore.getExported()) {
+            // change color of the row to green
+            feedBackTableModel.setRowColor(feedBackTableModel.getRowCount() - 1, PASTEL_GREEN);
+
+        }
+        else {
+            // change color of the row to red
+            feedBackTableModel.setRowColor(feedBackTableModel.getRowCount() - 1, PASTEL_RED);
+
+        }
+
     }
     /* Reports errors that occur in a little pop-up in the gui.
      */
@@ -609,68 +637,18 @@ public class GUI extends javax.swing.JFrame{
         p.setBorder(compound);
         p.setOpaque(true);
     }
+    public void makeNewChange(String changeType, XMLNode toBeChanged) throws MalformedURLException, TransformerException, SAXException {
+        System.out.println("- - - - Make new change - - - -");
+        XMLChange change = new XMLChange(changeType, toBeChanged);
+        edit.changeHistory.add(change);
 
-    public void makeHistoryEntry(XMLNode originNode, String modification, String newText) throws MalformedURLException, TransformerException, SAXException {
-        if (modification == "edit") {
-            System.out.println("change \"Edit\" added to history");
-            String path = Arrays.toString(originNode.getPath());
-            LinkedList<String> location = new LinkedList<>();
-            location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
-
-            System.out.println("Path: " + path);
-            System.out.println("New Text: " + newText);
-            System.out.println("added new location: " + location.toString());
-
-            XMLChange change = new XMLChange(modification, location);
-            change.setNewValue(newText);
-            edit.changeHistory.add(change);
-            updateChangeHistoryTab();
-        }
-        else System.out.println("No change was added");
-
-    }
-
-    public void makeHistoryEntry(XMLNode originNode, String modification, XMLNode toBeAdded) throws MalformedURLException, TransformerException, SAXException {
-        if (modification == "add") {
-            if (toBeAdded.getUserObject().toString().startsWith("@")) {
-                System.out.println("change \"Addition\" added to history");
-                String path = Arrays.toString(originNode.getPath());
-                LinkedList<String> location = new LinkedList<>();
-                location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
-                XMLChange change = new XMLChange(modification, location);
-                String newText = toBeAdded.getUserObject().toString()+ "=" +toBeAdded.getFirstChild().getUserObject().toString();
-                change.setNewValue(newText);
-                edit.changeHistory.add(change);
-                updateChangeHistoryTab();
-                return;
+        if (toBeChanged.getType().equals("element") && changeType.equals("modify") && toBeChanged.getChildCount() > 0) {
+            for (int c = 0; c < toBeChanged.getChildCount(); c++) {
+                makeNewChange("add", (XMLNode) toBeChanged.getChildAt(c));
             }
-            System.out.println("change \"Addition\" added to history");
-            String path = Arrays.toString(originNode.getPath());
-            LinkedList<String> location = new LinkedList<>();
-            location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
-
-            XMLChange change = new XMLChange(modification, location);
-            change.setNewValue(toBeAdded.getUserObject().toString());
-            edit.changeHistory.add(change);
-            if (toBeAdded.getChildCount()>0){
-                for (int c=0; c< toBeAdded.getChildCount(); c++){
-                    makeHistoryEntry(toBeAdded, "add", (XMLNode) toBeAdded.getChildAt(c));
-                }
-            }
+            return;
         }
-        else System.out.println("No change was added");
-    }
-
-    public void makeHistoryEntry(XMLNode originNode, String modification) throws MalformedURLException, TransformerException, SAXException {
-        if (modification == "del") {
-            System.out.println("change \"Deletion\" added to history");
-            String path = Arrays.toString(originNode.getPath());
-            LinkedList<String> location = new LinkedList<>();
-            location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
-            XMLChange change = new XMLChange(modification, location);
-            edit.changeHistory.add(change);
-            updateChangeHistoryTab();
-        }
+        updateChangeHistoryTab();
     }
     public void makeSimplisticTree(Document dom) {
 
@@ -785,9 +763,9 @@ public class GUI extends javax.swing.JFrame{
         editPanel.repaint();
 
         // identify the currently selected element node and add it as title button (the children will be added in addTitleButton())
-        if (selectedNode.getUserObject().toString().startsWith("@") ||
-                selectedNode.getUserObject().toString().startsWith("#") ||
-                selectedNode.getUserObject().toString().startsWith(":")) {
+        if (selectedNode.getType().equals("attribute") ||
+                selectedNode.getType().equals("text") ||
+                selectedNode.getType().equals("value")) {
 
             selectedNode = selectedNode.getParent();
             addElementButton();
@@ -839,6 +817,7 @@ public class GUI extends javax.swing.JFrame{
         // add to button group so only one attribute / title can be selected at a time
         bg.add(titleButton);
         // add a listener to the button to detect selection and show the add and delete button
+        /*
         titleButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -851,18 +830,97 @@ public class GUI extends javax.swing.JFrame{
                 titlePanel.repaint();
             }
         });
+        */
+        titleButton.addMouseListener(new MouseAdapter() {
+            private int eventCnt = 0;
+            java.util.Timer timer = new java.util.Timer("doubleClickTimer", false);
+
+            @Override
+            public void mouseClicked(final MouseEvent e) {
+                eventCnt = e.getClickCount();
+                if ( e.getClickCount() == 1 ) {
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            if ( eventCnt == 1 ) {
+                                // set the to be deleted node to the currently selected element node
+                                toBeDeletedNode = selectedNode;
+                                // add the buttons to the title panel
+                                titlePanel.add(delButton, BorderLayout.EAST);
+                                titlePanel.add(addButton, BorderLayout.WEST);
+                                titlePanel.revalidate();
+                                titlePanel.repaint();
+                                System.err.println( "You did a single click.");
+
+                            } else if ( eventCnt > 1 ) {
+                                // remove the buttons from the title panel
+                                titlePanel.remove(delButton);
+                                titlePanel.remove(addButton);
+                                titlePanel.remove(titleButton);
+                                // create a new text field to overlay the title button when clicked to edit the title
+                                JTextField tmpTextField = new JTextField();
+                                // set the preferred size of the text field
+                                tmpTextField.setPreferredSize(new Dimension(titlePanel.getWidth(), titlePanel.getHeight()));
+                                // set the text to be centered
+                                tmpTextField.setHorizontalAlignment(JTextField.CENTER);
+                                // set the starting text of the text field to the title of the selected node
+                                tmpTextField.setText(selectedNode.getUserObject().toString());
+                                // add the text field to the title panel
+                                titlePanel.add(tmpTextField, BorderLayout.CENTER);
+                                titlePanel.revalidate();
+                                // give the text field an action listener to detect when the user is done editing the title
+                                tmpTextField.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        // get the text from the text field
+                                        String text = tmpTextField.getText();
+                                        // register the addition in the deletion History
+                                        try {
+                                            makeNewChange("delete", selectedNode);
+                                        } catch (MalformedURLException | TransformerException |
+                                                 SAXException ex) {
+                                            throw new RuntimeException(ex);
+                                        }
+                                        // set the user object of the selected node to the text from the text field
+                                        selectedNode.setUserObject(text);
+                                        // register the addition in the change History
+                                        try {
+                                            makeNewChange("add", selectedNode);
+                                        } catch (MalformedURLException | TransformerException |
+                                                 SAXException ex) {
+                                            throw new RuntimeException(ex);
+                                        }
+                                        // remove the text field from the title panel
+                                        titlePanel.remove(tmpTextField);
+                                        // add the title button to the title panel
+                                        titlePanel.add(titleButton, BorderLayout.CENTER);
+                                        // set the text of the title button to the text from the text field
+                                        titleButton.setText(text);
+                                        // revalidate and repaint the title panel
+                                        titlePanel.revalidate();
+                                        titlePanel.repaint();
+                                    }
+                                });
+                                System.err.println("you clicked " + eventCnt + " times.");
+                            }
+                            eventCnt = 0;
+                        }
+                    }, 500);
+                }
+            }
+        });
 
         // draw the children of the title node
         for (int c=0; c<selectedNode.getChildCount();c++) {
             XMLNode child = (XMLNode) selectedNode.getChildAt(c);
-            if (child.getUserObject().toString().startsWith("@")) {
+            if (child.getType().equals("attribute")) {
                 XMLNode childChild = child.getFirstChild();
                 addAttributeButton(child.getUserObject().toString(), childChild);
             }
-            else if (child.getUserObject().toString().startsWith(":")) {
+            else if (child.getType().equals("value")) {
                 addAttributeButton(selectedNode.getUserObject().toString(), child);
             }
-            else if (child.getUserObject().toString().startsWith("#")) {
+            else if (child.getType().equals("text")){
                 addTextButton("", child);
             }
         }
@@ -883,12 +941,11 @@ public class GUI extends javax.swing.JFrame{
             public void actionPerformed(ActionEvent event) {
                 String newText = textField.getText();
                 try {
-                    makeHistoryEntry(textField.getNode(),"edit" , newText);
+                    makeNewChange("modify", textField.getNode());
                 } catch (MalformedURLException | TransformerException | SAXException e) {
                     throw new RuntimeException(e);
                 }
                 textField.getNode().setUserObject(newText);
-                System.out.println("change detected");
             }
         });
         // add a listener to the button to detect selection and show the delete button
@@ -943,7 +1000,7 @@ public class GUI extends javax.swing.JFrame{
             public void actionPerformed(ActionEvent event) {
                 String newText = textField.getText();
                 try {
-                    makeHistoryEntry(textField.getNode(),"edit" , newText);
+                    makeNewChange("modify" , textField.getNode());
                 } catch (MalformedURLException | TransformerException | SAXException e) {
                     throw new RuntimeException(e);
                 }
@@ -1042,28 +1099,32 @@ public class GUI extends javax.swing.JFrame{
             group.add(elementRadio);
 
             // create textfields for each type of node
-            JTextField attrField = new JTextField(5);
-            JTextField valField = new JTextField(5);
-            JTextField textField = new JTextField(5);
-            JTextField elementField = new JTextField(5);
+            JTextField attrField = new JTextField(1);
+            JTextField valField = new JTextField(1);
+            JTextField textField = new JTextField(1);
+            JTextField elementField = new JTextField(1);
+            JTextField elementIDField = new JTextField(1);
 
             // create label for each textfield
             JLabel attrLabel = new JLabel("Attribute:");
             JLabel valLabel = new JLabel("Value:");
             JLabel textLabel = new JLabel("Text:");
             JLabel elementLabel = new JLabel("Element:");
+            JLabel elementIDLabel = new JLabel("ID:");
 
-            // set preferred width for each textfield to textfield width and height to 30
+            // set preferred width for each textfield to textfield width and height to BUTTON_HEIGHT
             attrField.setPreferredSize(new Dimension(attrField.getWidth(), BUTTON_HEIGHT));
             valField.setPreferredSize(new Dimension(valField.getWidth(), BUTTON_HEIGHT));
             textField.setPreferredSize(new Dimension(textField.getWidth(), BUTTON_HEIGHT));
             elementField.setPreferredSize(new Dimension(elementField.getWidth(), BUTTON_HEIGHT));
+            elementIDField.setPreferredSize(new Dimension(elementIDField.getWidth(), BUTTON_HEIGHT));
 
             // set labels for each textfield
             attrLabel.setLabelFor(attrField);
             valLabel.setLabelFor(valField);
             textLabel.setLabelFor(textField);
             elementLabel.setLabelFor(elementField);
+            elementIDLabel.setLabelFor(elementIDField);
 
             // set default selection
             attrRadio.setSelected(true);
@@ -1087,7 +1148,7 @@ public class GUI extends javax.swing.JFrame{
                     rightPanel.add(valField);
 
                     // Lay out the panel by defining SpringUtilities constraints
-                    SpringUtilities.makeCompactGrid(rightPanel, 2, 2, 5, 5, 5, 5);
+                    SpringUtilities.makeCompactGrid(rightPanel, rightPanel.getComponentCount()/2, 2, 5, 5, 5, 5);
 
                     // revalidate and repaint
                     rightPanel.revalidate();
@@ -1105,7 +1166,7 @@ public class GUI extends javax.swing.JFrame{
                     rightPanel.add(textField);
 
                     // Lay out the panel by defining SpringUtilities constraints
-                    SpringUtilities.makeCompactGrid(rightPanel, 1, 2, 5, 5, 5, 5);
+                    SpringUtilities.makeCompactGrid(rightPanel, rightPanel.getComponentCount()/2, 2, 5, 5, 5, 5);
 
                     // revalidate and repaint
                     rightPanel.revalidate();
@@ -1121,9 +1182,11 @@ public class GUI extends javax.swing.JFrame{
                     // add labels and textfields to rightPanel
                     rightPanel.add(elementLabel);
                     rightPanel.add(elementField);
+                    rightPanel.add(elementIDLabel);
+                    rightPanel.add(elementIDField);
 
                     // Lay out the panel by defining SpringUtilities constraints
-                    SpringUtilities.makeCompactGrid(rightPanel, 1, 2, 5, 5, 5, 5);
+                    SpringUtilities.makeCompactGrid(rightPanel, rightPanel.getComponentCount()/2, 2, 5, 5, 5, 5);
 
                     // revalidate and repaint
                     rightPanel.revalidate();
@@ -1136,23 +1199,21 @@ public class GUI extends javax.swing.JFrame{
 
             if (confirmed == JOptionPane.OK_OPTION) {
                 String selection = group.getSelection().getActionCommand();
-                if (selection == "attribute") {
+                if (selection.equals("attribute")) {
                     // create new XMLNode and add it to the selected node
                     XMLNode newAttrNode = new XMLNode();
                     XMLNode newValNode = new XMLNode();
                     newAttrNode.add(newValNode);
-                    newAttrNode.setUserObject("@"+attrField.getText());
-                    newValNode.setUserObject(":"+valField.getText());
+                    newAttrNode.setUserObject(attrField.getText());
+                    newValNode.setUserObject(valField.getText());
+                    newAttrNode.setType("attribute");
+                    newValNode.setType("value");
                     selectedNode.add(newAttrNode);
 
                     // add the new node to the change history
                     try {
-                        makeHistoryEntry(selectedNode, "add", (XMLNode) newAttrNode);
-                    } catch (MalformedURLException e) {
-                        throw new RuntimeException(e);
-                    } catch (TransformerException e) {
-                        throw new RuntimeException(e);
-                    } catch (SAXException e) {
+                        makeNewChange("add", newAttrNode);
+                    } catch (MalformedURLException | TransformerException | SAXException e) {
                         throw new RuntimeException(e);
                     }
 
@@ -1163,15 +1224,16 @@ public class GUI extends javax.swing.JFrame{
                     updateEditPanel();
                     myTree.updateUI();
                 }
-                else if (selection == "text") {
+                else if (selection.equals("text")) {
                     // create new XMLNode and add it to the selected node
                     XMLNode newTextNode = new XMLNode();
-                    newTextNode.setUserObject("#" + textField.getText());
+                    newTextNode.setUserObject(textField.getText());
+                    newTextNode.setType("text");
                     selectedNode.add(newTextNode);
 
                     // add the new node to the change history
                     try {
-                        makeHistoryEntry(selectedNode, "add", (XMLNode) newTextNode);
+                        makeNewChange("add", newTextNode);
                     } catch (MalformedURLException | SAXException | TransformerException e) {
                         throw new RuntimeException(e);
                     }
@@ -1183,18 +1245,23 @@ public class GUI extends javax.swing.JFrame{
                     updateEditPanel();
                     myTree.updateUI();
                 }
-                else if (selection == "element") {
+                else if (selection.equals("element")) {
                     // create new XMLNode and add it to the selected node
                     XMLNode newElementNode = new XMLNode();
-                    newElementNode.setUserObject("" + elementField.getText());
-
-                    // add the new node to the change history
-                    try {
-                        makeHistoryEntry(selectedNode, "add", (XMLNode) newElementNode);
-                    } catch (MalformedURLException | TransformerException | SAXException e) {
-                        throw new RuntimeException(e);
-                    }
-
+                    newElementNode.setUserObject(elementField.getText());
+                    newElementNode.setType("element");
+                    // create a new ID node for the new element
+                    XMLNode newIDNode = new XMLNode();
+                    newIDNode.setUserObject("ID");
+                    newIDNode.setType("attribute");
+                    // create a new ID value node for the new element
+                    XMLNode newIDValNode = new XMLNode();
+                    newIDValNode.setUserObject(elementIDField.getText());
+                    newIDValNode.setType("value");
+                    // add the ID value node to the ID node
+                    newIDNode.add(newIDValNode);
+                    // add the ID node to the new element node
+                    newElementNode.add(newIDNode);
                     // redraw the argument panel
                     updateEditPanel();
                     System.out.println(selectedNode.getChildCount());
@@ -1203,6 +1270,14 @@ public class GUI extends javax.swing.JFrame{
                     model.insertNodeInto(newElementNode, selectedNode, selectedNode.getChildCount());
                     System.out.println(selectedNode.getChildCount());
                     myTree.updateUI();
+                    // add the new node to the change history
+                    try {
+                        makeNewChange("add", newElementNode);
+                    }
+                    catch (MalformedURLException | TransformerException | SAXException e) {
+                        throw new RuntimeException(e);
+                    }
+
                 }
             }
             // make sure the option pane closes when the user clicks cancel
@@ -1224,7 +1299,7 @@ public class GUI extends javax.swing.JFrame{
 
             // remove the node from the tree
             try {
-                makeHistoryEntry(toBeDeletedNode, "del");
+                makeNewChange("delete", toBeDeletedNode);
             } catch (MalformedURLException | TransformerException | SAXException e) {
                 throw new RuntimeException(e);
             }

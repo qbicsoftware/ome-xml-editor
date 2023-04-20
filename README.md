@@ -5,6 +5,19 @@
 Fiji plugin, that allows the user to EDIT (not add tags) the metadata of ome-xml files. This is usefull for example for curating metadata that was auto generated
 by bioformats, but has flaws. Work in progress.
 
+
+### Update 20.04.23
+
+**This patch manly contains changes to the back end**
+
+- The load and save change History is reworked to now save the changes as serialized objects
+- The way nodes have their type tagged is changed. Now the type is stored in the node itself,
+instead of the node value. The different values wont start with ":, @, ..." anymore. This also
+required to modify how changes are applied internally.
+- Element nodes can now be double-clicked to be modified.
+
+![](data/updateImges/XML_Editor_20_04_23.png)
+
 ### Update 05.04.23
 
 - Change History now shows what's wrong if the verification fails

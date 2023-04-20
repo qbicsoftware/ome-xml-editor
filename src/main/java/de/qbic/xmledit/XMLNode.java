@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class XMLNode extends DefaultMutableTreeNode {
     private ArrayList<String> attributes;
-    private String nodeType;
+    private String nodeType = "element";
     public XMLNode(DefaultMutableTreeNode defaultMutableTreeNode) {
         super(defaultMutableTreeNode);
          attributes = new ArrayList<>();
@@ -43,5 +43,42 @@ public class XMLNode extends DefaultMutableTreeNode {
     }
     public String getType() {
         return this.nodeType;
+    }
+    public void setType(String type) {
+        if (type.equals("element") || type.equals("attribute") || type.equals("text") || type.equals("value")) {
+            this.nodeType = type;
+        } else {
+            System.out.println("Invalid node type");
+        }
+    }
+    /**
+     * Return all children of this node as an array of XMLNode objects.
+     */
+    public XMLNode[] getChildren() {
+        XMLNode[] children = new XMLNode[getChildCount()];
+        for (int i = 0; i < children.length; i++) {
+            children[i] = (XMLNode) getChildAt(i);
+        }
+        return children;
+    }
+
+    /**
+     * Get ID of this node.
+     */
+    public String getID() {
+        if (this.getUserObject().equals("OME")) {
+            return null;
+        }
+        else if (this.getType().equals("element")) {
+            for (XMLNode child : this.getChildren()) {
+                if (child.getType().equals("attribute") && child.getUserObject().equals("ID")) {
+                    return child.getFirstChild().toString();
+                }
+            }
+        }
+        else {
+            throw new IllegalArgumentException("This node is not an element node and therefore has no ID.");
+        }
+        throw new IllegalArgumentException("This element node has no ID attribute.");
     }
 }

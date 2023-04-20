@@ -8,19 +8,24 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.swing.*;
+import javax.swing.tree.TreeModel;
 
 class XMLTree extends JTree {
 
-    XMLTreeModel dtModel = null;
+    XMLTreeModel dtModel;
 
     public XMLTree(Document xml, boolean simplified) {
+        if (xml != null)
+            setTree(xml);
         if (simplified) {
-            this.setCellRenderer(new XMLTreeRendererSimplified());
+            this.setCellRenderer(new XMLTreeRendererSimplified(this));
         } else {
             this.setCellRenderer(new XMLTreeRenderer());
         }
-        if (xml != null)
-            setTree(xml);
+    }
+    @Override
+    public TreeModel getModel() {
+        return dtModel;
     }
 
     public void setTree(Document xml) {
@@ -53,8 +58,10 @@ class XMLTree extends JTree {
                     Attr attr = (Attr) root.getAttributes().item(i);
                     String attrName = attr.getNodeName();
                     String attrValue = attr.getNodeValue();
-                    XMLNode atrNode = new XMLNode("@"+attrName);
-                    XMLNode valNode = new XMLNode(":"+attrValue);
+                    XMLNode atrNode = new XMLNode(attrName);
+                    atrNode.setType("attribute");
+                    XMLNode valNode = new XMLNode(attrValue);
+                    valNode.setType("value");
                     atrNode.add(valNode);
                     dmtNode.add(atrNode);
                 }
@@ -64,7 +71,8 @@ class XMLTree extends JTree {
             System.out.println("Node Type 2");
         }
         else if (root.getNodeType() == 3) {
-            dmtNode = new XMLNode("#"+root.getTextContent());
+            dmtNode = new XMLNode(root.getTextContent());
+            dmtNode.setType("text");
         }
 
         NodeList nodeList = root.getChildNodes();

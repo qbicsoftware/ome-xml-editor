@@ -42,14 +42,11 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -329,129 +326,176 @@ public class XMLEditor<T extends RealType<T>> implements Command {
      * @param path the path to the file
      */
     public void applyChangesToFile(String path) throws Exception {
-        System.out.println("Inside applyChangesToFile");
+        FeedbackStore fbStore= new FeedbackStore(path);
         Document newXMLDom =  loadFile(path);
-        if (validateChangeHistory()) {
-            exportToOmeTiff(path, newXMLDom);
+        if (validateChangeHistory(newXMLDom)) {
+            fbStore.setValidity(true);
+            try {
+                exportToOmeTiff(path, newXMLDom);
+                fbStore.setExported(true);
+            }
+            catch (Exception e) {
+                fbStore.setExported(false);
+                fbStore.setExportError(e.getMessage());
+            }
         }
         else {
-            System.out.println("Change history is not valid for file: " + path);
+            fbStore.setValidity(false);
         }
+        myGUI.addFeedback(fbStore);
     }
+    public boolean validateChangeHistory(Document newXMLDom) throws TransformerException {
+        System.out.println("- - - - Validating Change History - - - -");
+        Document example_xml_doc = (Document) newXMLDom.cloneNode(true);
+        boolean changeHistoryValidity= true;
+        for (XMLChange c : changeHistory) {
+            System.out.println("- - - - Applying Change - - - -");
+            System.out.println("ToBeChangedNode: " + c.getToBeChangedNode().getUserObject().toString());
+            System.out.println("ToBeChangedNode Type: " + c.getNodeType());
+            System.out.println("Change Type: " + c.getChangeType());
+            applyChange(c, example_xml_doc, example_xml_doc, 0);
+            try {
+                Element xmlExampleElement = example_xml_doc.getDocumentElement();
+                OMEModel xmlModel = new OMEModelImpl();
+                // catch verification errors and print them
+                MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
+                c.setValidity(true);
+            } catch (Exception e) {
+                c.setValidity(false);
+                c.setValidationError(e.getMessage());
+            }
+            changeHistoryValidity = changeHistory.getLast().getValidity();
+        }
+        return changeHistoryValidity;
+    }
+
     public void applyChanges(Document dom) {
         System.out.println("Inside applyChanges");
         for (XMLChange c : changeHistory) {
-            LinkedList<String> query = new LinkedList<>();
-            query.addAll(c.getLocation());
-            applyChange(c, dom, dom, query);
+            applyChange(c, dom, dom, 0);
         }
     }
-    public void applyChange(XMLChange change, Document root, Node n, LinkedList<String> query) {
-        System.out.println("---------------------------------------------------------------------");
-        System.out.println("Current Node: " + n.getNodeName());
-        System.out.println("Remaining Query: " + query.toString());
+    public void applyChange(XMLChange change, Document root, Node currentNode, int positionInQuery) {
+        System.out.println("- - - -");
+        System.out.println("Current Node: " + currentNode.getNodeName());
+        // Some variables to make the code more readable
+        LinkedList<XMLNode> query = change.getNodePath();
+        boolean queryIsEmpty = query.size() == positionInQuery;
+        if (queryIsEmpty) {
+            switch (change.getNodeType()) {
+                case "element":
+                    switch (change.getChangeType()) {
+                        case "add":
+                            System.out.println("Adding new element");
+                            Element newElement = root.createElement(change.getToBeChangedNode().getUserObject().toString());
+                            newElement.setAttribute("ID", change.getToBeChangedNode().getID());
+                            currentNode.appendChild(newElement);
+                            break;
+                        case "modify":
+                            System.out.println("Modifying element");
+                            currentNode.setTextContent(change.getToBeChangedNode().getUserObject().toString());
+                            break;
+                        case "delete":
+                            System.out.println("Deleting element");
+                            currentNode.getParentNode().removeChild(currentNode);
+                            break;
+                    }
+                    break;
 
-        // If the query is empty, we are at the node where the new node should be added
-        if (change.changeType == "add" && query.size()==0) {
+                case "attribute":
+                    switch (change.getChangeType()) {
+                        case "add":
+                            System.out.println("Adding new attribute");
+                            String attrName = change.getToBeChangedNode().getUserObject().toString();
+                            String attrValue = change.getToBeChangedNode().getFirstChild().getUserObject().toString();
+                            ((Element) currentNode).setAttribute(attrName, attrValue);
+                            break;
+                        case "modify":
+                            System.out.println("Modifying attribute");
+                            String attrName2 = change.getToBeChangedNode().getUserObject().toString();
+                            String attrValue2 = change.getToBeChangedNode().getFirstChild().getUserObject().toString();
+                            currentNode.getAttributes().getNamedItem(attrName2).setNodeValue(attrValue2);
+                            // ((Element) currentNode).setAttribute(attrName2, attrValue2);
+                            break;
+                        case "delete":
+                            System.out.println("Deleting attribute");
+                            String attrName3 = change.getToBeChangedNode().getUserObject().toString();
+                            ((Element) currentNode).removeAttribute(attrName3);
+                            break;
+                    }
+                    break;
 
-            if (change.getNewValue().startsWith("@")) {
-                // Adding a new Attribute node and its value
-                System.out.println("adding new attribute");
+                case "value":
+                    switch (change.getChangeType()) {
+                        case "add":
+                            System.out.println("Adding new value???");
+                            String attrName = change.getToBeChangedNode().getParent().getUserObject().toString();
+                            String attrValue = change.getToBeChangedNode().getUserObject().toString();
+                            ((Element) currentNode).setAttribute(attrName, attrValue);
+                            break;
+                        case "modify":
+                            System.out.println("Modifying value");
+                            String attrName2 = change.getToBeChangedNode().getParent().getUserObject().toString();
+                            String attrValue2 = change.getToBeChangedNode().getUserObject().toString();
+                            currentNode.getAttributes().getNamedItem(attrName2).setNodeValue(attrValue2);
+                            // ((Element) currentNode).setAttribute(attrName2, attrValue2);
+                            break;
+                        case "delete":
+                            System.out.println("Deleting value???");
+                            String attrName3 = change.getToBeChangedNode().getParent().getUserObject().toString();
+                            ((Element) currentNode).removeAttribute(attrName3);
+                            break;
+                    }
+                    break;
 
-                String attrName = change.getNewValue().split("=")[0].replace("@", "");
-                String attrValue = change.getNewValue().split("=")[1].replace(":", "");
-                ((Element) n).setAttribute(attrName, attrValue);
-                return;
+                case "text":
+                    switch (change.getChangeType()) {
+                        case "add":
+                            System.out.println("Adding new text");
+                            String newNodeValue = change.getToBeChangedNode().getUserObject().toString();
+                            currentNode.setTextContent(newNodeValue);
+                            break;
+                        case "modify":
+                            System.out.println("Modifying text");
+                            String newNodeValue2 = change.getToBeChangedNode().getUserObject().toString();
+                            currentNode.setTextContent(newNodeValue2);
+                            break;
+                        case "delete":
+                            System.out.println("Deleting text");
+                            currentNode.setTextContent("");
+                            break;
+                    }
+                    break;
             }
-            else if (change.getNewValue().startsWith("#")) {
-                // Adding a new Text Node
-                System.out.println("adding new text");
-
-                String newNodeValue = change.getNewValue().replace("#", "");
-                n.setTextContent(newNodeValue);
-                return;
-            }
-            else {
-                // Adding a new Element Node
-                System.out.println("adding new element");
-
-                n.appendChild(root.createElement(change.getNewValue()));
-                return;
+            return;
+        }
+        // remainingQuery is not empty --> continue with next remainingQuery item
+        else {
+            XMLNode currentQueryItem = query.get(positionInQuery);
+            String currentQueryItemName = currentQueryItem.getUserObject().toString();
+            String currentQueryItemID = currentQueryItem.getID();
+            // loop over all child nodes of the current node
+            for (int c=0; c<currentNode.getChildNodes().getLength(); c++) {
+                // if the name of the child node matches the next remainingQuery item
+                if (currentQueryItemName.equals(currentNode.getChildNodes().item(c).getNodeName())) {
+                    Node idNode = currentNode.getChildNodes().item(c).getAttributes().getNamedItem("ID");
+                    System.out.println("ID Node: " + idNode);
+                    System.out.println("Current Query Item ID: " + currentQueryItemID);
+                    if ((idNode != null && idNode.getNodeValue().equals(currentQueryItemID)) || currentNode.getNodeName().equals("#document")) {
+                        // name and id matches we are at the right node apply the change / go deeper
+                        positionInQuery++;
+                        applyChange(change, root, currentNode.getChildNodes().item(c), positionInQuery);
+                        // return to break out of the recursion
+                        return;
+                    }
+                    else {
+                        break;
+                    }
+                }
             }
         }
-        // if the query has only left 1 item, then we are at the node to be edited
-        else if (change.changeType == "edit" && query.size()<=2) {
-
-            if (query.get(0).startsWith("@")) {
-                // Editing an Attribute node
-                System.out.println("editing attribute");
-
-                String oldNodeName = query.get(0).replace("@", "");
-                String newNodeValue = change.getNewValue();
-                n.getAttributes().getNamedItem(oldNodeName).setNodeValue(newNodeValue);
-                return;
-            }
-            else if (query.get(0).startsWith(":")) {
-                // Editing the value of an attribute node
-                System.out.println("editing value");
-                return;
-            }
-            else if (query.get(0).startsWith("#")) {
-                // Editing a Text Node
-                System.out.println("editing text");
-
-                String newNodeValue = change.getNewValue();
-                n.setTextContent(newNodeValue);
-                return;
-            }
-            else if (query.size()==0) {
-                // Editing an Element Node
-                System.out.println("editing element");
-                return;
-            }
-        }
-        // If the query is empty, we are at the node that is to be deleted
-        else if (change.changeType == "del") {
-            if (query.size()>0){
-                if (query.get(0).startsWith("@")) {
-                    // Deleting an Attribute node
-                    System.out.println("deleting attribute");
-                    String oldNodeName = query.get(0).replace("@", "");
-                    n.getAttributes().removeNamedItem(oldNodeName);
-                    return;
-                }
-                else if (query.get(0).startsWith(":")) {
-                    // Deleting the value of an attribute node
-                    System.out.println("deleting value");
-                    String oldNodeName = query.get(0).replace(":", "");
-                    return;
-                }
-                else if (query.get(0).startsWith("#")) {
-                    // Deleting a Text Node
-                    n.setTextContent("");
-                    System.out.println("deleting text");
-                    return;
-                }
-            }
-            else if (query.size()==0){
-                // Deleting an Element Node
-                n.getParentNode().removeChild(n);
-                System.out.println("deleting element");
-                return;
-            }
-        }
-        // query is not empty --> continue with next query item
-        if (query.size()>0) {
-            for (int c=0; c<n.getChildNodes().getLength(); c++) {
-                if (query.get(0).equals(n.getChildNodes().item(c).getNodeName())) {
-                    query.remove(0);
-                    applyChange(change, root, n.getChildNodes().item(c), query);
-                    return;
-                }
-            }
-        }
-        // query not in graph --> print error
-        System.out.println("Query couldnt be found, no change was made");
+        // remainingQuery not in graph --> print error
+        throw new IllegalArgumentException("Query not in graph");
     }
     /**
      * Exports the current metadata to an OME-TIFF file
@@ -507,7 +551,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // refocus gui
         myGUI.setVisible(true);
         System.out.println("[done]");
-
     }
     public void showCurrentXML() throws Exception {
         Document example_xml_doc = (Document) xml_doc.cloneNode(true);
@@ -535,61 +578,48 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         return changeHistory;
     }
 
-    public boolean validateChangeHistory() throws TransformerException {
-        System.out.println("- - - - - - - - - -");
-        Document example_xml_doc = (Document) xml_doc.cloneNode(true);
-        boolean changeHistoryValidity= true;
-        for (XMLChange c : changeHistory) {
-            LinkedList<String> query = new LinkedList<>();
-            query.addAll(c.getLocation());
-            applyChange(c, example_xml_doc, example_xml_doc, query);
-            try {
-                Element xmlExampleElement = example_xml_doc.getDocumentElement();
-                OMEModel xmlModel = new OMEModelImpl();
-                // catch verification errors and print them
-                MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
-                c.setValidity(true);
-            } catch (Exception e) {
-                c.setValidity(false);
-                c.setValidationError(e.getMessage());
-            }
-            changeHistoryValidity = changeHistory.getLast().getValidity();
-        }
-        System.out.println("- - - - - - - - - -");
-        return changeHistoryValidity;
-    }
+
 
     public void saveChangeHistory(String path){
-        // save each change as a new line to file
-        // each line contains the modification type, the location and the new content seperated by tabs
-        // for identification the file is called path/ + change + date + time + .txt
-        String history = "";
-        for (XMLChange c : changeHistory) {
-            String line = c.changeType + "\t" + c.getLocation().toString() + "\t" + c.getNewValue();
-            history += line + "\n";
-        }
         try {
-            Files.write(Paths.get(path + ".ch"), history.getBytes());
+            FileOutputStream f = new FileOutputStream(new File(path));
+            ObjectOutputStream o = new ObjectOutputStream(f);
+            // Write objects to file
+            for (XMLChange c : changeHistory) {
+                o.writeObject(c);
+            }
+            o.close();
+            f.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     public void loadChangeHistory(String path) throws Exception {
-        // load each change from file
-        // each line contains the modification type, the location and the new content seperated by tabs
-        // for identification the file is called path/ + change + date + time + .txt
-        List<String> lines = Files.readAllLines(Paths.get(path));
-        for (String line : lines) {
-            String[] parts = line.replace("\n", "").split("\t");
-            String modificationType = parts[0];
-            String location = parts[1];
-            String newContent = parts[2];
-            LinkedList<String> locationList = new LinkedList<>();
-            locationList.addAll(Arrays.asList(location.split(",")));
-            XMLChange c = new XMLChange(modificationType, locationList, newContent);
-            changeHistory.add(c);
+        try {
+            FileInputStream fi = new FileInputStream(new File(path));
+            ObjectInputStream oi = new ObjectInputStream(fi);
+            // Write objects to file
+            boolean moreObjects = true;
+            while (moreObjects) {
+                XMLChange c = (XMLChange) oi.readObject();
+                changeHistory.add(c);
+                // check if there are more objects
+                if (oi.available() == 0) {
+                    moreObjects = false;
+                }
+            }
+            oi.close();
+            fi.close();
+            // apply changes to the view port and show the change history
+            myGUI.makeChangeHistoryTab();
+            updateTree();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
     public void openSchema() throws Exception {
         XMLSchemaEditor schemaEditor = new XMLSchemaEditor();
         String xmlString = schemaEditor.createExampleXML();
@@ -643,12 +673,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             // define a new xml document
             Document new_xml_doc = (Document) xml_doc.cloneNode(true);
             // apply all changes to the original xml
-            for (XMLChange c : changeHistory) {
-                System.out.println("apply Change: " + c.changeType);
-                LinkedList<String> query = new LinkedList<>();
-                query.addAll(c.getLocation());
-                applyChange(c, new_xml_doc, new_xml_doc, query);
-            }
+            applyChanges(new_xml_doc);
             myGUI.updateTree(new_xml_doc, simplified);
             myGUI.updateChangeHistoryTab();
         }
