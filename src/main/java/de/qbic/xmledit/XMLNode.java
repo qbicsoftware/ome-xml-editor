@@ -77,8 +77,10 @@ public class XMLNode extends DefaultMutableTreeNode {
             }
         }
         else {
-            throw new IllegalArgumentException("This node is not an element node and therefore has no ID.");
+            return null;
+            // throw new IllegalArgumentException("This node is not an element node and therefore has no ID.");
         }
-        throw new IllegalArgumentException("This element node has no ID attribute.");
+        return null;
+        // throw new IllegalArgumentException("This element node has no ID attribute.");
     }
 }

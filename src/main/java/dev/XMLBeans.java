@@ -1,18 +1,20 @@
-package de.qbic.xmledit;
+package dev;
 
+import org.apache.xmlbeans.*;
+import org.openmicroscopy.schemas.ome._2016_06.ObjectFactory;
 import org.openmicroscopy.schemas.ome._2016_06.*;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import java.io.FileReader;
+import javax.xml.namespace.QName;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
-public class XMLSchemaEditor {
-    private OME defineExampleXML() {
+public class XMLBeans  {
+    public XMLBeans() {
+    }
+    private static OME defineExampleXML() {
         // create the ObjectFactory
-        ObjectFactory factory = new ObjectFactory();
+        org.openmicroscopy.schemas.ome._2016_06.ObjectFactory factory = new ObjectFactory();
 
         // Create the root OME object and set all attributes
         OME ome = new OME();
@@ -80,29 +82,37 @@ public class XMLSchemaEditor {
 
         return ome;
     }
-    public OME unmarshall() throws JAXBException, IOException {
-        JAXBContext context = JAXBContext.newInstance(OME.class);
-        return (OME) context.createUnmarshaller()
-                .unmarshal(new FileReader("./book.xml"));
-    }
+    public static String createExampleXML() throws XmlException, IOException {
 
-    public String createExampleXML() throws JAXBException {
-
-        JAXBContext context = JAXBContext.newInstance("org.openmicroscopy.schemas.ome._2016_06");
-        Marshaller marshaller = context.createMarshaller();
-
-        String exampleXML = "";
-
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-
+        // Load the schema file
+        File schemaFile = new File("data/ome.xsd");
+        // Parse the schema into a SchemaTypeSystem object
+        SchemaTypeSystem sts = XmlBeans.compileXsd(new XmlObject[] { XmlObject.Factory.parse(schemaFile) }, XmlBeans.getBuiltinTypeSystem(), null);
+        // Create a SchemaTypeLoader that can load and resolve types from the SchemaTypeSystem
+        SchemaTypeLoader stl = XmlBeans.typeLoaderUnion(new SchemaTypeLoader[] { sts, XmlBeans.getContextTypeLoader() });
+        // Get the SchemaType object for the root element of the XML document
+        SchemaType rootType = stl.findDocumentType(new QName("http://www.openmicroscopy.org/Schemas/OME/2016-06", "OME"));
+        // Create an empty XML document of that type
+        XmlObject xobj = XmlObject.Factory.newInstance();
+        // Change the type of the XML document to the root type
+        xobj = xobj.changeType(rootType);
+        // Populate the XML document with data using the generated setter methods
+        xobj.Factory.parse(defineExampleXML().toString());
+        // Create an XmlOptions object to specify the output format and encoding
+        XmlOptions xmlOptions = new XmlOptions();
+        xmlOptions.setSavePrettyPrint();
+        xmlOptions.setSavePrettyPrintIndent(4);
+        xmlOptions.setSaveAggressiveNamespaces();
+        xmlOptions.setCharacterEncoding("UTF-8");
+        // Save the XML document to a StringWriter
         StringWriter sw = new StringWriter();
-        marshaller.marshal(defineExampleXML(), sw);
+        xobj.save(sw, xmlOptions);
 
         return sw.toString();
     }
-    public static void main(String[] args) throws JAXBException {
-        XMLSchemaEditor editor = new XMLSchemaEditor();
-        System.out.println(editor.createExampleXML());
+
+    public static void main(String[] args) throws XmlException, IOException {
+        System.out.println(createExampleXML());
+
     }
 }

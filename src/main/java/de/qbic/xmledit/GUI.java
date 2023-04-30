@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.LinkedList;
-import java.util.TimerTask;
 
 // CLASS
 public class GUI extends javax.swing.JFrame{
@@ -74,7 +73,8 @@ public class GUI extends javax.swing.JFrame{
     private JMenuItem loadChangeButton;
     private JMenuItem saveChangeButton;
     private JMenuItem validateChangeButton;
-    private JMenuItem exportButton;
+    private JMenuItem exportOmeTiffButton;
+    private JMenuItem exportOmeXmlButton;
     private JMenuItem howToUseButton;
     private JMenuItem aboutButton;
     private JCheckBoxMenuItem simplifiedTree;
@@ -121,7 +121,9 @@ public class GUI extends javax.swing.JFrame{
         // Button that shows the current XML
         showCurrentXML = new JMenuItem("Show Current XML");
         // Button that exports the current XML to OmeTiff
-        exportButton = new JMenuItem("Export to OmeTiff");
+        exportOmeTiffButton = new JMenuItem("Export to OmeTiff");
+        // Button that exports the current XML to OmeXml
+        exportOmeXmlButton = new JMenuItem("Export to OmeXML");
         // Button that opens the schema
         openSchemaButton = new JMenuItem("Open Schema");
         // Button that adds a tab to the tabbed pane that shows the changes currently loaded in the change history
@@ -321,7 +323,7 @@ public class GUI extends javax.swing.JFrame{
             }
         });
 
-        exportButton.addActionListener(e -> {
+        exportOmeTiffButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Export to OmeTiff");
             int userSelection = chooser.showSaveDialog(splitPane);
@@ -333,7 +335,21 @@ public class GUI extends javax.swing.JFrame{
                     throw new RuntimeException(ex);
                 }
             }
-            });
+        });
+
+        exportOmeXmlButton.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Export to OmeXml");
+            int userSelection = chooser.showSaveDialog(splitPane);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = chooser.getSelectedFile();
+                try {
+                    edit.exportToOmeXml(fileToSave.getPath(), edit.xml_doc);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
         // Add an action listener to the JCheckBoxMenuItem
         simplifiedTree.addActionListener(new ActionListener() {
@@ -369,12 +385,13 @@ public class GUI extends javax.swing.JFrame{
         changeHistoryPane.setLayout(new ScrollPaneLayout());
 
         // SET BORDERS #################################################################################################
-        makeStandardBorder(editPanel);
+
 
         // SET ICONS FOR MENU ITEMS ####################################################################################
         openImage.setIcon(loadSvgAsImageIcon(FILES_SVG));
         showCurrentXML.setIcon(loadSvgAsImageIcon(FILES_SVG));
-        exportButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
+        exportOmeTiffButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
+        exportOmeXmlButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
         openSchemaButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
 
         showChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
@@ -406,7 +423,8 @@ public class GUI extends javax.swing.JFrame{
         // add menu items to file menu
         file.add(openImage);
         file.add(showCurrentXML);
-        file.add(exportButton);
+        file.add(exportOmeTiffButton);
+        file.add(exportOmeXmlButton);
         file.add(openSchemaButton);
 
         // add menu items to settings menu
@@ -460,7 +478,7 @@ public class GUI extends javax.swing.JFrame{
         validationErrorsField.setWrapStyleWord(true);
         validationErrorsField.setSize(WIDTH, BUTTON_HEIGHT);
         // add a border to the validation errors textfield
-        makeStandardBorder(validationErrorsField);
+        makePanelBorder(validationErrorsField);
         // add the validation errors to the change history window panel
         changeHistoryWindowPanel.add(validationErrorsField);
         addChangesToTable(model);
@@ -627,16 +645,25 @@ public class GUI extends javax.swing.JFrame{
         p.setOpaque(true);
     }
 
-    public void makeStandardBorder(JComponent p) {
+    public void makePanelBorder(JComponent p) {
         // create a compound border with a line border and an empty border
         Border line = BorderFactory.createLineBorder(Color.GRAY);
-        Border margin = BorderFactory.createEmptyBorder(BASE_UNIT, BASE_UNIT, BASE_UNIT, BASE_UNIT);
+        Border margin = BorderFactory.createEmptyBorder(BASE_UNIT/2, BASE_UNIT/2, BASE_UNIT/2, BASE_UNIT/2);
         Border compound = BorderFactory.createCompoundBorder(line, margin);
 
         // set the border of this component
         p.setBorder(compound);
         p.setOpaque(true);
     }
+
+    public void makeLineBorder(JComponent p) {
+        // create a compound border with a line border and an empty border
+        Border line = BorderFactory.createLineBorder(Color.GRAY, 1);
+        // set the border of this component
+        p.setBorder(line);
+        p.setOpaque(true);
+    }
+
     public void makeNewChange(String changeType, XMLNode toBeChanged) throws MalformedURLException, TransformerException, SAXException {
         System.out.println("- - - - Make new change - - - -");
         XMLChange change = new XMLChange(changeType, toBeChanged);
@@ -650,9 +677,11 @@ public class GUI extends javax.swing.JFrame{
         }
         updateChangeHistoryTab();
     }
+
     public void makeSimplisticTree(Document dom) {
 
     }
+
     public void makeNewTreeTab(Document dom, boolean simplified, String title) throws TransformerException {
         // create a new XMLTree from the DOM
         myTree = new XMLTree(dom, simplified);
@@ -718,16 +747,18 @@ public class GUI extends javax.swing.JFrame{
         p.setSize(p.getWidth(), BUTTON_HEIGHT);
         tabbedPane.addTab(title, p);
         // get index of new tab
-        int index = tabbedPane.getTabCount() - 1;
+        int index = tabbedPane.getTabCount()-1;
         MouseListener close = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int componentPos = tabbedPane.indexOfTabComponent(e.getComponent().getParent().getParent());
+                int componentPos = tabbedPane.indexOfTabComponent(e.getComponent().getParent());
+                System.out.println("Closing tab " + componentPos);
                 tabbedPane.remove(componentPos);
             }
         };
         final CloseButton closeButton = new CloseButton(title,  loadSvgAsImageIcon(svgCode), close);
         closeButton.setOpaque(false);
+        closeButton.setPreferredSize(new Dimension(BUTTON_WIDTH, 20));
         // closeButton.setFocusable(false);
         // set panel as tab component
         tabbedPane.setTabComponentAt(index, closeButton);
@@ -768,10 +799,10 @@ public class GUI extends javax.swing.JFrame{
                 selectedNode.getType().equals("value")) {
 
             selectedNode = selectedNode.getParent();
-            addElementButton();
+            makeEditPanel();
         }
         else {
-            addElementButton();
+            makeEditPanel();
         }
         JPanel spacer = new JPanel();
         labelCount++;
@@ -779,6 +810,30 @@ public class GUI extends javax.swing.JFrame{
         spacer.setPreferredSize(new Dimension(0, spacer.getHeight()));
         SpringUtilities.makeCompactGrid(editPanel, labelCount, 1,0,0,0, 0);
         scrollPaneBottom.setViewportView(editPanel);
+    }
+
+    /**
+     * Creates the editPanel
+     */
+    private void makeEditPanel() {
+        // make border for the editPanel
+        // makePanelBorder(editPanel);
+        // add the Element Button to the editPanel
+        addElementButton();
+        // draw the children of the element node
+        for (int c=0; c<selectedNode.getChildCount();c++) {
+            XMLNode child = (XMLNode) selectedNode.getChildAt(c);
+            if (child.getType().equals("attribute")) {
+                XMLNode childChild = child.getFirstChild();
+                addAttributeButton(child.getUserObject().toString(), childChild);
+            }
+            else if (child.getType().equals("value")) {
+                addAttributeButton(selectedNode.getUserObject().toString(), child);
+            }
+            else if (child.getType().equals("text")){
+                addTextButton(child);
+            }
+        }
     }
 
     /**
@@ -817,7 +872,7 @@ public class GUI extends javax.swing.JFrame{
         // add to button group so only one attribute / title can be selected at a time
         bg.add(titleButton);
         // add a listener to the button to detect selection and show the add and delete button
-        /*
+
         titleButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -830,100 +885,7 @@ public class GUI extends javax.swing.JFrame{
                 titlePanel.repaint();
             }
         });
-        */
-        titleButton.addMouseListener(new MouseAdapter() {
-            private int eventCnt = 0;
-            java.util.Timer timer = new java.util.Timer("doubleClickTimer", false);
 
-            @Override
-            public void mouseClicked(final MouseEvent e) {
-                eventCnt = e.getClickCount();
-                if ( e.getClickCount() == 1 ) {
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            if ( eventCnt == 1 ) {
-                                // set the to be deleted node to the currently selected element node
-                                toBeDeletedNode = selectedNode;
-                                // add the buttons to the title panel
-                                titlePanel.add(delButton, BorderLayout.EAST);
-                                titlePanel.add(addButton, BorderLayout.WEST);
-                                titlePanel.revalidate();
-                                titlePanel.repaint();
-                                System.err.println( "You did a single click.");
-
-                            } else if ( eventCnt > 1 ) {
-                                // remove the buttons from the title panel
-                                titlePanel.remove(delButton);
-                                titlePanel.remove(addButton);
-                                titlePanel.remove(titleButton);
-                                // create a new text field to overlay the title button when clicked to edit the title
-                                JTextField tmpTextField = new JTextField();
-                                // set the preferred size of the text field
-                                tmpTextField.setPreferredSize(new Dimension(titlePanel.getWidth(), titlePanel.getHeight()));
-                                // set the text to be centered
-                                tmpTextField.setHorizontalAlignment(JTextField.CENTER);
-                                // set the starting text of the text field to the title of the selected node
-                                tmpTextField.setText(selectedNode.getUserObject().toString());
-                                // add the text field to the title panel
-                                titlePanel.add(tmpTextField, BorderLayout.CENTER);
-                                titlePanel.revalidate();
-                                // give the text field an action listener to detect when the user is done editing the title
-                                tmpTextField.addActionListener(new ActionListener() {
-                                    @Override
-                                    public void actionPerformed(ActionEvent e) {
-                                        // get the text from the text field
-                                        String text = tmpTextField.getText();
-                                        // register the addition in the deletion History
-                                        try {
-                                            makeNewChange("delete", selectedNode);
-                                        } catch (MalformedURLException | TransformerException |
-                                                 SAXException ex) {
-                                            throw new RuntimeException(ex);
-                                        }
-                                        // set the user object of the selected node to the text from the text field
-                                        selectedNode.setUserObject(text);
-                                        // register the addition in the change History
-                                        try {
-                                            makeNewChange("add", selectedNode);
-                                        } catch (MalformedURLException | TransformerException |
-                                                 SAXException ex) {
-                                            throw new RuntimeException(ex);
-                                        }
-                                        // remove the text field from the title panel
-                                        titlePanel.remove(tmpTextField);
-                                        // add the title button to the title panel
-                                        titlePanel.add(titleButton, BorderLayout.CENTER);
-                                        // set the text of the title button to the text from the text field
-                                        titleButton.setText(text);
-                                        // revalidate and repaint the title panel
-                                        titlePanel.revalidate();
-                                        titlePanel.repaint();
-                                    }
-                                });
-                                System.err.println("you clicked " + eventCnt + " times.");
-                            }
-                            eventCnt = 0;
-                        }
-                    }, 500);
-                }
-            }
-        });
-
-        // draw the children of the title node
-        for (int c=0; c<selectedNode.getChildCount();c++) {
-            XMLNode child = (XMLNode) selectedNode.getChildAt(c);
-            if (child.getType().equals("attribute")) {
-                XMLNode childChild = child.getFirstChild();
-                addAttributeButton(child.getUserObject().toString(), childChild);
-            }
-            else if (child.getType().equals("value")) {
-                addAttributeButton(selectedNode.getUserObject().toString(), child);
-            }
-            else if (child.getType().equals("text")){
-                addTextButton("", child);
-            }
-        }
     }
 
     private void addAttributeButton(String labelText, XMLNode node) {;
@@ -933,7 +895,12 @@ public class GUI extends javax.swing.JFrame{
         JToggleButton attrButton = new JToggleButton(labelText);
         // set the unselected background color of the button to gray
         attrButton.setBackground(Color.LIGHT_GRAY);
+        // set the border of the attribute Button
+        makeLineBorder(attrButton);
+        // make new textfield for the attribute
         NodedTextField textField = new NodedTextField(node);
+        // give the textfield  a border
+        makeLineBorder(textField);
         // add to button group so only one attribute can be selected at a time
         bg.add(attrButton);
         // add a listener to the textfield to detect changes
@@ -985,15 +952,13 @@ public class GUI extends javax.swing.JFrame{
         labelCount +=1;
     }
 
-    private void addTextButton(String labelText, XMLNode node) {
+    private void addTextButton(XMLNode node) {
         // add a new text to the editPanel consisting of a label, a textfield and a delete button in a new panel
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new BorderLayout(0,0));
-        JToggleButton textButton = new JToggleButton(labelText);
         NodedTextField textField = new NodedTextField(node);
-
-        // add to button group so only one text can be selected at a time
-        bg.add(textButton);
+        // give the textfield  a border
+        makeLineBorder(textField);
 
         // add a listener to the textfield to detect changes
         textField.addActionListener(new java.awt.event.ActionListener() {
@@ -1009,39 +974,38 @@ public class GUI extends javax.swing.JFrame{
             }
         });
 
-        // add a listener to the button to detect selection and show the delete button
-        textButton.addActionListener(new ActionListener() {
+        // add a mouse listener to the textfield to detect selection and show the delete button
+        textField.addMouseListener(new MouseAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                // remove the add button from the titlePanel
-                titlePanel.remove(addButton);
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    // remove the add button from the titlePanel
+                    titlePanel.remove(addButton);
 
-                // set the to be deleted node to the currently selected text
-                toBeDeletedNode = node;
+                    // set the to be deleted node to the currently selected text
+                    toBeDeletedNode = node;
 
-                // add the delete button to the textPanel
-                textPanel.add(delButton, BorderLayout.EAST);
-                textPanel.revalidate();
-                textPanel.repaint();
+                    // add the delete button to the textPanel
+                    textPanel.add(delButton, BorderLayout.EAST);
+                    textPanel.revalidate();
+                    textPanel.repaint();
+                }
             }
         });
 
         // set the size of the buttons and the textfield
         Dimension d = new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT);
         textPanel.setPreferredSize(d);
-        textButton.setPreferredSize(d);
         delButton.setPreferredSize(d);
         // set the minimum size of the buttons and the textfield
         textPanel.setMinimumSize(d);
-        textButton.setMinimumSize(d);
         delButton.setMinimumSize(d);
         // set the maximum size of the buttons and the textfield
         textPanel.setMaximumSize(d);
-        textButton.setMaximumSize(d);
         delButton.setMaximumSize(d);
 
         // add the components to the panel and the panel to the editPanel
-        textPanel.add(textButton, BorderLayout.WEST);
+        //textPanel.add(textButton, BorderLayout.WEST);
         textPanel.add(textField, BorderLayout.CENTER);
         editPanel.add(textPanel);
 

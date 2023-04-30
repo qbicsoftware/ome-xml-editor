@@ -8,9 +8,9 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.qbic</groupId>
-  <artifactId>Editor</artifactId>
+  <artifactId>XMLEditor</artifactId>
   <name>XML Editor</name>
-  <version>1</version>
+  <version>20_04_23</version>
   <description>A Maven project implementing an ImageJ command.</description>
   <url>https://mycompany.com/imagej/gauss-filtering/</url>
   <issueManagement>
@@ -114,21 +114,9 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.3.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-      <version>2.3.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.javassist</groupId>
-      <artifactId>javassist</artifactId>
-      <version>3.25.0-GA</version>
+      <groupId>org.apache.xmlbeans</groupId>
+      <artifactId>xmlbeans</artifactId>
+      <version>5.1.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

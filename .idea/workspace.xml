@@ -5,18 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="tested as Fiji plugin, 05.04.23">
-      <change afterPath="$PROJECT_DIR$/data/updateImges/XML_Editor_20_04_23.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/FeedbackStore.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/OMETest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/XMLBeans.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dependency-reduced-pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/dependency-reduced-pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/CloseButton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/CloseButton.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/GUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLChange.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLChange.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLEditor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRendererSimplified.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRendererSimplified.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/old.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/old.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLSchemaEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLSchemaEditor.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,12 +114,29 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="XMLBeans" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="dev.XMLBeans" />
+      <module name="XMLEditor" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="dev.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="XMLEditor" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="de.qbic.xmledit.XMLEditor" />
-      <module name="Editor" />
+      <module name="XMLEditor" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value=".*" />
+          <option name="ENABLED" value="false" />
+        </pattern>
+        <pattern>
+          <option name="PATTERN" value="de.qbic.xmledit.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -130,36 +146,10 @@
     </configuration>
     <configuration name="XMLSchemaEditor" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="de.qbic.xmledit.XMLSchemaEditor" />
-      <module name="XML_metadata_editor" />
+      <module name="XMLEditor" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="dev.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="XSDToXML" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="dev.XSDToXML" />
-      <module name="XML_metadata_editor" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="dev.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="XsdToXmlGenerator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="dev.XsdToXmlGenerator" />
-      <module name="XML_metadata_editor" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="dev.*" />
+          <option name="PATTERN" value="*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -173,6 +163,7 @@
           <MavenGeneralSettings>
             <option name="alwaysUpdateSnapshots" value="false" />
             <option name="checksumPolicy" value="NOT_SET" />
+            <option name="emulateTerminal" value="false" />
             <option name="failureBehavior" value="NOT_SET" />
             <option name="localRepository" value="" />
             <option name="mavenHome" value="Bundled (Maven 3)" />
@@ -226,13 +217,48 @@
       </MavenSettings>
       <method v="2" />
     </configuration>
+    <configuration name="XMLEditor [install]" type="MavenRunConfiguration" factoryName="Maven" temporary="true">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="install" />
+              </list>
+            </option>
+            <option name="pomFileName" value="pom.xml" />
+            <option name="profilesMap">
+              <map>
+                <entry key="dev.fiji" value="true" />
+              </map>
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Application.Test" />
+      <item itemvalue="Application.XMLBeans" />
+      <item itemvalue="Application.XMLEditor" />
+      <item itemvalue="Application.XMLSchemaEditor" />
+      <item itemvalue="Maven.Editor [install]" />
+      <item itemvalue="Maven.XMLEditor [install]" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.XMLEditor" />
-        <item itemvalue="Application.Test" />
+        <item itemvalue="Maven.XMLEditor [install]" />
+        <item itemvalue="Application.XMLBeans" />
         <item itemvalue="Application.XMLSchemaEditor" />
-        <item itemvalue="Application.XSDToXML" />
-        <item itemvalue="Application.XsdToXmlGenerator" />
+        <item itemvalue="Application.Test" />
       </list>
     </recent_temporary>
   </component>
@@ -364,7 +390,14 @@
       <option name="project" value="LOCAL" />
       <updated>1681306323323</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="tested as Fiji plugin, 05.04.23">
+      <created>1681980862213</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1681980862213</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

@@ -493,6 +493,18 @@ public class XMLEditor<T extends RealType<T>> implements Command {
                     }
                 }
             }
+            // without the ID requirement
+            for (int c=0; c<currentNode.getChildNodes().getLength(); c++) {
+                // if the name of the child node matches the next remainingQuery item
+                if (currentQueryItemName.equals(currentNode.getChildNodes().item(c).getNodeName())) {
+                    // print a warning, that the ID is not found
+                    System.out.println("Warning: ID Argument not found, proceeding without ID. This could lead to ambiguity and thus wrong changes.");
+                    positionInQuery++;
+                    applyChange(change, root, currentNode.getChildNodes().item(c), positionInQuery);
+                    // return to break out of the recursion
+                    return;
+                }
+            }
         }
         // remainingQuery not in graph --> print error
         throw new IllegalArgumentException("Query not in graph");
@@ -524,7 +536,10 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // set metadata
         xmlElement = new_xml_doc.getDocumentElement();
         OMEModel xmlModel = new OMEModelImpl();
-        MetadataRoot mdr = null;
+        // MetadataRoot mdr = null;
+        OMEXMLMetadataRoot mdr = null;
+        // OME test = new OME();
+        //OME.getChildrenByTagName();
         try {
             mdr = new OMEXMLMetadataRoot(xmlElement, xmlModel);
         } catch (EnumerationException e) {
@@ -548,6 +563,30 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // close writer
         writer.close();
         biwriter.close();
+        // refocus gui
+        myGUI.setVisible(true);
+        System.out.println("[done]");
+    }
+
+    /**
+     * Exports the current metadata to an OME-XML file
+     * @param path the path to the file
+     * @throws Exception
+     */
+    public void exportToOmeXml(String path, Document newXML) throws Exception {
+        System.out.println("Inside exportToOmeXml");
+        System.out.println("Path: " + path);
+        // define output path
+        int dot = path.lastIndexOf(".");
+        String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.xml";
+        // apply changes to metadata
+        Document new_xml_doc = (Document) newXML.cloneNode(true);
+        applyChanges(new_xml_doc);
+        // write to file
+        System.out.println("Writing to: " + outPath);
+        FileOutputStream xmlOutStream = new FileOutputStream(outPath);
+        XMLTools.writeXML(xmlOutStream, new_xml_doc);
+        xmlOutStream.close();
         // refocus gui
         myGUI.setVisible(true);
         System.out.println("[done]");
@@ -682,6 +721,8 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         changeHistory = new LinkedList<>();
         myGUI = new GUI(this);
         myGUI.setVisible(true);
+        OMEModel xmlModel = new OMEModelImpl();
+        System.out.println("Mode Objects: " + xmlModel.getModelObjects().toString());
     }
     public void resetChangeHistory() {
         changeHistory = new LinkedList<>();
