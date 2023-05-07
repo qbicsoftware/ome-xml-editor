@@ -21,6 +21,7 @@ public class CloseButton extends JPanel {
 
         // create a label that displays the title
         JLabel text = new JLabel(title);
+        text.setPreferredSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
         text.setOpaque(false);
 
         // create a button with a custom look
@@ -40,8 +41,8 @@ public class CloseButton extends JPanel {
         layout.putConstraint(SpringLayout.WEST, ic, 1, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, ic, 4, SpringLayout.NORTH, this);
         // set constraints for the layout such that the text is always in the middle
-        layout.putConstraint(SpringLayout.WEST, text, 10, SpringLayout.EAST, ic);
-        layout.putConstraint(SpringLayout.EAST, text, 5, SpringLayout.WEST, button);
+        layout.putConstraint(SpringLayout.WEST, text, 8, SpringLayout.EAST, ic);
+        layout.putConstraint(SpringLayout.EAST, text, 8, SpringLayout.WEST, button);
         layout.putConstraint(SpringLayout.NORTH, text, 4, SpringLayout.NORTH, this);
 
         // add the components to the panel

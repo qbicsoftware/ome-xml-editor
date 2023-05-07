@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package dev;
 
 import org.openmicroscopy.schemas.ome._2016_06.*;
 

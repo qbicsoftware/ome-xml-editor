@@ -13,14 +13,22 @@ import javax.swing.tree.TreeModel;
 class XMLTree extends JTree {
 
     XMLTreeModel dtModel;
+    private final boolean simplified;
 
     public XMLTree(Document xml, boolean simplified) {
+        this.simplified = simplified;
         if (xml != null)
             setTree(xml);
+
         if (simplified) {
-            this.setCellRenderer(new XMLTreeRendererSimplified(this));
+
+            this.setCellRenderer(new XMLTreeRendererSimplified());
+            this.setShowsRootHandles(false);
+            this.setDragEnabled(true);
         } else {
             this.setCellRenderer(new XMLTreeRenderer());
+            this.setShowsRootHandles(false);
+            this.setDragEnabled(true);
         }
     }
     @Override
@@ -39,6 +47,8 @@ class XMLTree extends JTree {
         }
         if (root != null) {
             dtModel = new XMLTreeModel(builtTreeNode(root.getFirstChild()));
+            dtModel.activateFilter(simplified);
+            dtModel.reload();
             this.setModel(dtModel);
         }
     }
@@ -82,6 +92,7 @@ class XMLTree extends JTree {
             dmtNode.add(builtTreeNode(tempNode));
 
         }
+
         return dmtNode;
     }
 }

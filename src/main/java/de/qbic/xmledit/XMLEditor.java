@@ -5,6 +5,7 @@ package de.qbic.xmledit;
 
 // Imports
 
+import dev.XMLSchemaEditor;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;
@@ -88,7 +89,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     private String swapOrder = null, shuffleOrder = null;
     private String format = null;
     private String cachedir = null;
-    public LinkedList<XMLChange> changeHistory;
+    public LinkedList<XMLChange> changeHistory = null;
     public Document xml_doc;
     public Element xmlElement;
     private DynamicMetadataOptions options = new DynamicMetadataOptions();
@@ -698,7 +699,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         String title = path.substring(path.lastIndexOf("/") + 1);
         xml_doc = loadFile(path);
         Document new_xml_doc = (Document) xml_doc.cloneNode(true);
-        if (changeHistory != null) {
+        if (changeHistory.size() > 0) {
             applyChanges(new_xml_doc);
             myGUI.updateChangeHistoryTab();
         }

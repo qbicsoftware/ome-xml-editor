@@ -1,22 +1,93 @@
 package de.qbic.xmledit;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 public class XMLNode extends DefaultMutableTreeNode {
     private ArrayList<String> attributes;
     private String nodeType = "element";
+    protected boolean isVisible;
+
+    public XMLNode() {
+        this(null);
+    }
+    /*
     public XMLNode(DefaultMutableTreeNode defaultMutableTreeNode) {
         super(defaultMutableTreeNode);
-         attributes = new ArrayList<>();
-    }
-    public XMLNode(String newNode) {
-        super(newNode);
         attributes = new ArrayList<>();
     }
+
     public XMLNode() {
         super();
         attributes = new ArrayList<>();
+    }
+
+     */
+    public XMLNode(Object userObject) {
+        this(userObject, true, true);
+        attributes = new ArrayList<>();
+    }
+
+    public XMLNode(Object userObject, boolean allowsChildren,
+                         boolean isVisible) {
+        super(userObject, allowsChildren);
+        this.isVisible = isVisible;
+    }
+
+    public TreeNode getChildAt(int index, boolean filterIsActive) {
+        if (!filterIsActive) {
+            return super.getChildAt(index);
+        }
+        if (children == null) {
+            throw new ArrayIndexOutOfBoundsException("node has no children");
+        }
+
+        int realIndex = -1;
+        int visibleIndex = -1;
+        Enumeration e = children.elements();
+        while (e.hasMoreElements()) {
+            XMLNode node = (XMLNode) e.nextElement();
+            if (node.isVisible()) {
+                visibleIndex++;
+            }
+            realIndex++;
+            if (visibleIndex == index) {
+                return (TreeNode) children.elementAt(realIndex);
+            }
+        }
+
+        throw new ArrayIndexOutOfBoundsException("index unmatched");
+        //return (TreeNode)children.elementAt(index);
+    }
+
+    public int getChildCount(boolean filterIsActive) {
+        if (!filterIsActive) {
+            return super.getChildCount();
+        }
+        if (children == null) {
+            return 0;
+        }
+
+        int count = 0;
+        Enumeration e = children.elements();
+        while (e.hasMoreElements()) {
+            XMLNode node = (XMLNode) e.nextElement();
+            if (node.isVisible()) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    public void setVisible(boolean visible) {
+        this.isVisible = visible;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
     }
     public ArrayList<String> getAttributes() {
         return this.attributes ;
@@ -47,6 +118,7 @@ public class XMLNode extends DefaultMutableTreeNode {
     public void setType(String type) {
         if (type.equals("element") || type.equals("attribute") || type.equals("text") || type.equals("value")) {
             this.nodeType = type;
+            setVisible(type.equals("element"));
         } else {
             System.out.println("Invalid node type");
         }

@@ -94,7 +94,9 @@ public class GUI extends javax.swing.JFrame{
     private XMLNode selectedNode;
     private XMLNode toBeDeletedNode;
     private Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
-    public XMLTableModel feedBackTableModel;
+    public XMLTableModel feedBackTableModel = null;
+    public XMLTableModel historyTableModel = null;
+    public JTable historyTable = null;
 
     public GUI(XMLEditor edit){
         this.edit = edit;
@@ -115,6 +117,7 @@ public class GUI extends javax.swing.JFrame{
         help = new JMenu("Help");
         // Menu for the change history
         changeHistoryMenu = new JMenu("Change History Menu");
+        makeHistoryTable();
 
         // Button that opens the xml tree of an image
         openImage = new JMenuItem("Open Image");
@@ -453,6 +456,13 @@ public class GUI extends javax.swing.JFrame{
         splitPane.setBottomComponent(bottomPanel);
 
     }
+
+    /**
+     * Takes a markdown string and transforms it into a html string. Then returns a JScrollPane
+     * that shows the html.
+     * @param md markdown string
+     * @return JComponent that shows the html
+     */
     public JComponent renderMarkdown(String md) {
         final String src = md;
         final MarkdownFlavourDescriptor flavour = new GFMFlavourDescriptor();
@@ -464,14 +474,17 @@ public class GUI extends javax.swing.JFrame{
         editor.setText(html);
         return scrollPane;
     }
+
+    /**
+     * Creates a change history tab in the tabbed pane
+     */
     public void makeChangeHistoryTab() throws TransformerException, ServiceException, DependencyException, MalformedURLException, SAXException {
         // create changer history window panel
         changeHistoryWindowPanel.setLayout(new BoxLayout(changeHistoryWindowPanel, BoxLayout.Y_AXIS));
         // add the change history pane to the change history window panel
         changeHistoryWindowPanel.add(changeHistoryPane);
         // Create Header entrys for the list of changes, so the user knows which entry is what
-        JTable table = makeHistoryTable();
-        XMLTableModel model = (XMLTableModel) table.getModel();
+        makeHistoryTable();
         // add a textfield to the change history panel to display validation errors
         validationErrorsField.setEditable(false);
         validationErrorsField.setLineWrap(true);
@@ -481,20 +494,53 @@ public class GUI extends javax.swing.JFrame{
         makePanelBorder(validationErrorsField);
         // add the validation errors to the change history window panel
         changeHistoryWindowPanel.add(validationErrorsField);
-        addChangesToTable(model);
-        changeHistoryPane.add(table);
-        changeHistoryPane.setViewportView(table);
-
+        // add the changes to the table model
+        addChangesToTable(historyTableModel);
+        // add the table to the change history pane
+        changeHistoryPane.add(historyTable);
+        // set the view port of the change history pane to the table
+        changeHistoryPane.setViewportView(historyTable);
         // add the change panel to the tabbed pane
         makeNewTab(changeHistoryWindowPanel, "Change History", CHANGE_SVG);
     }
+
+    /**
+     * Initializes the change history table
+     */
+    public void makeHistoryTable() {
+        // create an array of column names
+        String[] columnNames = {"Index", "Change Type", "Location", "Node Type"};
+        // create a default table model with no data
+        historyTableModel = new XMLTableModel(columnNames, 0);
+        // create a JTable with the model
+        historyTable = new JTable(historyTableModel);
+        // make the table cells editable
+        historyTable.setDefaultEditor(Object.class, null);
+        historyTable.setDefaultRenderer(Object.class, new XMLTableRenderer());
+        // add a mouse listener to handle clicks on the table
+        historyTable.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                // get the row and column of the clicked cell
+                int row = historyTable.rowAtPoint(e.getPoint());
+                int col = historyTable.columnAtPoint(e.getPoint());
+                // get the value of the clicked cell
+                Object value = historyTable.getValueAt(row, col);
+                // do something with the value (for example, print it)
+                System.out.println("Clicked on: " + value);
+            }
+        });
+    }
+
+    /**
+     * adds changes to the table
+     */
     public void addChangesToTable(XMLTableModel model) throws TransformerException {
         // get the change history
         LinkedList<XMLChange> changeHistory = edit.getChangeHistory();
         edit.validateChangeHistory(edit.xml_doc);
         int index = 0;
         for (XMLChange c : changeHistory) {
-            model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getToBeChangedNode()});
+            model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNodeType()});
             if (c.getValidity()) {
                 model.setRowColor(index, PASTEL_GREEN);
                 validationErrorsField.setText("No validation errors in most recent change found.");
@@ -515,47 +561,18 @@ public class GUI extends javax.swing.JFrame{
         }
     }
 
+    /**
+     * Update the change history tab with the new changes
+     */
     public void updateChangeHistoryTab() throws TransformerException {
-        // Create Header entrys for the list of changes, so the user knows which entry is what
-        JTable table = makeHistoryTable();
-        XMLTableModel model = (XMLTableModel) table.getModel();
-        // iterate over the change history and remember the index
-        addChangesToTable(model);
-        changeHistoryPane.add(table);
-        changeHistoryPane.setViewportView(table);
+        // empty the table model
+        historyTableModel.setRowCount(0);
+        // add new data to the table model
+        addChangesToTable(historyTableModel);
+        changeHistoryPane.add(historyTable);
+        changeHistoryPane.setViewportView(historyTable);
     }
 
-    public JTable makeHistoryTable() {
-        // create an array of column names
-        String[] columnNames = {"Index", "Change Type", "Location", "New Value"};
-
-        // create a default table model with no data
-        XMLTableModel model = new XMLTableModel(columnNames, 0);
-
-        // create a JTable with the model
-        JTable table = new JTable(model);
-
-        // make the table cells editable
-        table.setDefaultEditor(Object.class, null);
-        table.setDefaultRenderer(Object.class, new XMLTableRenderer());
-
-        // add a mouse listener to handle clicks on the table
-        table.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                // get the row and column of the clicked cell
-                int row = table.rowAtPoint(e.getPoint());
-                int col = table.columnAtPoint(e.getPoint());
-
-                // get the value of the clicked cell
-                Object value = model.getValueAt(row, col);
-
-                // do something with the value (for example, print it)
-                System.out.println("Clicked on: " + value);
-
-            }
-        });
-        return table;
-    }
     /**
      * Creates a new table in a new tab that shows the user which files from the specified folder
      * (apply change to folder) have been changed and which have not.
@@ -603,6 +620,7 @@ public class GUI extends javax.swing.JFrame{
         // add the panel to the tabbed pane
         makeNewTab(feedbackTablePanel, "Feedback", FEEDBACK_SVG);
     }
+
     /**
      * Creates a new table in a new tab that shows the user which files from the specified folder
      * (apply change to folder) have been changed and which have not.
@@ -614,22 +632,27 @@ public class GUI extends javax.swing.JFrame{
         if (feedbackStore.getValidity() & feedbackStore.getExported()) {
             // change color of the row to green
             feedBackTableModel.setRowColor(feedBackTableModel.getRowCount() - 1, PASTEL_GREEN);
-
         }
         else {
             // change color of the row to red
             feedBackTableModel.setRowColor(feedBackTableModel.getRowCount() - 1, PASTEL_RED);
 
         }
-
     }
-    /* Reports errors that occur in a little pop-up in the gui.
+
+    /**
+     * Reports errors that occur in a little pop-up in the gui.
      */
     public void reportError(String exception) {
         JOptionPane.showMessageDialog(this, "Error: " + exception, "Error", JOptionPane.ERROR_MESSAGE);
 
     }
 
+    /**
+     * Adds a border to the specified panel with the specified title.
+     * @param p the panel to which the border will be added
+     * @param title the title of the border
+     */
     public void makeTitledBorder(JPanel p, String title) {
         // create a compound border with a line border and an empty border
         Border line = BorderFactory.createLineBorder(Color.GRAY);
@@ -645,6 +668,10 @@ public class GUI extends javax.swing.JFrame{
         p.setOpaque(true);
     }
 
+    /**
+     * Adds a border to the specified panel
+     * @param p the component to which the border will be added
+     */
     public void makePanelBorder(JComponent p) {
         // create a compound border with a line border and an empty border
         Border line = BorderFactory.createLineBorder(Color.GRAY);
@@ -675,7 +702,11 @@ public class GUI extends javax.swing.JFrame{
             }
             return;
         }
-        updateChangeHistoryTab();
+        // update the change history tab if it is opened
+
+        if (tabbedPane.indexOfComponent(changeHistoryWindowPanel) != -1) {
+            updateChangeHistoryTab();
+        }
     }
 
     public void makeSimplisticTree(Document dom) {
@@ -786,6 +817,9 @@ public class GUI extends javax.swing.JFrame{
         return icon;
     }
 
+    /**
+     * Creates the editPanel
+     */
     public void updateEditPanel() {
         // reset the editPanel
         labelCount = 0;
@@ -888,6 +922,11 @@ public class GUI extends javax.swing.JFrame{
 
     }
 
+    /**
+     * Adds an attribute to the editPanel
+     * @param labelText
+     * @param node
+     */
     private void addAttributeButton(String labelText, XMLNode node) {;
         // add a new attribute to the editPanel consisting of a label, a textfield and a delete button in a new panel
         JPanel attributePanel = new JPanel();
@@ -952,6 +991,10 @@ public class GUI extends javax.swing.JFrame{
         labelCount +=1;
     }
 
+    /**
+     * Adds a text button to the editPanel
+     * @param node
+     */
     private void addTextButton(XMLNode node) {
         // add a new text to the editPanel consisting of a label, a textfield and a delete button in a new panel
         JPanel textPanel = new JPanel();
@@ -1013,6 +1056,9 @@ public class GUI extends javax.swing.JFrame{
         labelCount +=1;
     }
 
+    /**
+     * Initializes the add button
+     */
     private void initializeAddButton() {
         addButton.addActionListener(event -> {
             // create optionPane that is a pane containing two panels.
@@ -1251,6 +1297,9 @@ public class GUI extends javax.swing.JFrame{
         });
     }
 
+    /**
+     *
+     */
     private void initializeDelButton() {
         // remove all the action listeners from the delete button
         for (ActionListener al : delButton.getActionListeners()) {

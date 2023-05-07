@@ -2,8 +2,10 @@ package de.qbic.xmledit;
 
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.Vector;
+
 
 public class XMLTreeModel extends DefaultTreeModel {
 
@@ -11,27 +13,59 @@ public class XMLTreeModel extends DefaultTreeModel {
     private Vector<TreeModelListener> treeModelListeners =
             new Vector<TreeModelListener>();
 
+    protected boolean filterIsActive;
+    /*
     XMLTreeModel(XMLNode root) {
         super(root);
         this.root = root;
 
     }
+     */
+    public XMLTreeModel(TreeNode root) {
+        this(root, false);
 
+    }
+
+    public XMLTreeModel(TreeNode root, boolean asksAllowsChildren) {
+        this(root, false, false);
+    }
+
+    public XMLTreeModel(TreeNode root, boolean asksAllowsChildren,
+                              boolean filterIsActive) {
+        super(root, asksAllowsChildren);
+        this.filterIsActive = filterIsActive;
+        this.root = (XMLNode) root;
+    }
+
+    public void activateFilter(boolean newValue) {
+        filterIsActive = newValue;
+    }
+
+    public boolean isActivatedFilter() {
+        return filterIsActive;
+    }
+
+    public Object getChild(Object parent, int index) {
+        if (filterIsActive) {
+            if (parent instanceof XMLNode) {
+                return ((XMLNode) parent).getChildAt(index,
+                        filterIsActive);
+            }
+        }
+        return ((TreeNode) parent).getChildAt(index);
+    }
+
+    public int getChildCount(Object parent) {
+        if (filterIsActive) {
+            if (parent instanceof XMLNode) {
+                return ((XMLNode) parent).getChildCount(filterIsActive);
+            }
+        }
+        return ((TreeNode) parent).getChildCount();
+    }
     @Override
     public Object getRoot() {
         return root;
-    }
-
-    @Override
-    public Object getChild(Object parent, int index) {
-        XMLNode n = (XMLNode) parent;
-        return n.getChildAt(index);
-    }
-
-    @Override
-    public int getChildCount(Object parent) {
-        XMLNode n = (XMLNode) parent;
-        return n.getChildCount();
     }
 
     @Override

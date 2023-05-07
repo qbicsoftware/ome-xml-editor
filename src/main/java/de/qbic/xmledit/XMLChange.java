@@ -6,16 +6,13 @@ import java.util.LinkedList;
 
 public class XMLChange implements Serializable {
     private static final long serialVersionUID = 1L;
-    private LinkedList<String> location;
-    public String oldContent;
-    public LinkedList<XMLNode> nodePath = new LinkedList<>();
+    private final LinkedList<String> location = new LinkedList<>();
+    private final LinkedList<XMLNode> nodePath = new LinkedList<>();
     private XMLNode toBeChangedNode;
-    public String changeType;
+    private String changeType;
     private String ID;
-    private XMLNode myNode;
     public String nodeType = "element";
     private boolean valid;
-
     private String validationError = null;
 
     XMLChange(String mod, XMLNode newN) {
@@ -25,6 +22,7 @@ public class XMLChange implements Serializable {
         if (newN.getType().equals("element") && changeType.equals("add")) {
             nodePath.removeLast();
         }
+        setLocation(toBeChangedNode.getPath());
     }
     public void setID(String id){
         this.ID = id;
@@ -42,23 +40,13 @@ public class XMLChange implements Serializable {
     public XMLNode getToBeChangedNode() {
         return toBeChangedNode;
     }
+    public void setLocation(TreeNode[] treePath) {
+        for (TreeNode n : treePath){
+            location.add((n.toString()));
+        }
+    }
 
     public LinkedList<String> getLocation() {
-        /*
-        String path = Arrays.toString(nodePath);
-        LinkedList<String> location = new LinkedList<>();
-        location.addAll(Arrays.asList(path.replace("[", "").replace("]", "").split(", ")));
-        setLocation(location);
-
-        if (nodePath.getType().equals("element")) {
-            for (XMLNode c : originNode.getChildren()){
-                if (c.getUserObject() == "ID") {
-                    change.setID(c.getFirstChild().getUserObject().toString());
-                    System.out.println("ID: " + c.getFirstChild().getUserObject().toString());
-                }
-            }
-        }
-        */
         return location;
     }
     /**
