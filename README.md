@@ -6,6 +6,13 @@ Fiji plugin, that allows the user to EDIT (not add tags) the metadata of ome-xml
 by bioformats, but has flaws. Work in progress.
 
 
+### Update 07.05.23
+
+- fixed a visual bug, that occured when the application was started from within fiji
+- reworked the simplified tree view system
+
+![](data/updateImges/XML_Editor_07_05_23.png)
+
 ### Update 20.04.23
 
 **This patch manly contains changes to the back end**
