@@ -276,15 +276,6 @@ public class GUI extends javax.swing.JFrame{
             }
         });
 
-        openSchemaButton.addActionListener(e -> {
-                try {
-                    edit.openSchema();
-                }
-                catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
-
         // Opens the tutorial
         howToUseButton.addActionListener(e -> {
             try {

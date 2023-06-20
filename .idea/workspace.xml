@@ -244,11 +244,11 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.XMLEditor" />
-        <item itemvalue="Application.InvisibleNodeTreeExample" />
         <item itemvalue="Maven.XMLEditor [install]" />
-        <item itemvalue="Application.XMLBeans" />
         <item itemvalue="Application.XMLSchemaEditor" />
+        <item itemvalue="Application.XMLEditor" />
+        <item itemvalue="Application.XMLBeans" />
+        <item itemvalue="Application.InvisibleNodeTreeExample" />
       </list>
     </recent_temporary>
   </component>

@@ -11,7 +11,7 @@ by bioformats, but has flaws. Work in progress.
 - fixed a visual bug, that occured when the application was started from within fiji
 - reworked the simplified tree view system
 
-![](data/updateImges/XML_Editor_07_05_23.png)
+![](old_versions/updateImges/XML_Editor_07_05_23.png)
 
 ### Update 20.04.23
 
@@ -23,7 +23,7 @@ instead of the node value. The different values wont start with ":, @, ..." anym
 required to modify how changes are applied internally.
 - Element nodes can now be double-clicked to be modified.
 
-![](data/updateImges/XML_Editor_20_04_23.png)
+![](old_versions/updateImges/XML_Editor_20_04_23.png)
 
 ### Update 05.04.23
 
@@ -33,7 +33,7 @@ required to modify how changes are applied internally.
 - Added an undo button, to revert changes
 - Tab now shows the name of the file
 
-![](data/updateImges/XML_Editor_05_04_23.png)
+![](old_versions/updateImges/XML_Editor_05_04_23.png)
 
 ### Update 09.03.23
 
@@ -42,7 +42,7 @@ required to modify how changes are applied internally.
 - The change history now automatically validates any change made and shows the result in the change history by changing the background color of the change
 - Added some basic functions for loading a schema and showing some element of it
 
-![](data/updateImges/XML_Editor_09_03_23.png)
+![](old_versions/updateImges/XML_Editor_09_03_23.png)
 
 ### Update 03.03.23
 
@@ -50,7 +50,7 @@ required to modify how changes are applied internally.
 - Added the ability to view and validate the change history
 - added the ability to load and export the change history
 
-![](data/updateImges/XML_Editor_03_03_23.png)
+![](old_versions/updateImges/XML_Editor_03_03_23.png)
 
 ### Update 25.02.23
 
@@ -60,7 +60,7 @@ required to modify how changes are applied internally.
 - Fixed maven dependencies, so that the plugin can be build and used from within fiji
 - The xml is now inside a tabbed pane
 
-![](data/updateImges/XML_Editor_25_02_23.png)
+![](old_versions/updateImges/XML_Editor_25_02_23.png)
 
 ### Update 16.02.23
 
@@ -68,7 +68,7 @@ required to modify how changes are applied internally.
 - Added the ability to add new nodes (there are still some bugs)
 - Improved look and user experience of GUI
 
-![](data/updateImges/XML_Editor_16_02_23.png)
+![](old_versions/updateImges/XML_Editor_16_02_23.png)
 
 ### Update 14.02.23:
 
@@ -78,5 +78,5 @@ required to modify how changes are applied internally.
   - Exporting the pixel- and meta- data as .ome.tif
   - A GUI that implements the said functionality
 
-![](data/updateImges/XML_Editor_14_02_23.png)
+![](old_versions/updateImges/XML_Editor_14_02_23.png)
 

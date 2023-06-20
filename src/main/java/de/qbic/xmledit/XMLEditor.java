@@ -5,7 +5,6 @@ package de.qbic.xmledit;
 
 // Imports
 
-import dev.XMLSchemaEditor;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;
@@ -658,13 +657,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void openSchema() throws Exception {
-        XMLSchemaEditor schemaEditor = new XMLSchemaEditor();
-        String xmlString = schemaEditor.createExampleXML();
-        Document xmlDoc = XMLTools.parseDOM(xmlString);
-        // myGUI.makeTree(xmlDoc, simplified);
     }
     public void updateTree() {
         // define a new xml document
