@@ -9,6 +9,7 @@ public class NodedTextField extends JTextField {
         myNode = node;
     }
     NodedTextField() {
+        super();
     }
     public XMLNode getNode() {
         return this.myNode;
@@ -16,5 +17,7 @@ public class NodedTextField extends JTextField {
     public void setNode(XMLNode node) {
         this.myNode = node;
     }
+
+
 
 }

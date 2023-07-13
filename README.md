@@ -1,10 +1,46 @@
-# XML metadata editor
+<div align="center">
 
----
+# OME-XML metadata editor
 
-Fiji plugin, that allows the user to EDIT (not add tags) the metadata of ome-xml files. This is usefull for example for curating metadata that was auto generated
+A Fiji plugin, that allows the user to EDIT (not add tags) the metadata of ome-xml files. This is usefull for example for curating metadata that was auto generated
 by bioformats, but has flaws. Work in progress.
 
+</div>
+
+## Overview
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [How to use the XML-Editor](#how-to-use-the-xml-editor)
+- [Update History](#Update-History)
+
+## Installation
+
+Simply place the .jar file in the plugins folder of your Fiji installation.
+
+## How to use the XML-Editor
+
+1. Select a file (an image of your choice) by clicking on file and then open image
+2. Select a node by clicking on it in the tree in the upper part of the window
+3. Edit the node by changing nodes in the lower part of the window.
+4. To change the value of an attribute, simply change its text.
+5. To delete nodes, click on them (in the lower window) and press the delete button that popped up.
+6. To add Nodes, click on the title, an add button should pop up.
+7. View the change you have made by clicking on Change History and then on show change history.
+8. To save the file as .ome.tiff with the changes applied, click on file and then export to ome.tiff.
+9. To save the change history, click on change History and then save change history.
+
+## Update History
+
+### Update 12.07.23
+
+- changed the name to OME-XML-Editor
+- change history is now opened by default
+- the currently edited attribute or text is highlighted while editing
+- leaving a text field or attribute field reverts the changes unless enter was pressed
+- a change is no longer submited to the change history if it was empty
+
+![](old_versions/updateImges/OME_XML_Editor_12_07_23.png)
 
 ### Update 07.05.23
 

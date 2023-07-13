@@ -316,8 +316,8 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // loop over all valid files in the folder
         for (String file : getFilesInDir(path)) {
             System.out.println("###############################################################");
-            System.out.println("Current File: " + file);
             applyChangesToFile(path + "/" + file);
+            System.out.println("Current File: " + file);
         }
         System.out.println("Done");
     }
@@ -343,6 +343,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             fbStore.setValidity(false);
         }
         myGUI.addFeedback(fbStore);
+        // update teh feedback tabl
     }
     public boolean validateChangeHistory(Document newXMLDom) throws TransformerException {
         System.out.println("- - - - Validating Change History - - - -");
@@ -617,8 +618,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         return changeHistory;
     }
 
-
-
     public void saveChangeHistory(String path){
         try {
             FileOutputStream f = new FileOutputStream(new File(path));
@@ -698,6 +697,26 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         myGUI.makeNewTreeTab(new_xml_doc, simplified, title);
 
     }
+
+    /**
+     * Opens an external XML file and applies loaded changes to it
+     * @param path the path to the file
+     * @throws Exception
+     */
+    public void openXML(String path) throws Exception {
+        // make tab title from path
+        String title = path.substring(path.lastIndexOf("/") + 1);
+        // read the file
+        xml_doc = XMLTools.parseDOM(new File(path));
+        // apply changes to metadata
+        Document new_xml_doc = (Document) xml_doc.cloneNode(true);
+        if (changeHistory.size() > 0) {
+            applyChanges(new_xml_doc);
+            myGUI.updateChangeHistoryTab();
+        }
+        myGUI.makeNewTreeTab(new_xml_doc, simplified, title);
+    }
+
     public void undoChange() throws MalformedURLException, TransformerException, SAXException {
         if (changeHistory.size() > 0) {
             // remove the last change from the history

@@ -5,9 +5,6 @@ package de.qbic.xmledit;
 
 // IMPORTS
 
-import loci.common.services.DependencyException;
-import loci.common.services.ServiceException;
-import loci.formats.FormatException;
 import loci.plugins.config.SpringUtilities;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -21,12 +18,10 @@ import org.xml.sax.SAXException;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.LinkedList;
@@ -82,6 +77,7 @@ public class GUI extends javax.swing.JFrame{
     private JMenuBar mb;
     private JMenu file, settings, changeHistoryMenu, help;
     private JMenuItem openImage;
+    private JMenuItem openXML;
     private static JPanel titlePanel = new JPanel();
     private static JTabbedPane tabbedPane = new JTabbedPane();
     private static JScrollPane changeHistoryPane = new JScrollPane();
@@ -97,10 +93,14 @@ public class GUI extends javax.swing.JFrame{
     public XMLTableModel feedBackTableModel = null;
     public XMLTableModel historyTableModel = null;
     public JTable historyTable = null;
+    // create a new panel for the table
+    // private JPanel feedbackTablePanel = new JPanel();
+    
 
     public GUI(XMLEditor edit){
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.edit = edit;
-        this.setTitle("XML-Editor");
+        this.setTitle("OME-XML Editor");
         makeUI();
         pack();   // calling pack() at the end, will ensure that every layout and size we just defined gets applied before the stuff becomes visible
     }
@@ -121,6 +121,8 @@ public class GUI extends javax.swing.JFrame{
 
         // Button that opens the xml tree of an image
         openImage = new JMenuItem("Open Image");
+        // Button that opens an external xml file
+        openXML = new JMenuItem("Open XML");
         // Button that shows the current XML
         showCurrentXML = new JMenuItem("Show Current XML");
         // Button that exports the current XML to OmeTiff
@@ -162,13 +164,10 @@ public class GUI extends javax.swing.JFrame{
         textField = new NodedTextField();
         scrollPaneTop = new JScrollPane();
 
-
         editPanel = new JPanel();
-
 
         tabbedPane.setUI(new MyTabbedPaneUI(BUTTON_HEIGHT));
         tabbedPane.setFocusable(false);
-
 
         scrollPaneTop.setOpaque(true);
         scrollPaneTop.setBackground(Color.WHITE);
@@ -186,7 +185,7 @@ public class GUI extends javax.swing.JFrame{
                 String newText = textField.getText();
                 try {
                     makeNewChange("edit", textField.getNode());
-                } catch (MalformedURLException | TransformerException | SAXException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 textField.getNode().setUserObject(newText);
@@ -214,6 +213,7 @@ public class GUI extends javax.swing.JFrame{
                     System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
                     System.out.println("Folder: " + folder.getAbsolutePath());
                     giveFeedback();
+                    Thread.sleep(2000);
                     edit.applyChangesToFolder(folder.getAbsolutePath());
 
                 } catch (Exception ex) {
@@ -231,8 +231,7 @@ public class GUI extends javax.swing.JFrame{
         showChangeButton.addActionListener(e -> {
             try {
                 makeChangeHistoryTab();
-            } catch (TransformerException | ServiceException | DependencyException |
-                     MalformedURLException | SAXException ex) {
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -301,8 +300,23 @@ public class GUI extends javax.swing.JFrame{
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     edit.openImage(chooser.getSelectedFile().getAbsolutePath());
-                } catch (IOException | FormatException | ServiceException |
-                         ParserConfigurationException | SAXException | TransformerException ex) {
+                    makeChangeHistoryTab();
+                    // focus the xml tab
+                    tabbedPane.setSelectedIndex(0);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        // Opens a new XML file in the topPanel of the GUI, in a new tab
+        openXML.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            int returnVal = chooser.showOpenDialog(null);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                try {
+                    edit.openXML(chooser.getSelectedFile().getAbsolutePath());
+                } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -383,6 +397,7 @@ public class GUI extends javax.swing.JFrame{
 
         // SET ICONS FOR MENU ITEMS ####################################################################################
         openImage.setIcon(loadSvgAsImageIcon(FILES_SVG));
+        openXML.setIcon(loadSvgAsImageIcon(FILES_SVG));
         showCurrentXML.setIcon(loadSvgAsImageIcon(FILES_SVG));
         exportOmeTiffButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
         exportOmeXmlButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
@@ -416,13 +431,15 @@ public class GUI extends javax.swing.JFrame{
 
         // add menu items to file menu
         file.add(openImage);
+        file.add(openXML);
+        file.add(openSchemaButton);
         file.add(showCurrentXML);
         file.add(exportOmeTiffButton);
         file.add(exportOmeXmlButton);
-        file.add(openSchemaButton);
 
         // add menu items to settings menu
         settings.add(simplifiedTree);
+
         // add menu items to change history menu
         changeHistoryMenu.add(showChangeButton);
         changeHistoryMenu.add(loadChangeButton);
@@ -469,7 +486,7 @@ public class GUI extends javax.swing.JFrame{
     /**
      * Creates a change history tab in the tabbed pane
      */
-    public void makeChangeHistoryTab() throws TransformerException, ServiceException, DependencyException, MalformedURLException, SAXException {
+    public void makeChangeHistoryTab() throws Exception {
         // create changer history window panel
         changeHistoryWindowPanel.setLayout(new BoxLayout(changeHistoryWindowPanel, BoxLayout.Y_AXIS));
         // add the change history pane to the change history window panel
@@ -591,15 +608,13 @@ public class GUI extends javax.swing.JFrame{
 
                 // do something with the value (for example, print it)
                 System.out.println("Clicked on: " + value);
-
             }
         });
-        // create a new panel for the table
-        JPanel feedbackTablePanel = new JPanel();
+
         // set the layout of the panel to a box layout
-        feedbackTablePanel.setLayout(new BoxLayout(feedbackTablePanel, BoxLayout.Y_AXIS));
+        //feedbackTablePanel.setLayout(new BoxLayout(feedbackTablePanel, BoxLayout.Y_AXIS));
         // set dimensions of the panel
-        feedbackTablePanel.setPreferredSize(new Dimension(feedbackTablePanel.getWidth(), feedbackTablePanel.getHeight()));
+        //feedbackTablePanel.setPreferredSize(new Dimension(feedbackTablePanel.getWidth(), feedbackTablePanel.getHeight()));
         // create a scroll pane for the table
         JScrollPane feedbackScrollPane = new JScrollPane(table);
         // set dimensions of the scroll pane
@@ -607,9 +622,9 @@ public class GUI extends javax.swing.JFrame{
         // set viewport view to the table
         feedbackScrollPane.setViewportView(table);
         // add the scroll pane to the panel
-        feedbackTablePanel.add(feedbackScrollPane);
+        //feedbackTablePanel.add(feedbackScrollPane);
         // add the panel to the tabbed pane
-        makeNewTab(feedbackTablePanel, "Feedback", FEEDBACK_SVG);
+        makeNewTab(feedbackScrollPane, "Feedback", FEEDBACK_SVG);
     }
 
     /**
@@ -674,6 +689,10 @@ public class GUI extends javax.swing.JFrame{
         p.setOpaque(true);
     }
 
+    /**
+     * Adds a border to the specified panel
+     * @param p the component to which the border will be added
+     */
     public void makeLineBorder(JComponent p) {
         // create a compound border with a line border and an empty border
         Border line = BorderFactory.createLineBorder(Color.GRAY, 1);
@@ -682,6 +701,11 @@ public class GUI extends javax.swing.JFrame{
         p.setOpaque(true);
     }
 
+    /**
+     * Adds a change to the change history.
+     * @param changeType the type of change that is to be maade on of the following: "add", "modify", "delete"
+     * @param toBeChanged the node that is to be changed
+     */
     public void makeNewChange(String changeType, XMLNode toBeChanged) throws MalformedURLException, TransformerException, SAXException {
         System.out.println("- - - - Make new change - - - -");
         XMLChange change = new XMLChange(changeType, toBeChanged);
@@ -700,10 +724,12 @@ public class GUI extends javax.swing.JFrame{
         }
     }
 
-    public void makeSimplisticTree(Document dom) {
-
-    }
-
+    /**
+     * Creates a new xml-viewer tab.
+     * @param dom the xml dom that is to be displayed in the tab
+     * @param simplified whether the xml-view should be simplified (only show elements) or not (show all nodes)
+     * @param title the title of the new xml-viewer tab
+     */
     public void makeNewTreeTab(Document dom, boolean simplified, String title) throws TransformerException {
         // create a new XMLTree from the DOM
         myTree = new XMLTree(dom, simplified);
@@ -726,6 +752,11 @@ public class GUI extends javax.swing.JFrame{
         makeNewTab(scrollPaneTop, title, TREE_SVG);
     }
 
+    /**
+     * Updates the xml-viewer tab with the specified dom tree,
+     * @param dom the new xml dom that is to be displayed in the tab
+     * @param simplified whether the xml-view should be simplified (only show elements) or not (show all nodes)
+     */
     public void updateTree(Document dom, boolean simplified){
         // create a new XMLTree from the DOM
         myTree = new XMLTree(dom, simplified);
@@ -746,6 +777,11 @@ public class GUI extends javax.swing.JFrame{
         scrollPaneTop.setViewportView(myTree);
     }
 
+    /**
+     * Creates a new xml-viewer tab. This version does not allow the user to edit the xml.
+     * @param dom the xml dom that is to be displayed in the tab
+     * @param title the title of the new xml-viewer tab
+     */
     public void showXMLTree(Document dom, String title) {
         XMLTree currentTree = new XMLTree(dom, false);
         currentTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
@@ -760,12 +796,16 @@ public class GUI extends javax.swing.JFrame{
         makeNewTab(currentScrollPane, title, TREE_SVG);
     }
 
+    /**
+     * Helper function called by multiple methods to create new tabs.
+     * @param p the component that is to be added to a new tab
+     * @param title the title of the new xml-viewer tab
+     * @param svgCode the svg code that is to be used for the tab icon
+     */
     public void makeNewTab(JComponent p, String title, String svgCode) {
         if (svgCode == null) {
             svgCode = DEFAULT_SVG;
         }
-        // p.setOpaque(false);
-        // p.setFocusable(false);
         p.setSize(p.getWidth(), BUTTON_HEIGHT);
         tabbedPane.addTab(title, p);
         // get index of new tab
@@ -788,6 +828,11 @@ public class GUI extends javax.swing.JFrame{
         tabbedPane.setSelectedIndex(index);
     }
 
+    /**
+     * Loads an svg code as an ImageIcon
+     * @param svgCode the svg code that is to be loaded
+     * @return the ImageIcon that was created from the svg code
+     */
     public ImageIcon loadSvgAsImageIcon(String svgCode) {
         // create a transcoder input from the svg code
         TranscoderInput input = new TranscoderInput(new StringReader(svgCode));
@@ -809,7 +854,7 @@ public class GUI extends javax.swing.JFrame{
     }
 
     /**
-     * Creates the editPanel
+     * Updates the editPanel, which shows the attributes and text nodes of the currently selected element node.
      */
     public void updateEditPanel() {
         // reset the editPanel
@@ -838,7 +883,7 @@ public class GUI extends javax.swing.JFrame{
     }
 
     /**
-     * Creates the editPanel
+     * Creates the editPanel, which shows the attributes and text nodes of the currently selected element node.
      */
     private void makeEditPanel() {
         // make border for the editPanel
@@ -862,7 +907,7 @@ public class GUI extends javax.swing.JFrame{
     }
 
     /**
-     * Adds a title button to the editPanel
+     * Adds a title button to the editPanel at the top. If clicked, an add and a delete button will pop up.
      */
     private void addElementButton() {
         // reset the titlePanel
@@ -933,16 +978,32 @@ public class GUI extends javax.swing.JFrame{
         makeLineBorder(textField);
         // add to button group so only one attribute can be selected at a time
         bg.add(attrButton);
+        // change the background color of the textfield when it is selected
+        textField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textField.setBackground(PASTEL_BLUE);
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                textField.setBackground(Color.WHITE);
+                textField.setText(textField.getNode().getUserObject().toString());
+            }
+        });
+
         // add a listener to the textfield to detect changes
         textField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                String newText = textField.getText();
-                try {
-                    makeNewChange("modify", textField.getNode());
-                } catch (MalformedURLException | TransformerException | SAXException e) {
-                    throw new RuntimeException(e);
+                if (!textField.getNode().getUserObject().equals(textField.getText())) {
+                    textField.getNode().setUserObject(textField.getText());
+                    try {
+                        makeNewChange("modify" , textField.getNode());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println("change detected");
                 }
-                textField.getNode().setUserObject(newText);
+                textField.getParent().requestFocus();
             }
         });
         // add a listener to the button to detect selection and show the delete button
@@ -994,17 +1055,32 @@ public class GUI extends javax.swing.JFrame{
         // give the textfield  a border
         makeLineBorder(textField);
 
+        // add a listener to the textfield to dtetect if it is selected
+        textField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textField.setBackground(PASTEL_BLUE);
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                textField.setBackground(Color.WHITE);
+                textField.setText(textField.getNode().getUserObject().toString());
+            }
+        });
+
         // add a listener to the textfield to detect changes
         textField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                String newText = textField.getText();
-                try {
-                    makeNewChange("modify" , textField.getNode());
-                } catch (MalformedURLException | TransformerException | SAXException e) {
-                    throw new RuntimeException(e);
+                if (!textField.getNode().getUserObject().equals(textField.getText())) {
+                    textField.getNode().setUserObject(textField.getText());
+                    try {
+                        makeNewChange("modify" , textField.getNode());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println("change detected");
                 }
-                textField.getNode().setUserObject(newText);
-                System.out.println("change detected");
+                textField.getParent().requestFocus();
             }
         });
 
