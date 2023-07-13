@@ -38,7 +38,7 @@ Simply place the .jar file in the plugins folder of your Fiji installation.
 - change history is now opened by default
 - the currently edited attribute or text is highlighted while editing
 - leaving a text field or attribute field reverts the changes unless enter was pressed
-- a change is no longer submited to the change history if it was empty
+- a change is no longer submitted to the change history if it was empty
 
 ![](old_versions/updateImges/OME_XML_Editor_12_07_23.png)
 
