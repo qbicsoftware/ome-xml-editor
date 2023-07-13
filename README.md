@@ -1,8 +1,8 @@
 <div align="center">
 
-# OME-XML metadata editor
+# OME-XML Metadata Editor
 
-A Fiji plugin, that allows the user to EDIT (not add tags) the metadata of ome-xml files. This is usefull for example for curating metadata that was auto generated
+A Fiji plugin, that allows the user to EDIT (not add tags) the metadata of ome-xml files. This is useful for example for curating metadata that was auto generated
 by bioformats, but has flaws. Work in progress.
 
 </div>
