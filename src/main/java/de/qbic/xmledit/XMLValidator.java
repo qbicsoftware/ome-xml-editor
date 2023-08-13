@@ -11,7 +11,7 @@ import java.io.StringReader;
 import java.net.URL;
 
 public class XMLValidator {
-    public static boolean validateOMEXML(String omexml, String xsdPath) {
+    public static String validateOMEXML(String omexml, String xsdPath) {
         try {
             // Create a schema factory and a URL for the XSD schema
             SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -32,10 +32,11 @@ public class XMLValidator {
             validator.validate(source);
 
             // If no exception is thrown, return true
-            return true;
+            return null;
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             // If any exception is thrown, return false
-            return false;
+            return e.getMessage();
         }
     }
 }

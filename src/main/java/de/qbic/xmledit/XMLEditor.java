@@ -14,13 +14,11 @@ import loci.common.xml.XMLTools;
 import loci.formats.*;
 import loci.formats.gui.AWTImageTools;
 import loci.formats.gui.BufferedImageReader;
-import loci.formats.gui.BufferedImageWriter;
 import loci.formats.in.DynamicMetadataOptions;
 import loci.formats.in.MetadataLevel;
 import loci.formats.meta.IMetadata;
 import loci.formats.meta.MetadataRetrieve;
 import loci.formats.meta.MetadataStore;
-import loci.formats.out.OMETiffWriter;
 import loci.formats.services.OMEXMLService;
 import loci.formats.services.OMEXMLServiceImpl;
 import net.imagej.ImageJ;
@@ -316,8 +314,12 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // loop over all valid files in the folder
         for (String file : getFilesInDir(path)) {
             System.out.println("###############################################################");
-            applyChangesToFile(path + "/" + file);
             System.out.println("Current File: " + file);
+            // measure time
+            long time = System.currentTimeMillis();
+            System.out.println("Start time: " + time);
+            applyChangesToFile(path + "/" + file);
+
         }
         System.out.println("Done");
     }
@@ -360,7 +362,17 @@ public class XMLEditor<T extends RealType<T>> implements Command {
                 OMEModel xmlModel = new OMEModelImpl();
                 // catch verification errors and print them
                 MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
-                c.setValidity(true);
+                XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
+                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), "./data/resources/ome.xsd");
+                if (error == null){
+                    System.out.println("XML is valid");
+                    c.setValidity(true);
+                }
+                else {
+                    System.out.println("XML is not valid");
+                    c.setValidity(false);
+                    c.setValidationError(error);
+                }
             } catch (Exception e) {
                 c.setValidity(false);
                 c.setValidationError(e.getMessage());
@@ -515,8 +527,11 @@ public class XMLEditor<T extends RealType<T>> implements Command {
      * @param path the path to the file
      */
     public void exportToOmeTiff(String path, Document newXML) throws IOException, FormatException {
+
         System.out.println("Inside exportToOmeTiff");
         System.out.println("Path: " + path);
+        // time measurement
+        System.out.println("Start export time"+ System.currentTimeMillis());
         // define output path
         int dot = path.lastIndexOf(".");
         String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.tif";
@@ -530,10 +545,12 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         } catch (DependencyException | ServiceException e) {
             myGUI.reportError(e.toString());
         }
+        System.out.println("After initialisation time"+ System.currentTimeMillis());
 
         // apply changes to metadata
         Document new_xml_doc = (Document) newXML.cloneNode(true);
         applyChanges(new_xml_doc);
+        System.out.println("Applied changes time"+ System.currentTimeMillis());
         // set metadata
         xmlElement = new_xml_doc.getDocumentElement();
         OMEModel xmlModel = new OMEModelImpl();
@@ -548,27 +565,38 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         }
         omexmlMeta.setRoot(mdr);
         // define writer
-        OMETiffWriter writer = new OMETiffWriter();
-        BufferedImageWriter biwriter = new BufferedImageWriter(writer);
+        //OMETiffWriter writer = new OMETiffWriter();
+        //BufferedImageWriter biwriter = new BufferedImageWriter(writer);
+
         // read pixels
         reader.setId(id);
         BufferedImage[] pixelData = readPixels2();
         reader.close();
         // write pixels
-        biwriter.setMetadataRetrieve(omexmlMeta);
+        //biwriter.setMetadataRetrieve(omexmlMeta);
         System.out.println("Writing to: " + outPath);
-        biwriter.setId(outPath);
-        for (int i = 0; i < pixelData.length; i++) {
-            biwriter.saveImage(i, pixelData[i]);
-        }
+        //biwriter.setId(outPath);
+        System.out.println("set metadata time"+ System.currentTimeMillis());
+        System.out.println("pixelData.length: " + pixelData.length);
+        System.out.println("pixelData[0].getWidth(): " + pixelData[0].getWidth());
+        System.out.println("pixelData[0].getHeight(): " + pixelData[0].getHeight());
+
+
+        ImageConverter converter = new ImageConverter();
+        converter.testConvert(new ImageWriter(), omexmlMeta, id, outPath);
+
+        //for (int i = 0; i < pixelData.length; i++) {
+        //    biwriter.saveImage(i, pixelData[i]);
+        //}
+        System.out.println("wrote pixels time"+ System.currentTimeMillis());
         // close writer
-        writer.close();
-        biwriter.close();
+        //writer.close();
+        //biwriter.close();
         // refocus gui
         myGUI.setVisible(true);
         System.out.println("[done]");
+        System.out.println("Done time"+ System.currentTimeMillis());
     }
-
     /**
      * Exports the current metadata to an OME-XML file
      * @param path the path to the file
@@ -685,7 +713,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         return XMLTools.parseDOM(xml);
     }
     public void openImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException, TransformerException {
-
         // make title from path
         String title = path.substring(path.lastIndexOf("/") + 1);
         xml_doc = loadFile(path);
@@ -695,9 +722,7 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             myGUI.updateChangeHistoryTab();
         }
         myGUI.makeNewTreeTab(new_xml_doc, simplified, title);
-
     }
-
     /**
      * Opens an external XML file and applies loaded changes to it
      * @param path the path to the file
@@ -729,13 +754,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             myGUI.updateChangeHistoryTab();
         }
     }
-    public void testEdit() {
-        changeHistory = new LinkedList<>();
-        myGUI = new GUI(this);
-        myGUI.setVisible(true);
-        OMEModel xmlModel = new OMEModelImpl();
-        System.out.println("Mode Objects: " + xmlModel.getModelObjects().toString());
-    }
     public void resetChangeHistory() {
         changeHistory = new LinkedList<>();
         try {
@@ -744,11 +762,27 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             throw new RuntimeException(e);
         }
     }
+    /**
+     * testEdit is a remnant, I dont see why this cant be moved to the run function.
+     */
+    public void testEdit() {
+        changeHistory = new LinkedList<>();
+        myGUI = new GUI(this);
+        myGUI.setVisible(true);
+        OMEModel xmlModel = new OMEModelImpl();
+        System.out.println("Mode Objects: " + xmlModel.getModelObjects().toString());
+    }
+    /**
+     * runs the plugin when started from within FiJi
+     */
     @Override
     public void run() {
         DebugTools.enableLogging("INFO");
         new XMLEditor().testEdit();
     }
+    /**
+     * Starts a new ImageJ session when started from outside Fiji
+     */
     public static void main(String[] args) throws Exception {
         final ImageJ ij = new ImageJ();
         ij.command().run(XMLEditor.class, true);
