@@ -72,33 +72,35 @@ public class GUI extends javax.swing.JFrame{
     private JMenuItem exportOmeXmlButton;
     private JMenuItem howToUseButton;
     private JMenuItem aboutButton;
+    private JMenuItem setSchemaPath;
     private JCheckBoxMenuItem simplifiedTree;
     private JPanel editPanel;
     private JMenuBar mb;
     private JMenu file, settings, changeHistoryMenu, help;
     private JMenuItem openImage;
     private JMenuItem openXML;
-    private static JPanel titlePanel = new JPanel();
-    private static JTabbedPane tabbedPane = new JTabbedPane();
-    private static JScrollPane changeHistoryPane = new JScrollPane();
-    private static ButtonGroup bg = new ButtonGroup();
+    private static final JPanel titlePanel = new JPanel();
+    private static final JTabbedPane tabbedPane = new JTabbedPane();
+    private static final JScrollPane changeHistoryPane = new JScrollPane();
+    private static final ButtonGroup bg = new ButtonGroup();
     private int labelCount =0;
-    private static JButton addButton = new JButton("Add Node");
-    private static JButton delButton = new JButton("Delete");
-    private static JTextArea validationErrorsField = new JTextArea();
-    private static JPanel changeHistoryWindowPanel = new JPanel();
+    private static final JButton addButton = new JButton("Add Node");
+    private static final JButton delButton = new JButton("Delete");
+    private static final JTextArea validationErrorsField = new JTextArea();
+    private static final JPanel changeHistoryWindowPanel = new JPanel();
     private XMLNode selectedNode;
     private XMLNode toBeDeletedNode;
-    private Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
+    private final Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
     public XMLTableModel feedBackTableModel = null;
     public XMLTableModel historyTableModel = null;
     public JTable historyTable = null;
+    private JOptionPane schemaHelp = null;
     // create a new panel for the table
     // private JPanel feedbackTablePanel = new JPanel();
     
 
     public GUI(XMLEditor edit){
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
         this.edit = edit;
         this.setTitle("OME-XML Editor");
         makeUI();
@@ -149,6 +151,8 @@ public class GUI extends javax.swing.JFrame{
         howToUseButton = new JMenuItem("How To Use");
         // Button that add the about page to the tabbed pane
         aboutButton = new JMenuItem("About XML-Editor");
+        //Button that sets the schema path
+        setSchemaPath = new JMenuItem("Set Schema Path");
         // simplifiedTree checkbox
         simplifiedTree = new JCheckBoxMenuItem("Simplified Tree");
         simplifiedTree.setSelected(true);
@@ -293,6 +297,21 @@ public class GUI extends javax.swing.JFrame{
                 throw new RuntimeException(ex);
             }
         });
+        // set schema path
+
+        setSchemaPath.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Set Schema Path");
+            int userSelection = chooser.showOpenDialog(splitPane);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToLoad = chooser.getSelectedFile();
+                try {
+                    edit.setSchemaPath(fileToLoad.getAbsolutePath());
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
         openImage.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
@@ -402,6 +421,7 @@ public class GUI extends javax.swing.JFrame{
         exportOmeTiffButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
         exportOmeXmlButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
         openSchemaButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
+        setSchemaPath.setIcon(loadSvgAsImageIcon(SETTINGS_SVG));
 
         showChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
         loadChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
@@ -409,6 +429,7 @@ public class GUI extends javax.swing.JFrame{
         validateChangeButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
         applyChangesToFolderButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
         resetChangeHistoryButton.setIcon(loadSvgAsImageIcon(CHANGE_SVG));
+
 
         undoChangeButton.setIcon(loadSvgAsImageIcon(UNDO_SVG));
 
@@ -439,6 +460,7 @@ public class GUI extends javax.swing.JFrame{
 
         // add menu items to settings menu
         settings.add(simplifiedTree);
+        settings.add(setSchemaPath);
 
         // add menu items to change history menu
         changeHistoryMenu.add(showChangeButton);
@@ -463,6 +485,13 @@ public class GUI extends javax.swing.JFrame{
         splitPane.setTopComponent(tabbedPane);
         splitPane.setBottomComponent(bottomPanel);
 
+    }
+    /**
+     * Creates a popup window that helps the user setting a valid schema path
+     */
+    public void popupSchemaHelp() {
+        schemaHelp = new JOptionPane();
+        JOptionPane.showMessageDialog(this, "Please set a valid schema path in the settings menu.", "Schema Path", JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
@@ -963,7 +992,7 @@ public class GUI extends javax.swing.JFrame{
      * @param labelText
      * @param node
      */
-    private void addAttributeButton(String labelText, XMLNode node) {;
+    private void addAttributeButton(String labelText, XMLNode node) {
         // add a new attribute to the editPanel consisting of a label, a textfield and a delete button in a new panel
         JPanel attributePanel = new JPanel();
         attributePanel.setLayout(new BorderLayout(0,0));
@@ -1295,7 +1324,7 @@ public class GUI extends javax.swing.JFrame{
                     }
 
                     // add the new node to the argument panel
-                    addAttributeButton(newAttrNode.getUserObject().toString(), (XMLNode) newValNode);
+                    addAttributeButton(newAttrNode.getUserObject().toString(), newValNode);
 
                     // redraw the argument panel
                     updateEditPanel();
@@ -1316,7 +1345,7 @@ public class GUI extends javax.swing.JFrame{
                     }
 
                     // add the new node to the argument panel
-                    addAttributeButton(newTextNode.getUserObject().toString(), (XMLNode) newTextNode);
+                    addAttributeButton(newTextNode.getUserObject().toString(), newTextNode);
 
                     // redraw the argument panel
                     updateEditPanel();

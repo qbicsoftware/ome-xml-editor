@@ -21,7 +21,6 @@ public class XMLValidator {
             Schema schema = schemaFactory.newSchema(xsdURL);
             System.out.println(schema.toString());
 
-
             // Create a validator object from the schema
             Validator validator = schema.newValidator();
 

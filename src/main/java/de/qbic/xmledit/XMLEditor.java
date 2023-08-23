@@ -23,7 +23,6 @@ import loci.formats.services.OMEXMLService;
 import loci.formats.services.OMEXMLServiceImpl;
 import net.imagej.ImageJ;
 import net.imglib2.type.numeric.RealType;
-import ome.xml.meta.MetadataRoot;
 import ome.xml.meta.OMEXMLMetadataRoot;
 import ome.xml.model.OMEModel;
 import ome.xml.model.OMEModelImpl;
@@ -96,8 +95,12 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     private DimensionSwapper dimSwapper;
     private BufferedImageReader biReader;
     private GUI myGUI;
+    public String schemaPath = "./data/resources/ome.xsd";
 
     // -- ImageInfo methods --
+    public void setSchemaPath(String schemaPath) {
+        this.schemaPath = schemaPath;
+    }
     public void createReader() {
         reader = new ImageReader();
         baseReader = reader;
@@ -358,15 +361,19 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             System.out.println("Change Type: " + c.getChangeType());
             applyChange(c, example_xml_doc, example_xml_doc, 0);
             try {
-                Element xmlExampleElement = example_xml_doc.getDocumentElement();
-                OMEModel xmlModel = new OMEModelImpl();
+                // Element xmlExampleElement = example_xml_doc.getDocumentElement();
+                //OMEModel xmlModel = new OMEModelImpl();
                 // catch verification errors and print them
-                MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
-                XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
-                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), "./data/resources/ome.xsd");
+                // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
+                // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
+                if (!(new File(schemaPath).exists())) {
+                    myGUI.popupSchemaHelp();
+                }
+                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), schemaPath);
                 if (error == null){
                     System.out.println("XML is valid");
                     c.setValidity(true);
+                    c.setValidationError("OME-XML is valid");
                 }
                 else {
                     System.out.println("XML is not valid");

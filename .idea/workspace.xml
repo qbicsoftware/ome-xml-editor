@@ -4,52 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="fixed some typos">
-      <change afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/ImageConverter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="changed writer used for exporting">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/XML_metadata_editor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/XML_metadata_editor.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/ome.xsd" beforeDir="false" afterPath="$PROJECT_DIR$/data/resources/ome.xsd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/resources/HowToUse.md" beforeDir="false" afterPath="$PROJECT_DIR$/data/resources/HowToUse.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tubhiswt-3D.zip" beforeDir="false" afterPath="$PROJECT_DIR$/data/tubhiswt-3D.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dependency-reduced-pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/dependency-reduced-pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/latest_version/OME-XML-Editor-13_07_23.jar" beforeDir="false" afterPath="$PROJECT_DIR$/latest_version/OME-XML-Editor-13_07_23.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/jars/Editor-15-03-23.jar" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/jars/Editor-15-03-23.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/jars/XMLEditor_13_07_23.jar" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/jars/XMLEditor_13_07_23.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/OME_XML_Editor_12_07_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/OME_XML_Editor_12_07_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_03_03_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_03_03_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_05_04_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_05_04_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_07_05_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_07_05_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_09_03_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_09_03_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_14_02_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_14_02_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_16_02_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_16_02_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_20_04_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_20_04_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_25_02_23.png" beforeDir="false" afterPath="$PROJECT_DIR$/old_versions/updateImges/XML_Editor_25_02_23.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/CloseButton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/CloseButton.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/FeedbackStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/FeedbackStore.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/GUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/MyImageTranscoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/MyImageTranscoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/MyTabbedPaneUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/MyTabbedPaneUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/NodedTextField.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/NodedTextField.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLChange.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLChange.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLEditor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTableModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTableModel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTableRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTableRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeModel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRendererSimplified.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLTreeRendererSimplified.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/XMLValidator.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -105,21 +63,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/aaron/Documents/Work/HiWi/QBiC/Metadata_Curation/XML_metadata_editor&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/home/aaron/Documents/Work/HiWi/QBiC/Metadata_Curation/XML_metadata_editor/latest_version",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/latest_version" />
@@ -509,7 +467,15 @@
       <option name="project" value="LOCAL" />
       <updated>1689240693365</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="changed writer used for exporting">
+      <option name="closed" value="true" />
+      <created>1691938617369</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1691938617369</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -537,7 +503,8 @@
     <MESSAGE value="clean up master" />
     <MESSAGE value="clean up master, fixed some bugs" />
     <MESSAGE value="fixed some typos" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed some typos" />
+    <MESSAGE value="changed writer used for exporting" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed writer used for exporting" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/XML_metadata_editor$Test2.ic" NAME="Test2 Coverage Results" MODIFIED="1670423461884" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
