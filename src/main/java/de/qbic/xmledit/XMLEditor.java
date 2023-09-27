@@ -1,5 +1,3 @@
-// License
-
 // Package
 package de.qbic.xmledit;
 
