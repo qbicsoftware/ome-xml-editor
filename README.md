@@ -20,7 +20,7 @@ Simply place the .jar file in the plugins folder of your Fiji installation. **Ad
 validate against**, this is most likely the latest ome schema available [here](http://www.openmicroscopy.org/Schemas/OME/2016-06/ome.xsd).
 Set the path to the location in the settings of the plugin.
 
-## How to use the XML-Editor
+## How to use the OME-Editor
 
 1. Select a file (an image of your choice) by clicking on file and then open image
 2. Select a node by clicking on it in the tree in the upper part of the window
