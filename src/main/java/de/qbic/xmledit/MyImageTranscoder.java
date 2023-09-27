@@ -21,6 +21,6 @@ public class MyImageTranscoder extends ImageTranscoder{
         this.image = img;
     }
     public Image getImage() {
-        return image.getScaledInstance(16, 16,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+        return image.getScaledInstance(16, 16,  java.awt.Image.SCALE_SMOOTH);
     }
 }

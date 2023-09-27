@@ -4,8 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="update 23.08:&#10;- noticeably sped up the export process (x12 for me) by using another writer&#10;- changed the validation method used&#10;- added a popup to warn the user to set a schema path if none is set&#10;- added a menu item to set the schema path">
+    <list default="true" id="1f5ebdec-8328-4197-9476-2eb6af758c54" name="Changes" comment="clean up">
+      <change afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/MyImageTranscoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/qbic/xmledit/MyImageTranscoder.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -494,7 +498,15 @@
       <option name="project" value="LOCAL" />
       <updated>1692791337291</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="clean up">
+      <option name="closed" value="true" />
+      <created>1695800800840</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1695800800840</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -524,7 +536,8 @@
     <MESSAGE value="fixed some typos" />
     <MESSAGE value="changed writer used for exporting" />
     <MESSAGE value="update 23.08:&#10;- noticeably sped up the export process (x12 for me) by using another writer&#10;- changed the validation method used&#10;- added a popup to warn the user to set a schema path if none is set&#10;- added a menu item to set the schema path" />
-    <option name="LAST_COMMIT_MESSAGE" value="update 23.08:&#10;- noticeably sped up the export process (x12 for me) by using another writer&#10;- changed the validation method used&#10;- added a popup to warn the user to set a schema path if none is set&#10;- added a menu item to set the schema path" />
+    <MESSAGE value="clean up" />
+    <option name="LAST_COMMIT_MESSAGE" value="clean up" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/XML_metadata_editor$Test2.ic" NAME="Test2 Coverage Results" MODIFIED="1670423461884" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
