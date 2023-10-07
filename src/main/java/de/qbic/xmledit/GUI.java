@@ -1,10 +1,9 @@
-// LICENSE
-
 // PACKAGE
 package de.qbic.xmledit;
 
+// ---------------------------------------------------------------------------------------------------------------------
 // IMPORTS
-
+// ---------------------------------------------------------------------------------------------------------------------
 import loci.plugins.config.SpringUtilities;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -15,7 +14,6 @@ import org.intellij.markdown.html.HtmlGenerator;
 import org.intellij.markdown.parser.MarkdownParser;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.xml.transform.TransformerException;
@@ -28,8 +26,9 @@ import java.util.LinkedList;
 
 // CLASS
 public class GUI extends javax.swing.JFrame{
-
-    // Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // -----------------------------------------------------------------------------------------------------------------
+    // Constants
+    // -----------------------------------------------------------------------------------------------------------------
     static final Color PASTEL_RED = new Color(255, 153, 153);
     static final Color PASTEL_GREEN = new Color(153, 255, 153);
     static final Color PASTEL_BLUE = new Color(153, 153, 255);
@@ -49,8 +48,9 @@ public class GUI extends javax.swing.JFrame{
     public static final int BUTTON_HEIGHT = 4*BASE_UNIT;
     public static final int BUTTON_WIDTH = 20*BASE_UNIT;
     public static final int SCREEN_HEIGHT = SCREEN_WIDTH*9/16;
-
-    // Variables %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // -----------------------------------------------------------------------------------------------------------------
+    // Variables
+    // -----------------------------------------------------------------------------------------------------------------
     public Document xml;
     public XMLEditor edit;
     public XMLTree myTree;
@@ -104,11 +104,15 @@ public class GUI extends javax.swing.JFrame{
         this.edit = edit;
         this.setTitle("OME-XML Editor");
         makeUI();
-        pack();   // calling pack() at the end, will ensure that every layout and size we just defined gets applied before the stuff becomes visible
+        pack();
+        // calling pack() at the end, will ensure that every layout and size we just defined gets
+        // applied before the stuff becomes visible
     }
 
     private void makeUI() {
-        // INITIALIZE COMPONENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // -------------------------------------------------------------------------------------------------------------
+        // INITIALIZE COMPONENTS
+        // -------------------------------------------------------------------------------------------------------------
         mb = new JMenuBar();
 
         // Menu for the file
@@ -183,7 +187,9 @@ public class GUI extends javax.swing.JFrame{
         splitPane.setBackground(Color.WHITE);
         splitPane.setForeground(Color.WHITE);
 
-        // ADD ACTION LISTENERS ########################################################################################
+        // -------------------------------------------------------------------------------------------------------------
+        // ADD ACTION LISTENERS
+        // -------------------------------------------------------------------------------------------------------------
         textField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 String newText = textField.getText();
