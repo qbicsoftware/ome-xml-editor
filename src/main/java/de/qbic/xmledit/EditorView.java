@@ -22,10 +22,8 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.StringReader;
 import java.net.MalformedURLException;
-import java.util.LinkedList;
 
-// CLASS
-public class GUI extends javax.swing.JFrame{
+public class EditorView extends javax.swing.JFrame {
     // -----------------------------------------------------------------------------------------------------------------
     // Constants
     // -----------------------------------------------------------------------------------------------------------------
@@ -48,12 +46,10 @@ public class GUI extends javax.swing.JFrame{
     public static final int BUTTON_HEIGHT = 4*BASE_UNIT;
     public static final int BUTTON_WIDTH = 20*BASE_UNIT;
     public static final int SCREEN_HEIGHT = SCREEN_WIDTH*9/16;
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // Variables
-    // -----------------------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------
+    // Instantiate Components
+    //-----------------------------------------------------------------------------------------------------------------
     public Document xml;
-    public XMLEditor edit;
     public XMLTree myTree;
     private JSplitPane splitPane;  // split the window in top and bottom
     private JPanel bottomPanel;    // container panel for the bottom
@@ -81,14 +77,14 @@ public class GUI extends javax.swing.JFrame{
     private JMenuItem openImage;
     private JMenuItem openXML;
     private static final JPanel titlePanel = new JPanel();
-    private static final JTabbedPane tabbedPane = new JTabbedPane();
-    private static final JScrollPane changeHistoryPane = new JScrollPane();
+    public static final JTabbedPane tabbedPane = new JTabbedPane();
+    public static final JScrollPane changeHistoryPane = new JScrollPane();
     private static final ButtonGroup bg = new ButtonGroup();
     private int labelCount =0;
     private static final JButton addButton = new JButton("Add Node");
     private static final JButton delButton = new JButton("Delete");
-    private static final JTextArea validationErrorsField = new JTextArea();
-    private static final JPanel changeHistoryWindowPanel = new JPanel();
+    public static final JTextArea validationErrorsField = new JTextArea();
+    public static final JPanel changeHistoryWindowPanel = new JPanel();
     private XMLNode selectedNode;
     private XMLNode toBeDeletedNode;
     private final Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
@@ -96,21 +92,15 @@ public class GUI extends javax.swing.JFrame{
     public XMLTableModel historyTableModel = null;
     public JTable historyTable = null;
     private JOptionPane schemaHelp = null;
+    public EditorController controller;
     // create a new panel for the table
     // private JPanel feedbackTablePanel = new JPanel();
-    
 
-    public GUI(XMLEditor edit){
-        //this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
-        this.edit = edit;
-        this.setTitle("OME-XML Editor");
-        makeUI();
-        pack();
-        // calling pack() at the end, will ensure that every layout and size we just defined gets
-        // applied before the stuff becomes visible
-    }
-
-    private void makeUI() {
+    // -----------------------------------------------------------------------------------------------------------------
+    // Constructor
+    // -----------------------------------------------------------------------------------------------------------------
+    public EditorView(EditorController myEditorController) {
+        controller = myEditorController;
         // -------------------------------------------------------------------------------------------------------------
         // INITIALIZE COMPONENTS
         // -------------------------------------------------------------------------------------------------------------
@@ -187,15 +177,14 @@ public class GUI extends javax.swing.JFrame{
         splitPane.setOpaque(true);
         splitPane.setBackground(Color.WHITE);
         splitPane.setForeground(Color.WHITE);
-
         // -------------------------------------------------------------------------------------------------------------
         // ADD ACTION LISTENERS
         // -------------------------------------------------------------------------------------------------------------
-        textField.addActionListener(new java.awt.event.ActionListener() {
+        textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 String newText = textField.getText();
                 try {
-                    makeNewChange("edit", textField.getNode());
+                    controller.makeNewChange("edit", textField.getNode());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -206,8 +195,8 @@ public class GUI extends javax.swing.JFrame{
         // undo the last change in the change history
         undoChangeButton.addActionListener(e -> {
             try {
-                edit.undoChange();
-            } catch (MalformedURLException | TransformerException | SAXException ex) {
+                controller.undoChange();
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -223,9 +212,9 @@ public class GUI extends javax.swing.JFrame{
                 try {
                     System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
                     System.out.println("Folder: " + folder.getAbsolutePath());
-                    giveFeedback();
+                    this.makeFeedbackTab();
                     Thread.sleep(2000);
-                    edit.applyChangesToFolder(folder.getAbsolutePath());
+                    controller.applyChangesToFolder(folder.getAbsolutePath());
 
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
@@ -235,7 +224,11 @@ public class GUI extends javax.swing.JFrame{
 
         // reset the change history
         resetChangeHistoryButton.addActionListener(e -> {
-            edit.resetChangeHistory();
+            try {
+                controller.resetChangeHistory();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         // show change profile action listener
@@ -255,7 +248,7 @@ public class GUI extends javax.swing.JFrame{
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = chooser.getSelectedFile();
                 try {
-                    edit.saveChangeHistory(fileToSave.getAbsolutePath());
+                    controller.saveChangeHistory(fileToSave.getAbsolutePath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -270,7 +263,7 @@ public class GUI extends javax.swing.JFrame{
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToLoad = chooser.getSelectedFile();
                 try {
-                    edit.loadChangeHistory(fileToLoad.getAbsolutePath());
+                    controller.loadChangeHistory(fileToLoad.getAbsolutePath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -280,7 +273,7 @@ public class GUI extends javax.swing.JFrame{
         // validate change history action listener
         validateChangeButton.addActionListener(e -> {
             try {
-                edit.validateChangeHistory(edit.xml_doc);
+                controller.validateChangeHistory();
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -289,7 +282,7 @@ public class GUI extends javax.swing.JFrame{
         // Opens the tutorial
         howToUseButton.addActionListener(e -> {
             try {
-                edit.openTutorial();
+                controller.openTutorial();
             }
             catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -298,7 +291,7 @@ public class GUI extends javax.swing.JFrame{
         // opens the about page
         aboutButton.addActionListener(e -> {
             try {
-                edit.openAbout();
+                controller.openAbout();
             }
             catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -313,7 +306,7 @@ public class GUI extends javax.swing.JFrame{
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToLoad = chooser.getSelectedFile();
                 try {
-                    edit.setSchemaPath(fileToLoad.getAbsolutePath());
+                    controller.setSchemaPath(fileToLoad.getAbsolutePath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -325,7 +318,7 @@ public class GUI extends javax.swing.JFrame{
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
-                    edit.openImage(chooser.getSelectedFile().getAbsolutePath());
+                    controller.openImage(chooser.getSelectedFile().getAbsolutePath());
                     makeChangeHistoryTab();
                     // focus the xml tab
                     tabbedPane.setSelectedIndex(0);
@@ -341,7 +334,7 @@ public class GUI extends javax.swing.JFrame{
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
-                    edit.openXML(chooser.getSelectedFile().getAbsolutePath());
+                    controller.openXML(chooser.getSelectedFile().getAbsolutePath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -351,7 +344,7 @@ public class GUI extends javax.swing.JFrame{
         // Opens the Current XML in the topPanel of the GUI, in a new tab
         showCurrentXML.addActionListener(e -> {
             try {
-                edit.showCurrentXML();
+                controller.showCurrentXML();
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -364,7 +357,7 @@ public class GUI extends javax.swing.JFrame{
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = chooser.getSelectedFile();
                 try {
-                    edit.exportToOmeTiff(fileToSave.getPath(), edit.xml_doc);
+                    controller.exportToOmeTiff(fileToSave.getPath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -378,7 +371,7 @@ public class GUI extends javax.swing.JFrame{
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = chooser.getSelectedFile();
                 try {
-                    edit.exportToOmeXml(fileToSave.getPath(), edit.xml_doc);
+                    controller.exportToOmeXml(fileToSave.getPath());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -394,22 +387,16 @@ public class GUI extends javax.swing.JFrame{
                 // Get the selection state of the checkbox
                 boolean selected = source.isSelected();
                 // Perform some action based on the selection state
-                if (selected) {
-                    edit.simplified = true;
-                    edit.updateTree();
-                }
-                else {
-                    edit.simplified = false;
-                    edit.updateTree();
-                }
+                controller.setSimplified(selected);
+                controller.updateTree();
             }
         });
-
-        // SET Layout ##############################################################################################
+        // -------------------------------------------------------------------------------------------------------------
+        // SET LAYOUT + DIMENSIONS
+        // -------------------------------------------------------------------------------------------------------------
         textField.setSize(WIDTH, BUTTON_HEIGHT);
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
 
-        // SET LAYOUTS #################################################################################################
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS)); // BoxLayout.Y_AXIS will arrange the content vertically
         getContentPane().setLayout(new GridLayout());  // the default GridLayout is like a grid with 1 column and 1 row,
 
@@ -418,10 +405,13 @@ public class GUI extends javax.swing.JFrame{
 
         changeHistoryPane.setLayout(new ScrollPaneLayout());
 
-        // SET BORDERS #################################################################################################
+        //--------------------------------------------------------------------------------------------------------------
+        // SET BORDERS
+        //--------------------------------------------------------------------------------------------------------------
 
-
-        // SET ICONS FOR MENU ITEMS ####################################################################################
+        //--------------------------------------------------------------------------------------------------------------
+        // SET ICONS FOR MENU ITEMS
+        //--------------------------------------------------------------------------------------------------------------
         openImage.setIcon(loadSvgAsImageIcon(FILES_SVG));
         openXML.setIcon(loadSvgAsImageIcon(FILES_SVG));
         showCurrentXML.setIcon(loadSvgAsImageIcon(FILES_SVG));
@@ -448,7 +438,9 @@ public class GUI extends javax.swing.JFrame{
         settings.setIcon(loadSvgAsImageIcon(SETTINGS_SVG));
         help.setIcon(loadSvgAsImageIcon(HELP_SVG));
 
-        // POPULATE COMPONENTS #########################################################################################
+        //--------------------------------------------------------------------------------------------------------------
+        // POPULATE COMPONENTS
+        //--------------------------------------------------------------------------------------------------------------
         getContentPane().add(splitPane);
 
         // add menu to menu bar
@@ -492,6 +484,21 @@ public class GUI extends javax.swing.JFrame{
         splitPane.setTopComponent(tabbedPane);
         splitPane.setBottomComponent(bottomPanel);
 
+        // -------------------------------------------------------------------------------------------------------------
+        // DISPLAY
+        // -------------------------------------------------------------------------------------------------------------
+        this.pack();
+
+    }
+    // -----------------------------------------------------------------------------------------------------------------
+    // METHODS
+    // -----------------------------------------------------------------------------------------------------------------
+    /**
+     * Reports errors that occur in a little pop-up in the gui.
+     */
+    public void reportError(String exception) {
+        JOptionPane.showMessageDialog(this, "Error: " + exception, "Error", JOptionPane.ERROR_MESSAGE);
+
     }
     /**
      * Creates a popup window that helps the user setting a valid schema path
@@ -500,7 +507,6 @@ public class GUI extends javax.swing.JFrame{
         schemaHelp = new JOptionPane();
         JOptionPane.showMessageDialog(this, "Please set a valid schema path in the settings menu.", "Schema Path", JOptionPane.INFORMATION_MESSAGE);
     }
-
     /**
      * Takes a markdown string and transforms it into a html string. Then returns a JScrollPane
      * that shows the html.
@@ -518,178 +524,6 @@ public class GUI extends javax.swing.JFrame{
         editor.setText(html);
         return scrollPane;
     }
-
-    /**
-     * Creates a change history tab in the tabbed pane
-     */
-    public void makeChangeHistoryTab() throws Exception {
-        // create changer history window panel
-        changeHistoryWindowPanel.setLayout(new BoxLayout(changeHistoryWindowPanel, BoxLayout.Y_AXIS));
-        // add the change history pane to the change history window panel
-        changeHistoryWindowPanel.add(changeHistoryPane);
-        // Create Header entrys for the list of changes, so the user knows which entry is what
-        makeHistoryTable();
-        // add a textfield to the change history panel to display validation errors
-        validationErrorsField.setEditable(false);
-        validationErrorsField.setLineWrap(true);
-        validationErrorsField.setWrapStyleWord(true);
-        validationErrorsField.setSize(WIDTH, BUTTON_HEIGHT);
-        // add a border to the validation errors textfield
-        makePanelBorder(validationErrorsField);
-        // add the validation errors to the change history window panel
-        changeHistoryWindowPanel.add(validationErrorsField);
-        // add the changes to the table model
-        addChangesToTable(historyTableModel);
-        // add the table to the change history pane
-        changeHistoryPane.add(historyTable);
-        // set the view port of the change history pane to the table
-        changeHistoryPane.setViewportView(historyTable);
-        // add the change panel to the tabbed pane
-        makeNewTab(changeHistoryWindowPanel, "Change History", CHANGE_SVG);
-    }
-
-    /**
-     * Initializes the change history table
-     */
-    public void makeHistoryTable() {
-        // create an array of column names
-        String[] columnNames = {"Index", "Change Type", "Location", "Node Type"};
-        // create a default table model with no data
-        historyTableModel = new XMLTableModel(columnNames, 0);
-        // create a JTable with the model
-        historyTable = new JTable(historyTableModel);
-        // make the table cells editable
-        historyTable.setDefaultEditor(Object.class, null);
-        historyTable.setDefaultRenderer(Object.class, new XMLTableRenderer());
-        // add a mouse listener to handle clicks on the table
-        historyTable.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                // get the row and column of the clicked cell
-                int row = historyTable.rowAtPoint(e.getPoint());
-                int col = historyTable.columnAtPoint(e.getPoint());
-                // get the value of the clicked cell
-                Object value = historyTable.getValueAt(row, col);
-                // do something with the value (for example, print it)
-                System.out.println("Clicked on: " + value);
-            }
-        });
-    }
-
-    /**
-     * Takes a table model and adds changes stored in the change history to it
-     */
-    public void addChangesToTable(XMLTableModel model) throws TransformerException {
-        // get the change history
-        LinkedList<XMLChange> changeHistory = edit.getChangeHistory();
-        edit.validateChangeHistory(edit.xml_doc);
-        int index = 0;
-        for (XMLChange c : changeHistory) {
-            model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNodeType()});
-            if (c.getValidity()) {
-                model.setRowColor(index, PASTEL_GREEN);
-                validationErrorsField.setText("No validation errors in most recent change found.");
-                // set the text color to green
-                validationErrorsField.setForeground(DARK_GREEN);
-
-            }
-            else if (!c.getValidity()) {
-                model.setRowColor(index, PASTEL_RED);
-                validationErrorsField.setText(c.getValidationError());
-                // set the text color to red
-                validationErrorsField.setForeground(DARK_RED);
-            }
-            else {
-                model.setRowColor(index, PASTEL_BLUE);
-            }
-            index++;
-        }
-    }
-
-    /**
-     * Update the change history tab with the new changes
-     */
-    public void updateChangeHistoryTab() throws TransformerException {
-        // empty the table model
-        historyTableModel.setRowCount(0);
-        // add new data to the table model
-        addChangesToTable(historyTableModel);
-        changeHistoryPane.add(historyTable);
-        changeHistoryPane.setViewportView(historyTable);
-    }
-
-    /**
-     * Creates a new empty table in a new tab that can show the user which files from the specified folder
-     * (apply change to folder) have been changed and which have not.
-     *
-     */
-    public void giveFeedback() {
-        // create the array of column names for the table
-        String[] columnNames = {"File Name", "Validation", "Exported"};
-        // create a default table model with no data
-        feedBackTableModel = new XMLTableModel(columnNames, 0);
-        // create a JTable with the model
-        JTable table = new JTable(feedBackTableModel);
-        // make the table cells editable
-        table.setDefaultEditor(Object.class, null);
-        table.setDefaultRenderer(Object.class, new XMLTableRenderer());
-        // add a mouse listener to handle clicks on the table
-        table.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                // get the row and column of the clicked cell
-                int row = table.rowAtPoint(e.getPoint());
-                int col = table.columnAtPoint(e.getPoint());
-
-                // get the value of the clicked cell
-                Object value = feedBackTableModel.getValueAt(row, col);
-
-                // do something with the value (for example, print it)
-                System.out.println("Clicked on: " + value);
-            }
-        });
-
-        // set the layout of the panel to a box layout
-        //feedbackTablePanel.setLayout(new BoxLayout(feedbackTablePanel, BoxLayout.Y_AXIS));
-        // set dimensions of the panel
-        //feedbackTablePanel.setPreferredSize(new Dimension(feedbackTablePanel.getWidth(), feedbackTablePanel.getHeight()));
-        // create a scroll pane for the table
-        JScrollPane feedbackScrollPane = new JScrollPane(table);
-        // set dimensions of the scroll pane
-        feedbackScrollPane.setPreferredSize(new Dimension(feedbackScrollPane.getWidth(), feedbackScrollPane.getHeight()));
-        // set viewport view to the table
-        feedbackScrollPane.setViewportView(table);
-        // add the scroll pane to the panel
-        //feedbackTablePanel.add(feedbackScrollPane);
-        // add the panel to the tabbed pane
-        makeNewTab(feedbackScrollPane, "Feedback", FEEDBACK_SVG);
-    }
-
-    /**
-     * Creates a new table in a new tab that shows the user which files from the specified folder
-     * (apply change to folder) have been changed and which have not.
-     *
-     */
-    public void addFeedback(FeedbackStore feedbackStore) {
-        String fileName = feedbackStore.getFilePath().substring(feedbackStore.getFilePath().lastIndexOf(File.separator) + 1);
-        feedBackTableModel.addRow(new Object[]{fileName, Boolean.toString(feedbackStore.getValidity()), Boolean.toString(feedbackStore.getExported())});
-        if (feedbackStore.getValidity() & feedbackStore.getExported()) {
-            // change color of the row to green
-            feedBackTableModel.setRowColor(feedBackTableModel.getRowCount() - 1, PASTEL_GREEN);
-        }
-        else {
-            // change color of the row to red
-            feedBackTableModel.setRowColor(feedBackTableModel.getRowCount() - 1, PASTEL_RED);
-
-        }
-    }
-
-    /**
-     * Reports errors that occur in a little pop-up in the gui.
-     */
-    public void reportError(String exception) {
-        JOptionPane.showMessageDialog(this, "Error: " + exception, "Error", JOptionPane.ERROR_MESSAGE);
-
-    }
-
     /**
      * Adds a border to the specified panel with the specified title.
      * @param p the panel to which the border will be added
@@ -736,30 +570,103 @@ public class GUI extends javax.swing.JFrame{
         p.setBorder(line);
         p.setOpaque(true);
     }
-
     /**
-     * Adds a change to the change history.
-     * @param changeType the type of change that is to be maade on of the following: "add", "modify", "delete"
-     * @param toBeChanged the node that is to be changed
+     * Creates a change history tab in the tabbed pane
      */
-    public void makeNewChange(String changeType, XMLNode toBeChanged) throws MalformedURLException, TransformerException, SAXException {
-        System.out.println("- - - - Make new change - - - -");
-        XMLChange change = new XMLChange(changeType, toBeChanged);
-        edit.changeHistory.add(change);
-
-        if (toBeChanged.getType().equals("element") && changeType.equals("modify") && toBeChanged.getChildCount() > 0) {
-            for (int c = 0; c < toBeChanged.getChildCount(); c++) {
-                makeNewChange("add", (XMLNode) toBeChanged.getChildAt(c));
-            }
-            return;
-        }
-        // update the change history tab if it is opened
-
-        if (tabbedPane.indexOfComponent(changeHistoryWindowPanel) != -1) {
-            updateChangeHistoryTab();
-        }
+    public void makeChangeHistoryTab() throws Exception {
+        // create changer history window panel
+        changeHistoryWindowPanel.setLayout(new BoxLayout(changeHistoryWindowPanel, BoxLayout.Y_AXIS));
+        // add the change history pane to the change history window panel
+        changeHistoryWindowPanel.add(changeHistoryPane);
+        // Create Header entrys for the list of changes, so the user knows which entry is what
+        makeHistoryTable();
+        // add a textfield to the change history panel to display validation errors
+        validationErrorsField.setEditable(false);
+        validationErrorsField.setLineWrap(true);
+        validationErrorsField.setWrapStyleWord(true);
+        validationErrorsField.setSize(WIDTH, BUTTON_HEIGHT);
+        // add a border to the validation errors textfield
+        makePanelBorder(validationErrorsField);
+        // add the validation errors to the change history window panel
+        changeHistoryWindowPanel.add(validationErrorsField);
+        // add the changes to the table model
+        controller.addChangesToTable(historyTableModel);
+        // add the table to the change history pane
+        changeHistoryPane.add(historyTable);
+        // set the view port of the change history pane to the table
+        changeHistoryPane.setViewportView(historyTable);
+        // add the change panel to the tabbed pane
+        makeNewTab(changeHistoryWindowPanel, "Change History", CHANGE_SVG);
     }
+    /**
+     * Initializes the change history table
+     */
+    public void makeHistoryTable() {
+        // create an array of column names
+        String[] columnNames = {"Index", "Change Type", "Location", "Node Type"};
+        // create a default table model with no data
+        historyTableModel = new XMLTableModel(columnNames, 0);
+        // create a JTable with the model
+        historyTable = new JTable(historyTableModel);
+        // make the table cells editable
+        historyTable.setDefaultEditor(Object.class, null);
+        historyTable.setDefaultRenderer(Object.class, new XMLTableRenderer());
+        // add a mouse listener to handle clicks on the table
+        historyTable.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                // get the row and column of the clicked cell
+                int row = historyTable.rowAtPoint(e.getPoint());
+                int col = historyTable.columnAtPoint(e.getPoint());
+                // get the value of the clicked cell
+                Object value = historyTable.getValueAt(row, col);
+                // do something with the value (for example, print it)
+                System.out.println("Clicked on: " + value);
+            }
+        });
+    }
+    /**
+     * Creates a new Feedback tab in the tabbed pane
+     */
+    public void makeFeedbackTab() { // originally called giveFeedback
+        // create the array of column names for the table
+        String[] columnNames = {"File Name", "Validation", "Exported"};
+        // create a default table model with no data
+        feedBackTableModel = new XMLTableModel(columnNames, 0);
+        // create a JTable with the model
+        JTable table = new JTable(feedBackTableModel);
+        // make the table cells editable
+        table.setDefaultEditor(Object.class, null);
+        table.setDefaultRenderer(Object.class, new XMLTableRenderer());
+        // add a mouse listener to handle clicks on the table
+        table.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                // get the row and column of the clicked cell
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
 
+                // get the value of the clicked cell
+                Object value = feedBackTableModel.getValueAt(row, col);
+
+                // do something with the value (for example, print it)
+                System.out.println("Clicked on: " + value);
+            }
+        });
+
+        // set the layout of the panel to a box layout
+        //feedbackTablePanel.setLayout(new BoxLayout(feedbackTablePanel, BoxLayout.Y_AXIS));
+        // set dimensions of the panel
+        //feedbackTablePanel.setPreferredSize(new Dimension(feedbackTablePanel.getWidth(), feedbackTablePanel.getHeight()));
+        // create a scroll pane for the table
+        JScrollPane feedbackScrollPane = new JScrollPane(table);
+        // set dimensions of the scroll pane
+        feedbackScrollPane.setPreferredSize(new Dimension(feedbackScrollPane.getWidth(), feedbackScrollPane.getHeight()));
+        // set viewport view to the table
+        feedbackScrollPane.setViewportView(table);
+        // add the scroll pane to the panel
+        //feedbackTablePanel.add(feedbackScrollPane);
+        // add the panel to the tabbed pane
+        makeNewTab(feedbackScrollPane, "Feedback", FEEDBACK_SVG);
+    }
     /**
      * Creates a new xml-viewer tab.
      * @param dom the xml dom that is to be displayed in the tab
@@ -787,13 +694,12 @@ public class GUI extends javax.swing.JFrame{
 
         makeNewTab(scrollPaneTop, title, TREE_SVG);
     }
-
     /**
      * Updates the xml-viewer tab with the specified dom tree,
      * @param dom the new xml dom that is to be displayed in the tab
      * @param simplified whether the xml-view should be simplified (only show elements) or not (show all nodes)
      */
-    public void updateTree(Document dom, boolean simplified){
+    public void updateTreeTab(Document dom, boolean simplified){ // originally called updateTree
         // create a new XMLTree from the DOM
         myTree = new XMLTree(dom, simplified);
         myTree.setOpaque(true);
@@ -812,7 +718,6 @@ public class GUI extends javax.swing.JFrame{
         // add the jTree to a new panel and add it to the tabbedPane
         scrollPaneTop.setViewportView(myTree);
     }
-
     /**
      * Creates a new xml-viewer tab. This version does not allow the user to edit the xml.
      * @param dom the xml dom that is to be displayed in the tab
@@ -831,7 +736,6 @@ public class GUI extends javax.swing.JFrame{
         currentScrollPane.setViewportView(currentTree);
         makeNewTab(currentScrollPane, title, TREE_SVG);
     }
-
     /**
      * Helper function called by multiple methods to create new tabs.
      * @param p the component that is to be added to a new tab
@@ -863,7 +767,6 @@ public class GUI extends javax.swing.JFrame{
         // put newly created tab in front
         tabbedPane.setSelectedIndex(index);
     }
-
     /**
      * Loads an svg code as an ImageIcon
      * @param svgCode the svg code that is to be loaded
@@ -888,7 +791,6 @@ public class GUI extends javax.swing.JFrame{
         // return the ImageIcon
         return icon;
     }
-
     /**
      * Updates the editPanel, which shows the attributes and text nodes of the currently selected element node.
      */
@@ -917,7 +819,6 @@ public class GUI extends javax.swing.JFrame{
         SpringUtilities.makeCompactGrid(editPanel, labelCount, 1,0,0,0, 0);
         scrollPaneBottom.setViewportView(editPanel);
     }
-
     /**
      * Creates the editPanel, which shows the attributes and text nodes of the currently selected element node.
      */
@@ -941,7 +842,6 @@ public class GUI extends javax.swing.JFrame{
             }
         }
     }
-
     /**
      * Adds a title button to the editPanel at the top. If clicked, an add and a delete button will pop up.
      */
@@ -993,7 +893,6 @@ public class GUI extends javax.swing.JFrame{
         });
 
     }
-
     /**
      * Adds an attribute to the editPanel
      * @param labelText
@@ -1033,7 +932,7 @@ public class GUI extends javax.swing.JFrame{
                 if (!textField.getNode().getUserObject().equals(textField.getText())) {
                     textField.getNode().setUserObject(textField.getText());
                     try {
-                        makeNewChange("modify" , textField.getNode());
+                        controller.makeNewChange("modify" , textField.getNode());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1078,7 +977,6 @@ public class GUI extends javax.swing.JFrame{
         // increase the labelCount so the layout can be updated
         labelCount +=1;
     }
-
     /**
      * Adds a text button to the editPanel
      * @param node
@@ -1110,7 +1008,7 @@ public class GUI extends javax.swing.JFrame{
                 if (!textField.getNode().getUserObject().equals(textField.getText())) {
                     textField.getNode().setUserObject(textField.getText());
                     try {
-                        makeNewChange("modify" , textField.getNode());
+                        controller.makeNewChange("modify" , textField.getNode());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1158,7 +1056,6 @@ public class GUI extends javax.swing.JFrame{
         // increase the labelCount so the layout can be updated
         labelCount +=1;
     }
-
     /**
      * Initializes the add button
      */
@@ -1325,7 +1222,7 @@ public class GUI extends javax.swing.JFrame{
 
                     // add the new node to the change history
                     try {
-                        makeNewChange("add", newAttrNode);
+                        controller.makeNewChange("add", newAttrNode);
                     } catch (MalformedURLException | TransformerException | SAXException e) {
                         throw new RuntimeException(e);
                     }
@@ -1346,7 +1243,7 @@ public class GUI extends javax.swing.JFrame{
 
                     // add the new node to the change history
                     try {
-                        makeNewChange("add", newTextNode);
+                        controller.makeNewChange("add", newTextNode);
                     } catch (MalformedURLException | SAXException | TransformerException e) {
                         throw new RuntimeException(e);
                     }
@@ -1385,7 +1282,7 @@ public class GUI extends javax.swing.JFrame{
                     myTree.updateUI();
                     // add the new node to the change history
                     try {
-                        makeNewChange("add", newElementNode);
+                        controller.makeNewChange("add", newElementNode);
                     }
                     catch (MalformedURLException | TransformerException | SAXException e) {
                         throw new RuntimeException(e);
@@ -1399,7 +1296,6 @@ public class GUI extends javax.swing.JFrame{
             }
         });
     }
-
     /**
      *
      */
@@ -1415,7 +1311,7 @@ public class GUI extends javax.swing.JFrame{
 
             // remove the node from the tree
             try {
-                makeNewChange("delete", toBeDeletedNode);
+                controller.makeNewChange("delete", toBeDeletedNode);
             } catch (MalformedURLException | TransformerException | SAXException e) {
                 throw new RuntimeException(e);
             }
@@ -1427,5 +1323,5 @@ public class GUI extends javax.swing.JFrame{
             updateEditPanel();
         });
     }
-}
 
+}
