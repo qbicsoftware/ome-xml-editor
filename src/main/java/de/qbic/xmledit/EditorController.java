@@ -28,6 +28,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EditorController {
+    /** This class aims to control or manage the interaction between the View and the Model. It is triggered via the
+     * Command or Graphical interfaces (or really any interface implemented). It then calls the appropriate methods to
+     * update the Model and the View.
+     */
     //------------------------------------------------------------------------------------------------------------------
     // Instantiations
     //------------------------------------------------------------------------------------------------------------------

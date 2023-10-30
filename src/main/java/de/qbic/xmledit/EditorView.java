@@ -24,6 +24,9 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 
 public class EditorView extends javax.swing.JFrame {
+    /** This class defines the visual representation of the OME-Editor.
+     *
+     */
     // -----------------------------------------------------------------------------------------------------------------
     // Constants
     // -----------------------------------------------------------------------------------------------------------------

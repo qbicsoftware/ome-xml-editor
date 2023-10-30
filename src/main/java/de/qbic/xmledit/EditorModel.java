@@ -32,6 +32,10 @@ import java.io.*;
 import java.util.LinkedList;
 
 public class EditorModel {
+    /**
+     * This class aims to implement the model layer. It should only act passively and thus only respond to requests from
+     * the controller.
+     */
     // -----------------------------------------------------------------------------------------------------------------
     // CONSTANTS
     // -----------------------------------------------------------------------------------------------------------------
