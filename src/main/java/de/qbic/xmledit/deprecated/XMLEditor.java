@@ -1,8 +1,9 @@
 // Package
-package de.qbic.xmledit;
-
+package de.qbic.xmledit.deprecated;
+import de.qbic.xmledit.FeedbackStore;
 // Imports
 
+import de.qbic.xmledit.*;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;
@@ -34,7 +35,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -42,6 +42,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,12 +50,14 @@ import java.util.stream.Stream;
 // Class
 @Plugin(type = Command.class, menuPath = "Plugins>XML-Editor")
 public class XMLEditor<T extends RealType<T>> implements Command {
-
-    // -- Constants --
+    // -----------------------------------------------------------------------------------------------------------------
+    // Constants
+    // -----------------------------------------------------------------------------------------------------------------
     private static final Logger LOGGER = LoggerFactory.getLogger(XMLEditor.class);
 
-    // -- Fields --
-
+    // -----------------------------------------------------------------------------------------------------------------
+    // Global Variables
+    // -----------------------------------------------------------------------------------------------------------------
     private String id = null;
     private boolean doMeta = true;
     private boolean filter = true;
@@ -81,9 +84,9 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     private int series = 0;
     private int xCoordinate = 0, yCoordinate = 0, width = 0, height = 0;
     private String swapOrder = null, shuffleOrder = null;
-    private String format = null;
+    //private String format = null;
     private String cachedir = null;
-    public LinkedList<XMLChange> changeHistory = null;
+    public LinkedList<XMLChange> changeHistory = new LinkedList<>();
     public Document xml_doc;
     public Element xmlElement;
     private DynamicMetadataOptions options = new DynamicMetadataOptions();
@@ -95,14 +98,31 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     private GUI myGUI;
     public String schemaPath = "./data/resources/ome.xsd";
 
-    // -- ImageInfo methods --
+    // -----------------------------------------------------------------------------------------------------------------
+    // Constructor
+    // -----------------------------------------------------------------------------------------------------------------
+    public XMLEditor() {
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Methods
+    // -----------------------------------------------------------------------------------------------------------------
+    /**
+     * set the path to the schema
+     */
     public void setSchemaPath(String schemaPath) {
         this.schemaPath = schemaPath;
     }
+    /**
+     * creates the reader.
+     */
     public void createReader() {
         reader = new ImageReader();
         baseReader = reader;
     }
+    /**
+     * ? remnant from the original code not sure whats needed here
+     */
     public void configureReaderPreInit() throws FormatException, IOException {
         if (omexml) {
             reader.setOriginalMetadataPopulated(originalMetadata);
@@ -180,7 +200,10 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         if (swapOrder != null) dimSwapper.swapDimensions(swapOrder);
         if (shuffleOrder != null) dimSwapper.setOutputOrder(shuffleOrder);
     }
-    public BufferedImage[] readPixels2() throws FormatException, IOException {
+    /**
+     * Reads the pixel data of the loaded image. Used for exporting to ome.tiff.
+     */
+    public BufferedImage[] readPixels() throws FormatException, IOException {
         String seriesLabel = reader.getSeriesCount() > 1 ?
                 (" series #" + series) : "";
         LOGGER.info("");
@@ -251,7 +274,10 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // display pixels in image viewer
         return images;
     }
-    public String getOMEXML() throws MissingLibraryException, ServiceException, IOException, ParserConfigurationException, SAXException {
+    /**
+     * Retrieves the ome metadata from the currently loaded image and returns it as a xml
+     */
+    public String getOMEXML() throws Exception {
         String xml = "";
         LOGGER.info("");
         MetadataStore ms = reader.getMetadataStore();
@@ -308,27 +334,34 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     }
     /**
      * Applys the current change history to all valid files in the selected folder
+     *
      * @param path the path to the folder
+     * @return
      */
-    public void applyChangesToFolder(String path) throws Exception {
+    public List<FeedbackStore> applyChangesToFolder(String path) throws Exception {
         System.out.println("Inside applyChangesToFolder");
         // loop over all valid files in the folder
+        List<FeedbackStore> fbList= new LinkedList<>();
+        FeedbackStore fb;
         for (String file : getFilesInDir(path)) {
             System.out.println("###############################################################");
             System.out.println("Current File: " + file);
             // measure time
             long time = System.currentTimeMillis();
             System.out.println("Start time: " + time);
-            applyChangesToFile(path + "/" + file);
+            fbList.add(applyChangesToFile(path + "/" + file)); // adds the feedback of applyChangesToFile to the list
 
         }
         System.out.println("Done");
+        return fbList;
     }
     /**
      * Applys the current change history to the selected file
+     *
      * @param path the path to the file
+     * @return
      */
-    public void applyChangesToFile(String path) throws Exception {
+    public FeedbackStore applyChangesToFile(String path) throws Exception {
         FeedbackStore fbStore= new FeedbackStore(path);
         Document newXMLDom =  loadFile(path);
         if (validateChangeHistory(newXMLDom)) {
@@ -345,54 +378,35 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         else {
             fbStore.setValidity(false);
         }
-        myGUI.addFeedback(fbStore);
-        // update teh feedback tabl
+        return fbStore;
+        // myGUI.addFeedback(fbStore);
+        // update the feedback tab
     }
-    public boolean validateChangeHistory(Document newXMLDom) throws TransformerException {
-        System.out.println("- - - - Validating Change History - - - -");
-        Document example_xml_doc = (Document) newXMLDom.cloneNode(true);
-        boolean changeHistoryValidity= true;
-        for (XMLChange c : changeHistory) {
-            System.out.println("- - - - Applying Change - - - -");
-            System.out.println("ToBeChangedNode: " + c.getToBeChangedNode().getUserObject().toString());
-            System.out.println("ToBeChangedNode Type: " + c.getNodeType());
-            System.out.println("Change Type: " + c.getChangeType());
-            applyChange(c, example_xml_doc, example_xml_doc, 0);
-            try {
-                // Element xmlExampleElement = example_xml_doc.getDocumentElement();
-                //OMEModel xmlModel = new OMEModelImpl();
-                // catch verification errors and print them
-                // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
-                // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
-                if (!(new File(schemaPath).exists())) {
-                    myGUI.popupSchemaHelp();
-                }
-                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), schemaPath);
-                if (error == null){
-                    System.out.println("XML is valid");
-                    c.setValidity(true);
-                    c.setValidationError("OME-XML is valid");
-                }
-                else {
-                    System.out.println("XML is not valid");
-                    c.setValidity(false);
-                    c.setValidationError(error);
-                }
-            } catch (Exception e) {
-                c.setValidity(false);
-                c.setValidationError(e.getMessage());
-            }
-            changeHistoryValidity = changeHistory.getLast().getValidity();
-        }
-        return changeHistoryValidity;
-    }
-
+    /**
+     * Applies the current change history to the selected file
+     */
     public void applyChanges(Document dom) {
         System.out.println("Inside applyChanges");
         for (XMLChange c : changeHistory) {
             applyChange(c, dom, dom, 0);
         }
     }
+    /**
+     * Applys the current change history to the selected file
+     */
+    public void applyChanges(Document dom, LinkedList<XMLChange> externalChangeHistory) {
+        System.out.println("Inside applyChanges");
+        for (XMLChange c : externalChangeHistory) {
+            applyChange(c, dom, dom, 0);
+        }
+    }
+    /**
+     * Applys a singular change to a given document at a specific position
+     * @param change the change to be applied
+     * @param root the root of the document
+     * @param currentNode the current node
+     * @param positionInQuery the position in the query
+     */
     public void applyChange(XMLChange change, Document root, Node currentNode, int positionInQuery) {
         System.out.println("- - - -");
         System.out.println("Current Node: " + currentNode.getNodeName());
@@ -528,6 +542,48 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         throw new IllegalArgumentException("Query not in graph");
     }
     /**
+     * Validates the current change history/ xml document against the schema specified in schemaPath
+     * @param newXMLDom the xml document to be validated
+     */
+    public boolean validateChangeHistory(Document newXMLDom) throws TransformerException {
+        System.out.println("- - - - Validating Change History - - - -");
+        Document example_xml_doc = (Document) newXMLDom.cloneNode(true);
+        boolean changeHistoryValidity= true;
+        for (XMLChange c : changeHistory) {
+            System.out.println("- - - - Applying Change - - - -");
+            System.out.println("ToBeChangedNode: " + c.getToBeChangedNode().getUserObject().toString());
+            System.out.println("ToBeChangedNode Type: " + c.getNodeType());
+            System.out.println("Change Type: " + c.getChangeType());
+            applyChange(c, example_xml_doc, example_xml_doc, 0);
+            try {
+                // Element xmlExampleElement = example_xml_doc.getDocumentElement();
+                //OMEModel xmlModel = new OMEModelImpl();
+                // catch verification errors and print them
+                // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
+                // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
+                if (!(new File(schemaPath).exists())) {
+                    myGUI.popupSchemaHelp();
+                }
+                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), schemaPath);
+                if (error == null){
+                    System.out.println("XML is valid");
+                    c.setValidity(true);
+                    c.setValidationError("OME-XML is valid");
+                }
+                else {
+                    System.out.println("XML is not valid");
+                    c.setValidity(false);
+                    c.setValidationError(error);
+                }
+            } catch (Exception e) {
+                c.setValidity(false);
+                c.setValidationError(e.getMessage());
+            }
+            changeHistoryValidity = changeHistory.getLast().getValidity();
+        }
+        return changeHistoryValidity;
+    }
+    /**
      * Exports the current metadata to an OME-TIFF file
      * @param path the path to the file
      */
@@ -559,44 +615,30 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // set metadata
         xmlElement = new_xml_doc.getDocumentElement();
         OMEModel xmlModel = new OMEModelImpl();
-        // MetadataRoot mdr = null;
         OMEXMLMetadataRoot mdr = null;
-        // OME test = new OME();
-        //OME.getChildrenByTagName();
         try {
             mdr = new OMEXMLMetadataRoot(xmlElement, xmlModel);
         } catch (EnumerationException e) {
             myGUI.reportError(e.toString());
         }
         omexmlMeta.setRoot(mdr);
-        // define writer
-        //OMETiffWriter writer = new OMETiffWriter();
-        //BufferedImageWriter biwriter = new BufferedImageWriter(writer);
 
         // read pixels
         reader.setId(id);
-        BufferedImage[] pixelData = readPixels2();
+        BufferedImage[] pixelData = readPixels();
         reader.close();
         // write pixels
-        //biwriter.setMetadataRetrieve(omexmlMeta);
         System.out.println("Writing to: " + outPath);
-        //biwriter.setId(outPath);
         System.out.println("set metadata time"+ System.currentTimeMillis());
         System.out.println("pixelData.length: " + pixelData.length);
         System.out.println("pixelData[0].getWidth(): " + pixelData[0].getWidth());
         System.out.println("pixelData[0].getHeight(): " + pixelData[0].getHeight());
 
-
         ImageConverter converter = new ImageConverter();
         converter.testConvert(new ImageWriter(), omexmlMeta, id, outPath);
 
-        //for (int i = 0; i < pixelData.length; i++) {
-        //    biwriter.saveImage(i, pixelData[i]);
-        //}
         System.out.println("wrote pixels time"+ System.currentTimeMillis());
-        // close writer
-        //writer.close();
-        //biwriter.close();
+
         // refocus gui
         myGUI.setVisible(true);
         System.out.println("[done]");
@@ -605,7 +647,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     /**
      * Exports the current metadata to an OME-XML file
      * @param path the path to the file
-     * @throws Exception
      */
     public void exportToOmeXml(String path, Document newXML) throws Exception {
         System.out.println("Inside exportToOmeXml");
@@ -625,6 +666,9 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         myGUI.setVisible(true);
         System.out.println("[done]");
     }
+    /**
+     * Shows the currently loaded xml as a non-editable Tree in a new GUI tab.
+     */
     public void showCurrentXML() throws Exception {
         Document example_xml_doc = (Document) xml_doc.cloneNode(true);
 
@@ -635,22 +679,37 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         myGUI.showXMLTree(example_xml_doc, example_xml_doc.getNodeName());
         myGUI.setVisible(true);
     }
+    /**
+     * Opens the "How To Use" page in a new tab in the GUI.
+     * FIXME:   Fiji has another WD structure than IntelliJ.
+     *          The path needs to be changed, to reliably point to the correct Tutorial.
+     */
     public void openTutorial() throws IOException {
         String path = "./data/resources/HowToUse.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
         myGUI.makeNewTab(myGUI.renderMarkdown(md), "How To Use", GUI.HELP_SVG);
     }
-
+    /**
+     * Opens the "About OME-Editor" page in a new tab in the GUI.
+     * FIXME:   Fiji has another WD structure than IntelliJ, which causes a wrong README to be loaded.
+     *          The path needs to be changed, to reliably point to the correct README.
+     *
+     */
     public void openAbout() throws IOException {
         String path = "./README.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
-        myGUI.makeNewTab(myGUI.renderMarkdown(md), "About XML-Editor", GUI.HELP_SVG);
+        myGUI.makeNewTab(myGUI.renderMarkdown(md), "About OME-Editor", GUI.HELP_SVG);
     }
-
+    /**
+     * returns the currently loaded changeHistory
+     */
     public LinkedList<XMLChange> getChangeHistory() {
         return changeHistory;
     }
-
+    /**
+     * Saves the currently loaded changeHistory.
+     * @param path the path to the file
+     */
     public void saveChangeHistory(String path){
         try {
             FileOutputStream f = new FileOutputStream(new File(path));
@@ -665,7 +724,10 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             e.printStackTrace();
         }
     }
-
+    /**
+     * load a changeHistory from file, updates the currently loaded xml view and shows the changeHistory in the GUI.
+     * @param path the path to the file
+     */
     public void loadChangeHistory(String path) throws Exception {
         try {
             FileInputStream fi = new FileInputStream(new File(path));
@@ -690,6 +752,9 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             e.printStackTrace();
         }
     }
+    /**
+     * Reloads the current xml tree and updates the GUI view accordingly
+     */
     public void updateTree() {
         // define a new xml document
         Document new_xml_doc = (Document) xml_doc.cloneNode(true);
@@ -698,10 +763,11 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         // update the tree
         myGUI.updateTree(new_xml_doc, simplified);
     }
-    public Document loadFile(String path) throws IOException, ServiceException, FormatException, ParserConfigurationException, SAXException {
-        String[] args = new String[2];
-        args[0] = path; // the id parameter
-        args[1] = "-omexml-only";
+    /**
+     * load an image and returns the metadata as a xml
+     * @param path the path to the image
+     */
+    public Document loadFile(String path) throws Exception {
         omexmlOnly = true;
         omexml = true;
         id = path;
@@ -717,12 +783,16 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         reader.close();
         return XMLTools.parseDOM(xml);
     }
-    public void openImage(String path) throws IOException, FormatException, ServiceException, ParserConfigurationException, SAXException, TransformerException {
+    /**
+     * load an image and shows its xml metadata in the GUI
+     * @param path the path to the image
+     */
+    public void openImage(String path) throws Exception {
         // make title from path
         String title = path.substring(path.lastIndexOf("/") + 1);
         xml_doc = loadFile(path);
         Document new_xml_doc = (Document) xml_doc.cloneNode(true);
-        if (changeHistory.size() > 0) {
+        if (!changeHistory.isEmpty()) {
             applyChanges(new_xml_doc);
             myGUI.updateChangeHistoryTab();
         }
@@ -731,7 +801,6 @@ public class XMLEditor<T extends RealType<T>> implements Command {
     /**
      * Opens an external XML file and applies loaded changes to it
      * @param path the path to the file
-     * @throws Exception
      */
     public void openXML(String path) throws Exception {
         // make tab title from path
@@ -740,15 +809,17 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         xml_doc = XMLTools.parseDOM(new File(path));
         // apply changes to metadata
         Document new_xml_doc = (Document) xml_doc.cloneNode(true);
-        if (changeHistory.size() > 0) {
+        if (!changeHistory.isEmpty()) {
             applyChanges(new_xml_doc);
             myGUI.updateChangeHistoryTab();
         }
         myGUI.makeNewTreeTab(new_xml_doc, simplified, title);
     }
-
+    /**
+     * undoes/ removes the last change stored in the changeHistory and updates the GUI view accordingly
+     */
     public void undoChange() throws MalformedURLException, TransformerException, SAXException {
-        if (changeHistory.size() > 0) {
+        if (!changeHistory.isEmpty()) {
             // remove the last change from the history
             changeHistory.removeLast();
             // define a new xml document
@@ -759,6 +830,9 @@ public class XMLEditor<T extends RealType<T>> implements Command {
             myGUI.updateChangeHistoryTab();
         }
     }
+    /**
+     * resets the change history and updates the GUI view accordingly
+     */
     public void resetChangeHistory() {
         changeHistory = new LinkedList<>();
         try {
@@ -768,27 +842,19 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         }
     }
     /**
-     * testEdit is a remnant, I dont see why this cant be moved to the run function.
-     */
-    public void testEdit() {
-        changeHistory = new LinkedList<>();
-        myGUI = new GUI(this);
-        myGUI.setVisible(true);
-        OMEModel xmlModel = new OMEModelImpl();
-        System.out.println("Mode Objects: " + xmlModel.getModelObjects().toString());
-    }
-    /**
      * runs the plugin when started from within FiJi
      */
     @Override
     public void run() {
         DebugTools.enableLogging("INFO");
-        new XMLEditor().testEdit();
+        myGUI = new GUI(this);
+        myGUI.setVisible(true);
     }
     /**
      * Starts a new ImageJ session when started from outside Fiji
      */
     public static void main(String[] args) throws Exception {
+        System.out.println("Starting Fiji");
         final ImageJ ij = new ImageJ();
         ij.command().run(XMLEditor.class, true);
     }

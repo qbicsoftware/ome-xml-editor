@@ -31,22 +31,20 @@ public class EditorController {
     //------------------------------------------------------------------------------------------------------------------
     // Instantiations
     //------------------------------------------------------------------------------------------------------------------
-    public EditorView view;
-    public Editor editor;
+    public EditorView view = new EditorView(this);
+    public EditorModel model = new EditorModel(this);
     //------------------------------------------------------------------------------------------------------------------
     // Constructor
     //------------------------------------------------------------------------------------------------------------------
-    public EditorController(EditorView MyView, Editor MyEditor) {
-        editor = MyEditor;
-        view = MyView;
+    public EditorController() {
     }
     /**
      * Takes a table model and adds changes stored in the change history to it
      */
     public void addChangesToTable(XMLTableModel model) throws TransformerException {
         // get the change history
-        LinkedList<XMLChange> changeHistory = editor.getChangeHistory();
-        validateChangeHistory(editor.xml_doc);
+        LinkedList<XMLChange> changeHistory = this.model.getChangeHistory();
+        validateChangeHistory(this.model.xml_doc);
         int index = 0;
         for (XMLChange c : changeHistory) {
             model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNodeType()});
@@ -104,7 +102,7 @@ public class EditorController {
 
         // update the model
         XMLChange change = new XMLChange(changeType, toBeChanged);
-        editor.changeHistory.add(change);
+        model.changeHistory.add(change);
 
         if (toBeChanged.getType().equals("element") && changeType.equals("modify") && toBeChanged.getChildCount() > 0) {
             for (int c = 0; c < toBeChanged.getChildCount(); c++) {
@@ -124,7 +122,7 @@ public class EditorController {
      * @param schemaPath
      */
     public void setSchemaPath(String schemaPath) {
-        editor.setSchemaPath(schemaPath);
+        model.setSchemaPath(schemaPath);
     }
     /**
      * gets all files in the directory and returns them as a set
@@ -207,17 +205,17 @@ public class EditorController {
 
         // apply changes to metadata
         Document new_xml_doc = (Document) newXML.cloneNode(true);
-        editor.applyChanges(new_xml_doc);
+        model.applyChanges(new_xml_doc);
         System.out.println("Applied changes time"+ System.currentTimeMillis());
         // set metadata
-        editor.setXMLElement(new_xml_doc.getDocumentElement());
+        model.setXMLElement(new_xml_doc.getDocumentElement());
         OMEModel xmlModel = new OMEModelImpl();
         // MetadataRoot mdr = null;
         OMEXMLMetadataRoot mdr = null;
         // OME test = new OME();
         //OME.getChildrenByTagName();
         try {
-            mdr = new OMEXMLMetadataRoot(editor.getXmlElement(), xmlModel);
+            mdr = new OMEXMLMetadataRoot(model.getXmlElement(), xmlModel);
         } catch (EnumerationException e) {
             view.reportError(e.toString());
         }
@@ -227,9 +225,9 @@ public class EditorController {
         //BufferedImageWriter biwriter = new BufferedImageWriter(writer);
 
         // read pixels
-        editor.getReader().setId(editor.id);
-        BufferedImage[] pixelData = editor.readPixels2();
-        editor.getReader().close();
+        model.getReader().setId(model.id);
+        BufferedImage[] pixelData = model.readPixels2();
+        model.getReader().close();
         // write pixels
         //biwriter.setMetadataRetrieve(omexmlMeta);
         System.out.println("Writing to: " + outPath);
@@ -241,7 +239,7 @@ public class EditorController {
 
 
         ImageConverter converter = new ImageConverter();
-        converter.testConvert(new ImageWriter(), omexmlMeta, editor.id, outPath);
+        converter.testConvert(new ImageWriter(), omexmlMeta, model.id, outPath);
 
         //for (int i = 0; i < pixelData.length; i++) {
         //    biwriter.saveImage(i, pixelData[i]);
@@ -281,18 +279,18 @@ public class EditorController {
         System.out.println("After initialisation time"+ System.currentTimeMillis());
 
         // apply changes to metadata
-        Document new_xml_doc = (Document) editor.getXMLDoc().cloneNode(true);
-        editor.applyChanges(new_xml_doc);
+        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
+        model.applyChanges(new_xml_doc);
         System.out.println("Applied changes time"+ System.currentTimeMillis());
         // set metadata
-        editor.setXMLElement(new_xml_doc.getDocumentElement());
+        model.setXMLElement(new_xml_doc.getDocumentElement());
         OMEModel xmlModel = new OMEModelImpl();
         // MetadataRoot mdr = null;
         OMEXMLMetadataRoot mdr = null;
         // OME test = new OME();
         //OME.getChildrenByTagName();
         try {
-            mdr = new OMEXMLMetadataRoot(editor.getXmlElement(), xmlModel);
+            mdr = new OMEXMLMetadataRoot(model.getXmlElement(), xmlModel);
         } catch (EnumerationException e) {
             view.reportError(e.toString());
         }
@@ -302,9 +300,9 @@ public class EditorController {
         //BufferedImageWriter biwriter = new BufferedImageWriter(writer);
 
         // read pixels
-        editor.getReader().setId(editor.id);
-        BufferedImage[] pixelData = editor.readPixels2();
-        editor.getReader().close();
+        model.getReader().setId(model.id);
+        BufferedImage[] pixelData = model.readPixels2();
+        model.getReader().close();
         // write pixels
         //biwriter.setMetadataRetrieve(omexmlMeta);
         System.out.println("Writing to: " + outPath);
@@ -316,7 +314,7 @@ public class EditorController {
 
 
         ImageConverter converter = new ImageConverter();
-        converter.testConvert(new ImageWriter(), omexmlMeta, editor.id, outPath);
+        converter.testConvert(new ImageWriter(), omexmlMeta, model.id, outPath);
 
         //for (int i = 0; i < pixelData.length; i++) {
         //    biwriter.saveImage(i, pixelData[i]);
@@ -343,7 +341,7 @@ public class EditorController {
         String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.xml";
         // apply changes to metadata
         Document new_xml_doc = (Document) newXML.cloneNode(true);
-        editor.applyChanges(new_xml_doc);
+        model.applyChanges(new_xml_doc);
         // write to file
         System.out.println("Writing to: " + outPath);
         FileOutputStream xmlOutStream = new FileOutputStream(outPath);
@@ -365,8 +363,8 @@ public class EditorController {
         int dot = path.lastIndexOf(".");
         String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.xml";
         // apply changes to metadata
-        Document new_xml_doc = (Document) editor.getXMLDoc().cloneNode(true);
-        editor.applyChanges(new_xml_doc);
+        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
+        model.applyChanges(new_xml_doc);
         // write to file
         System.out.println("Writing to: " + outPath);
         FileOutputStream xmlOutStream = new FileOutputStream(outPath);
@@ -380,9 +378,9 @@ public class EditorController {
      *
      */
     public void showCurrentXML() throws Exception {
-        Document example_xml_doc = (Document) editor.getXMLDoc().cloneNode(true);
+        Document example_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
 
-        editor.applyChanges(example_xml_doc);
+        model.applyChanges(example_xml_doc);
 
         System.out.println(XMLTools.indentXML(XMLTools.getXML(example_xml_doc)));
         System.out.println("All Changes applied");
@@ -392,7 +390,7 @@ public class EditorController {
     public void openTutorial() throws IOException {
         String path = "./data/resources/HowToUse.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
-        view.makeNewTab(view.renderMarkdown(md), "How To Use", GUI.HELP_SVG);
+        view.makeNewTab(view.renderMarkdown(md), "How To Use", EditorView.HELP_SVG);
     }
     /**
      * Opens the about tab
@@ -400,13 +398,13 @@ public class EditorController {
     public void openAbout() throws IOException {
         String path = "./README.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
-        view.makeNewTab(view.renderMarkdown(md), "About XML-Editor", GUI.HELP_SVG);
+        view.makeNewTab(view.renderMarkdown(md), "About XML-Editor", EditorView.HELP_SVG);
     }
     /**
      *
      */
     public LinkedList<XMLChange> getChangeHistory() {
-        return editor.getChangeHistory();
+        return model.getChangeHistory();
     }
     /**
      *
@@ -416,7 +414,7 @@ public class EditorController {
             FileOutputStream f = new FileOutputStream(new File(path));
             ObjectOutputStream o = new ObjectOutputStream(f);
             // Write objects to file
-            for (XMLChange c : editor.getChangeHistory()) {
+            for (XMLChange c : model.getChangeHistory()) {
                 o.writeObject(c);
             }
             o.close();
@@ -436,7 +434,7 @@ public class EditorController {
             boolean moreObjects = true;
             while (moreObjects) {
                 XMLChange c = (XMLChange) oi.readObject();
-                editor.addChange(c);
+                model.addChange(c);
                 // check if there are more objects
                 if (oi.available() == 0) {
                     moreObjects = false;
@@ -457,11 +455,11 @@ public class EditorController {
      */
     public void updateTree() {
         // define a new xml document
-        Document new_xml_doc = (Document) editor.getXMLDoc().cloneNode(true);
+        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
         // apply all changes to the original xml
-        editor.applyChanges(new_xml_doc);
+        model.applyChanges(new_xml_doc);
         // update the tree
-        view.updateTreeTab(new_xml_doc, editor.simplified);
+        view.updateTreeTab(new_xml_doc, model.simplified);
     }
     /**
      *
@@ -470,19 +468,19 @@ public class EditorController {
         String[] args = new String[2];
         args[0] = path; // the id parameter
         args[1] = "-omexml-only";
-        editor.omexmlOnly = true;
-        editor.omexml = true;
-        editor.id = path;
+        model.omexmlOnly = true;
+        model.omexml = true;
+        model.id = path;
 
-        editor.createReader();
-        editor.configureReaderPreInit();
-        editor.getReader().setId(path);
-        editor.configureReaderPostInit();
+        model.createReader();
+        model.configureReaderPreInit();
+        model.getReader().setId(path);
+        model.configureReaderPostInit();
 
-        editor.getReader().setSeries(editor.series);
+        model.getReader().setSeries(model.series);
 
-        String xml = editor.getOMEXML();
-        editor.getReader().close();
+        String xml = model.getOMEXML();
+        model.getReader().close();
         return XMLTools.parseDOM(xml);
     }
     /**
@@ -491,13 +489,13 @@ public class EditorController {
     public void openImage(String path) throws Exception {
         // make title from path
         String title = path.substring(path.lastIndexOf("/") + 1);
-        editor.setXMLDoc(loadFile(path));
-        Document new_xml_doc = (Document) editor.getXMLDoc().cloneNode(true);
-        if (!editor.getChangeHistory().isEmpty()) {
-            editor.applyChanges(new_xml_doc);
+        model.setXMLDoc(loadFile(path));
+        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
+        if (!model.getChangeHistory().isEmpty()) {
+            model.applyChanges(new_xml_doc);
             view.makeChangeHistoryTab();
         }
-        view.makeNewTreeTab(new_xml_doc, editor.simplified, title);
+        view.makeNewTreeTab(new_xml_doc, model.simplified, title);
     }
     /**
      * Opens an external XML file and applies loaded changes to it
@@ -508,27 +506,27 @@ public class EditorController {
         // make tab title from path
         String title = path.substring(path.lastIndexOf("/") + 1);
         // read the file
-        editor.setXMLDoc(XMLTools.parseDOM(new File(path)));
+        model.setXMLDoc(XMLTools.parseDOM(new File(path)));
         // apply changes to metadata
-        Document new_xml_doc = (Document) editor.getXMLDoc().cloneNode(true);
-        if (!editor.getChangeHistory().isEmpty()) {
-            editor.applyChanges(new_xml_doc);
+        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
+        if (!model.getChangeHistory().isEmpty()) {
+            model.applyChanges(new_xml_doc);
             view.makeChangeHistoryTab();
         }
-        view.makeNewTreeTab(new_xml_doc, editor.simplified, title);
+        view.makeNewTreeTab(new_xml_doc, model.simplified, title);
     }
     /**
      *
      */
     public void undoChange() throws Exception {
-        if (!editor.getChangeHistory().isEmpty()) {
+        if (!model.getChangeHistory().isEmpty()) {
             // remove the last change from the history
-            editor.getChangeHistory().removeLast();
+            model.getChangeHistory().removeLast();
             // define a new xml document
-            Document new_xml_doc = (Document) editor.getXmlElement().cloneNode(true);
+            Document new_xml_doc = (Document) model.getXmlElement().cloneNode(true);
             // apply all changes to the original xml
-            editor.applyChanges(new_xml_doc);
-            view.updateTreeTab(new_xml_doc, editor.simplified);
+            model.applyChanges(new_xml_doc);
+            view.updateTreeTab(new_xml_doc, model.simplified);
             view.makeChangeHistoryTab();
         }
     }
@@ -536,7 +534,7 @@ public class EditorController {
      *
      */
     public void resetChangeHistory() throws Exception {
-        editor.setChangeHistory(new LinkedList<XMLChange>());
+        model.setChangeHistory(new LinkedList<XMLChange>());
         try {
             view.makeChangeHistoryTab();
         } catch (TransformerException e) {
@@ -557,22 +555,22 @@ public class EditorController {
         System.out.println("- - - - Validating Change History - - - -");
         Document example_xml_doc = (Document) newXMLDom.cloneNode(true);
         boolean changeHistoryValidity= true;
-        for (XMLChange c : editor.getChangeHistory()) {
+        for (XMLChange c : model.getChangeHistory()) {
             System.out.println("- - - - Applying Change - - - -");
             System.out.println("ToBeChangedNode: " + c.getToBeChangedNode().getUserObject().toString());
             System.out.println("ToBeChangedNode Type: " + c.getNodeType());
             System.out.println("Change Type: " + c.getChangeType());
-            editor.applyChange(c, example_xml_doc, example_xml_doc, 0);
+            model.applyChange(c, example_xml_doc, example_xml_doc, 0);
             try {
                 // Element xmlExampleElement = example_xml_doc.getDocumentElement();
                 //OMEModel xmlModel = new OMEModelImpl();
                 // catch verification errors and print them
                 // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
                 // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
-                if (!(new File(editor.schemaPath).exists())) {
+                if (!(new File(model.schemaPath).exists())) {
                     view.popupSchemaHelp();
                 }
-                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), editor.schemaPath);
+                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), model.schemaPath);
                 if (error == null){
                     System.out.println("XML is valid");
                     c.setValidity(true);
@@ -587,7 +585,7 @@ public class EditorController {
                 c.setValidity(false);
                 c.setValidationError(e.getMessage());
             }
-            changeHistoryValidity = editor.getChangeHistory().getLast().getValidity();
+            changeHistoryValidity = model.getChangeHistory().getLast().getValidity();
         }
         return changeHistoryValidity;
     }
@@ -596,24 +594,24 @@ public class EditorController {
      */
     public boolean validateChangeHistory() throws TransformerException {
         System.out.println("- - - - Validating Change History - - - -");
-        Document example_xml_doc = (Document) editor.getXMLDoc().cloneNode(true);
+        Document example_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
         boolean changeHistoryValidity= true;
-        for (XMLChange c : editor.getChangeHistory()) {
+        for (XMLChange c : model.getChangeHistory()) {
             System.out.println("- - - - Applying Change - - - -");
             System.out.println("ToBeChangedNode: " + c.getToBeChangedNode().getUserObject().toString());
             System.out.println("ToBeChangedNode Type: " + c.getNodeType());
             System.out.println("Change Type: " + c.getChangeType());
-            editor.applyChange(c, example_xml_doc, example_xml_doc, 0);
+            model.applyChange(c, example_xml_doc, example_xml_doc, 0);
             try {
                 // Element xmlExampleElement = example_xml_doc.getDocumentElement();
                 //OMEModel xmlModel = new OMEModelImpl();
                 // catch verification errors and print them
                 // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
                 // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
-                if (!(new File(editor.schemaPath).exists())) {
+                if (!(new File(model.schemaPath).exists())) {
                     view.popupSchemaHelp();
                 }
-                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), editor.schemaPath);
+                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), model.schemaPath);
                 if (error == null){
                     System.out.println("XML is valid");
                     c.setValidity(true);
@@ -628,7 +626,7 @@ public class EditorController {
                 c.setValidity(false);
                 c.setValidationError(e.getMessage());
             }
-            changeHistoryValidity = editor.getChangeHistory().getLast().getValidity();
+            changeHistoryValidity = model.getChangeHistory().getLast().getValidity();
         }
         return changeHistoryValidity;
     }
@@ -636,6 +634,7 @@ public class EditorController {
      *
      */
     public void setSimplified(boolean simplified) {
-        editor.setSimplified(simplified);
+        model.setSimplified(simplified);
     }
+
 }

@@ -135,7 +135,7 @@
 
     <properties>
         <package-name>de.qbic.xmledit</package-name>                   <!-- FIXME: Your project package prefix here -->
-        <main-class>de.qbic.xmledit.XMLEditor</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
+        <main-class>de.qbic.xmledit.deprecated.XMLEditor</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
         <license.licenseName>cc0</license.licenseName>                      <!-- FIXME: Your license-maven-plugin license code here -->
         <license.copyrightOwners>My Company, Inc.</license.copyrightOwners> <!-- FIXME: Your organization legal entity name here -->
     </properties>

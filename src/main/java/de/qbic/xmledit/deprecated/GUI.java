@@ -1,9 +1,10 @@
 // PACKAGE
-package de.qbic.xmledit;
+package de.qbic.xmledit.deprecated;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // IMPORTS
 // ---------------------------------------------------------------------------------------------------------------------
+import de.qbic.xmledit.*;
 import loci.plugins.config.SpringUtilities;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;

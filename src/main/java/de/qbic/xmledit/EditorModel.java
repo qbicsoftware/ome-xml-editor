@@ -4,12 +4,12 @@ package de.qbic.xmledit;
 // IMPORTS
 // ---------------------------------------------------------------------------------------------------------------------
 
+import de.qbic.xmledit.deprecated.XMLEditor;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
-import loci.common.xml.XMLTools;
 import loci.formats.*;
 import loci.formats.gui.AWTImageTools;
 import loci.formats.gui.BufferedImageReader;
@@ -27,12 +27,11 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.LinkedList;
 
-public class Editor{
+public class EditorModel {
     // -----------------------------------------------------------------------------------------------------------------
     // CONSTANTS
     // -----------------------------------------------------------------------------------------------------------------
@@ -79,8 +78,10 @@ public class Editor{
     private BufferedImageReader biReader;
     public String schemaPath = "./data/resources/ome.xsd";
     public String id = null;
+    public EditorController controller;
 
-    public Editor() {
+    public EditorModel(EditorController cont) {
+        controller = cont;
         changeHistory = new LinkedList<>();
     }
     // -----------------------------------------------------------------------------------------------------------------

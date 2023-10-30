@@ -7,7 +7,7 @@ public class FeedbackStore {
     private boolean exported =  false;
     private String exportError = null;
 
-    FeedbackStore(String filePath) {
+    public FeedbackStore(String filePath) {
         this.filePath = filePath;
 
     }
