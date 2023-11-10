@@ -513,4 +513,8 @@ public class EditorModel {
     public String getId() {
         return id;
     }
+
+    public Object getSeries() {
+        return series;
+    }
 }

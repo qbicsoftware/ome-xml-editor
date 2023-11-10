@@ -316,7 +316,7 @@ public class EditorController {
     }
 
     public Object getSeries() {
-        return null;
+        return model.getSeries();
     }
 
     public void configureReaderPostInit() {
@@ -380,5 +380,9 @@ public class EditorController {
 
     public void setSeries(Object series) {
 
+    }
+
+    public Document getXmlDoc() {
+        return model.getXMLDoc();
     }
 }
