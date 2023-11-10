@@ -1,9 +1,7 @@
 // Package
-package de.qbic.xmledit.deprecated;
-import de.qbic.xmledit.FeedbackStore;
+package de.qbic.xmledit;
 // Imports
 
-import de.qbic.xmledit.*;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;

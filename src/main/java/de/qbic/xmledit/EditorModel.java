@@ -4,7 +4,6 @@ package de.qbic.xmledit;
 // IMPORTS
 // ---------------------------------------------------------------------------------------------------------------------
 
-import de.qbic.xmledit.deprecated.XMLEditor;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;
@@ -511,6 +510,7 @@ public class EditorModel {
     }
 
 
-
-
+    public String getId() {
+        return id;
+    }
 }

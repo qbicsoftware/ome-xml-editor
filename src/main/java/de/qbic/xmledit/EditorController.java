@@ -1,27 +1,16 @@
 package de.qbic.xmledit;
 
-import loci.common.services.DependencyException;
-import loci.common.services.ServiceException;
-import loci.common.services.ServiceFactory;
 import loci.common.xml.XMLTools;
 import loci.formats.FormatException;
-import loci.formats.ImageWriter;
-import loci.formats.meta.IMetadata;
-import loci.formats.services.OMEXMLService;
-import net.imagej.ImageJ;
-import ome.xml.meta.OMEXMLMetadataRoot;
-import ome.xml.model.OMEModel;
-import ome.xml.model.OMEModelImpl;
-import ome.xml.model.enums.EnumerationException;
+import loci.formats.IFormatHandler;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import javax.xml.parsers.ParserConfigurationException;
+
 import javax.xml.transform.TransformerException;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,50 +24,15 @@ public class EditorController {
     //------------------------------------------------------------------------------------------------------------------
     // Instantiations
     //------------------------------------------------------------------------------------------------------------------
-    public EditorView view = new EditorView(this);
-    public EditorModel model = new EditorModel(this);
+    private EditorView view;
+    private EditorModel model = new EditorModel(this);
     //------------------------------------------------------------------------------------------------------------------
     // Constructor
     //------------------------------------------------------------------------------------------------------------------
     public EditorController() {
     }
-    /**
-     * Takes a table model and adds changes stored in the change history to it
-     */
-    public void addChangesToTable(XMLTableModel model) throws TransformerException {
-        // get the change history
-        LinkedList<XMLChange> changeHistory = this.model.getChangeHistory();
-        validateChangeHistory(this.model.xml_doc);
-        int index = 0;
-        for (XMLChange c : changeHistory) {
-            model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNodeType()});
-            if (c.getValidity()) {
-                model.setRowColor(index, EditorView.PASTEL_GREEN);
-                view.validationErrorsField.setText("No validation errors in most recent change found.");
-                // set the text color to green
-                view.validationErrorsField.setForeground(EditorView.DARK_GREEN);
 
-            }
-            else{
-                model.setRowColor(index, EditorView.PASTEL_RED);
-                view.validationErrorsField.setText(c.getValidationError());
-                // set the text color to red
-                view.validationErrorsField.setForeground(EditorView.DARK_RED);
-            }
-            index++;
-        }
-    }
-    /**
-     * Update the change history tab with the new changes
-     */
-    public void updateChangeHistoryTab() throws TransformerException {
-        // empty the table model
-        view.historyTableModel.setRowCount(0);
-        // add new data to the table model
-        addChangesToTable(view.historyTableModel);
-        view.changeHistoryPane.add(view.historyTable);
-        view.changeHistoryPane.setViewportView(view.historyTable);
-    }
+
     /**
      * Adds Feedback to the Feedback table model
      *
@@ -115,10 +69,7 @@ public class EditorController {
             return;
         }
 
-        // update the view
-        if (view.tabbedPane.indexOfComponent(view.changeHistoryWindowPanel) != -1) {
-            updateChangeHistoryTab();
-        }
+
     }
 
     /**
@@ -182,277 +133,15 @@ public class EditorController {
         // update teh feedback tabl
     }
 
-    /**
-     * Exports the current metadata to an OME-TIFF file
-     * @param path the path to the file
-     */
-    public void exportToOmeTiff(String path, Document newXML) throws IOException, FormatException {
-
-        System.out.println("Inside exportToOmeTiff");
-        System.out.println("Path: " + path);
-        // time measurement
-        System.out.println("Start export time"+ System.currentTimeMillis());
-        // define output path
-        int dot = path.lastIndexOf(".");
-        String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.tif";
-        // record metadata to OME-XML format
-        ServiceFactory factory = null;
-        IMetadata omexmlMeta = null;
-        try {
-            factory = new ServiceFactory();
-            OMEXMLService service = factory.getInstance(OMEXMLService.class);
-            omexmlMeta = service.createOMEXMLMetadata();
-        } catch (DependencyException | ServiceException e) {
-            view.reportError(e.toString());
-        }
-        System.out.println("After initialisation time"+ System.currentTimeMillis());
-
-        // apply changes to metadata
-        Document new_xml_doc = (Document) newXML.cloneNode(true);
-        model.applyChanges(new_xml_doc);
-        System.out.println("Applied changes time"+ System.currentTimeMillis());
-        // set metadata
-        model.setXMLElement(new_xml_doc.getDocumentElement());
-        OMEModel xmlModel = new OMEModelImpl();
-        // MetadataRoot mdr = null;
-        OMEXMLMetadataRoot mdr = null;
-        // OME test = new OME();
-        //OME.getChildrenByTagName();
-        try {
-            mdr = new OMEXMLMetadataRoot(model.getXmlElement(), xmlModel);
-        } catch (EnumerationException e) {
-            view.reportError(e.toString());
-        }
-        omexmlMeta.setRoot(mdr);
-        // define writer
-        //OMETiffWriter writer = new OMETiffWriter();
-        //BufferedImageWriter biwriter = new BufferedImageWriter(writer);
-
-        // read pixels
-        model.getReader().setId(model.id);
-        BufferedImage[] pixelData = model.readPixels2();
-        model.getReader().close();
-        // write pixels
-        //biwriter.setMetadataRetrieve(omexmlMeta);
-        System.out.println("Writing to: " + outPath);
-        //biwriter.setId(outPath);
-        System.out.println("set metadata time"+ System.currentTimeMillis());
-        System.out.println("pixelData.length: " + pixelData.length);
-        System.out.println("pixelData[0].getWidth(): " + pixelData[0].getWidth());
-        System.out.println("pixelData[0].getHeight(): " + pixelData[0].getHeight());
-
-
-        ImageConverter converter = new ImageConverter();
-        converter.testConvert(new ImageWriter(), omexmlMeta, model.id, outPath);
-
-        //for (int i = 0; i < pixelData.length; i++) {
-        //    biwriter.saveImage(i, pixelData[i]);
-        //}
-        System.out.println("wrote pixels time"+ System.currentTimeMillis());
-        // close writer
-        //writer.close();
-        //biwriter.close();
-        // refocus gui
-        view.setVisible(true);
-        System.out.println("[done]");
-        System.out.println("Done time"+ System.currentTimeMillis());
+    private Document loadFile(String path) {
+        return null;
     }
-    /**
-     * Exports the current metadata to an OME-TIFF file
-     * @param path the path to the file
-     */
-    public void exportToOmeTiff(String path) throws IOException, FormatException {
 
-        System.out.println("Inside exportToOmeTiff");
-        System.out.println("Path: " + path);
-        // time measurement
-        System.out.println("Start export time"+ System.currentTimeMillis());
-        // define output path
-        int dot = path.lastIndexOf(".");
-        String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.tif";
-        // record metadata to OME-XML format
-        ServiceFactory factory = null;
-        IMetadata omexmlMeta = null;
-        try {
-            factory = new ServiceFactory();
-            OMEXMLService service = factory.getInstance(OMEXMLService.class);
-            omexmlMeta = service.createOMEXMLMetadata();
-        } catch (DependencyException | ServiceException e) {
-            view.reportError(e.toString());
-        }
-        System.out.println("After initialisation time"+ System.currentTimeMillis());
-
-        // apply changes to metadata
-        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
-        model.applyChanges(new_xml_doc);
-        System.out.println("Applied changes time"+ System.currentTimeMillis());
-        // set metadata
-        model.setXMLElement(new_xml_doc.getDocumentElement());
-        OMEModel xmlModel = new OMEModelImpl();
-        // MetadataRoot mdr = null;
-        OMEXMLMetadataRoot mdr = null;
-        // OME test = new OME();
-        //OME.getChildrenByTagName();
-        try {
-            mdr = new OMEXMLMetadataRoot(model.getXmlElement(), xmlModel);
-        } catch (EnumerationException e) {
-            view.reportError(e.toString());
-        }
-        omexmlMeta.setRoot(mdr);
-        // define writer
-        //OMETiffWriter writer = new OMETiffWriter();
-        //BufferedImageWriter biwriter = new BufferedImageWriter(writer);
-
-        // read pixels
-        model.getReader().setId(model.id);
-        BufferedImage[] pixelData = model.readPixels2();
-        model.getReader().close();
-        // write pixels
-        //biwriter.setMetadataRetrieve(omexmlMeta);
-        System.out.println("Writing to: " + outPath);
-        //biwriter.setId(outPath);
-        System.out.println("set metadata time"+ System.currentTimeMillis());
-        System.out.println("pixelData.length: " + pixelData.length);
-        System.out.println("pixelData[0].getWidth(): " + pixelData[0].getWidth());
-        System.out.println("pixelData[0].getHeight(): " + pixelData[0].getHeight());
-
-
-        ImageConverter converter = new ImageConverter();
-        converter.testConvert(new ImageWriter(), omexmlMeta, model.id, outPath);
-
-        //for (int i = 0; i < pixelData.length; i++) {
-        //    biwriter.saveImage(i, pixelData[i]);
-        //}
-        System.out.println("wrote pixels time"+ System.currentTimeMillis());
-        // close writer
-        //writer.close();
-        //biwriter.close();
-        // refocus gui
-        view.setVisible(true);
-        System.out.println("[done]");
-        System.out.println("Done time"+ System.currentTimeMillis());
-    }
-    /**
-     * Exports the current metadata to an OME-XML file
-     * @param path the path to the file
-     * @throws Exception
-     */
-    public void exportToOmeXml(String path, Document newXML) throws Exception {
-        System.out.println("Inside exportToOmeXml");
-        System.out.println("Path: " + path);
-        // define output path
-        int dot = path.lastIndexOf(".");
-        String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.xml";
-        // apply changes to metadata
-        Document new_xml_doc = (Document) newXML.cloneNode(true);
-        model.applyChanges(new_xml_doc);
-        // write to file
-        System.out.println("Writing to: " + outPath);
-        FileOutputStream xmlOutStream = new FileOutputStream(outPath);
-        XMLTools.writeXML(xmlOutStream, new_xml_doc);
-        xmlOutStream.close();
-        // refocus gui
-        view.setVisible(true);
-        System.out.println("[done]");
-    }
-    /**
-     * Exports the current metadata to an OME-XML file
-     * @param path the path to the file
-     * @throws Exception
-     */
-    public void exportToOmeXml(String path) throws Exception {
-        System.out.println("Inside exportToOmeXml");
-        System.out.println("Path: " + path);
-        // define output path
-        int dot = path.lastIndexOf(".");
-        String outPath = (dot >= 0 ? path.substring(0, dot) : path) + "_edited_" + ".ome.xml";
-        // apply changes to metadata
-        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
-        model.applyChanges(new_xml_doc);
-        // write to file
-        System.out.println("Writing to: " + outPath);
-        FileOutputStream xmlOutStream = new FileOutputStream(outPath);
-        XMLTools.writeXML(xmlOutStream, new_xml_doc);
-        xmlOutStream.close();
-        // refocus gui
-        view.setVisible(true);
-        System.out.println("[done]");
-    }
-    /**
-     *
-     */
-    public void showCurrentXML() throws Exception {
-        Document example_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
-
-        model.applyChanges(example_xml_doc);
-
-        System.out.println(XMLTools.indentXML(XMLTools.getXML(example_xml_doc)));
-        System.out.println("All Changes applied");
-        view.showXMLTree(example_xml_doc, example_xml_doc.getNodeName());
-        view.setVisible(true);
-    }
-    public void openTutorial() throws IOException {
-        String path = "./data/resources/HowToUse.md";
-        String md = new String(Files.readAllBytes(Paths.get(path)));
-        view.makeNewTab(view.renderMarkdown(md), "How To Use", EditorView.HELP_SVG);
-    }
-    /**
-     * Opens the about tab
-     */
-    public void openAbout() throws IOException {
-        String path = "./README.md";
-        String md = new String(Files.readAllBytes(Paths.get(path)));
-        view.makeNewTab(view.renderMarkdown(md), "About XML-Editor", EditorView.HELP_SVG);
-    }
     /**
      *
      */
     public LinkedList<XMLChange> getChangeHistory() {
         return model.getChangeHistory();
-    }
-    /**
-     *
-     */
-    public void saveChangeHistory(String path){
-        try {
-            FileOutputStream f = new FileOutputStream(new File(path));
-            ObjectOutputStream o = new ObjectOutputStream(f);
-            // Write objects to file
-            for (XMLChange c : model.getChangeHistory()) {
-                o.writeObject(c);
-            }
-            o.close();
-            f.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    /**
-     *
-     */
-    public void loadChangeHistory(String path) throws Exception {
-        try {
-            FileInputStream fi = new FileInputStream(new File(path));
-            ObjectInputStream oi = new ObjectInputStream(fi);
-            // Write objects to file
-            boolean moreObjects = true;
-            while (moreObjects) {
-                XMLChange c = (XMLChange) oi.readObject();
-                model.addChange(c);
-                // check if there are more objects
-                if (oi.available() == 0) {
-                    moreObjects = false;
-                }
-            }
-            oi.close();
-            fi.close();
-            // apply changes to the view port and show the change history
-            view.makeChangeHistoryTab();
-            updateTree();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
     /**
      *
@@ -466,63 +155,9 @@ public class EditorController {
         view.updateTreeTab(new_xml_doc, model.simplified);
     }
     /**
-     *
+     * @return
      */
-    public Document loadFile(String path) throws IOException, ServiceException, FormatException, ParserConfigurationException, SAXException {
-        String[] args = new String[2];
-        args[0] = path; // the id parameter
-        args[1] = "-omexml-only";
-        model.omexmlOnly = true;
-        model.omexml = true;
-        model.id = path;
-
-        model.createReader();
-        model.configureReaderPreInit();
-        model.getReader().setId(path);
-        model.configureReaderPostInit();
-
-        model.getReader().setSeries(model.series);
-
-        String xml = model.getOMEXML();
-        model.getReader().close();
-        return XMLTools.parseDOM(xml);
-    }
-    /**
-     *
-     */
-    public void openImage(String path) throws Exception {
-        // make title from path
-        String title = path.substring(path.lastIndexOf("/") + 1);
-        model.setXMLDoc(loadFile(path));
-        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
-        if (!model.getChangeHistory().isEmpty()) {
-            model.applyChanges(new_xml_doc);
-            view.makeChangeHistoryTab();
-        }
-        view.makeNewTreeTab(new_xml_doc, model.simplified, title);
-    }
-    /**
-     * Opens an external XML file and applies loaded changes to it
-     * @param path the path to the file
-     * @throws Exception
-     */
-    public void openXML(String path) throws Exception {
-        // make tab title from path
-        String title = path.substring(path.lastIndexOf("/") + 1);
-        // read the file
-        model.setXMLDoc(XMLTools.parseDOM(new File(path)));
-        // apply changes to metadata
-        Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
-        if (!model.getChangeHistory().isEmpty()) {
-            model.applyChanges(new_xml_doc);
-            view.makeChangeHistoryTab();
-        }
-        view.makeNewTreeTab(new_xml_doc, model.simplified, title);
-    }
-    /**
-     *
-     */
-    public void undoChange() throws Exception {
+    public Document undoChange() throws Exception {
         if (!model.getChangeHistory().isEmpty()) {
             // remove the last change from the history
             model.getChangeHistory().removeLast();
@@ -530,27 +165,19 @@ public class EditorController {
             Document new_xml_doc = (Document) model.getXmlElement().cloneNode(true);
             // apply all changes to the original xml
             model.applyChanges(new_xml_doc);
-            view.updateTreeTab(new_xml_doc, model.simplified);
-            view.makeChangeHistoryTab();
+            return new_xml_doc;
         }
+        else {
+            return model.getXMLDoc();
+        }
+
     }
     /**
      *
      */
     public void resetChangeHistory() throws Exception {
         model.setChangeHistory(new LinkedList<XMLChange>());
-        try {
-            view.makeChangeHistoryTab();
-        } catch (TransformerException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    /**
-     *
-     */
-    public void startWithGUI() {
-        final ImageJ ij = new ImageJ();
-        ij.command().run(EditorFijiPlugin.class, true);
+        view.makeChangeHistoryTab();
     }
     /**
      *
@@ -637,8 +264,121 @@ public class EditorController {
     /**
      *
      */
+    public Document getXMLDoc() {
+        return model.getXMLDoc();
+    }
+
     public void setSimplified(boolean simplified) {
         model.setSimplified(simplified);
     }
+    /**
+     *
+     */
+    public void exportToOmeXml(String path) {
 
+    }
+    /**
+     *
+     */
+    public void applyChanges(Document doc) {
+
+    }
+
+
+    public String getId() {
+        return model.getId();
+    }
+
+    public BufferedImage[] readPixels() throws IOException, FormatException {
+        return model.readPixels2();
+    }
+
+    public IFormatHandler getReader() {
+        return model.getReader();
+    }
+
+    public Element getXmlElement() {
+        return null;
+    }
+
+    public void setXMLElement(Element documentElement) {
+    }
+
+    public Object getSimplified() {
+        return null;
+    }
+
+    public void setXMLDoc(Document document) {
+    }
+
+    public String getOMEXML() {
+        return null;
+    }
+
+    public Object getSeries() {
+        return null;
+    }
+
+    public void configureReaderPostInit() {
+    }
+
+    public void configureReaderPreInit() {
+    }
+
+    public void createReader() {
+    }
+
+    public void setId(String path) {
+    }
+
+    public void addChange(XMLChange c) {
+    }
+
+    public void loadChangeHistory(String path) throws Exception {
+        try {
+            FileInputStream fi = new FileInputStream(new File(path));
+            ObjectInputStream oi = new ObjectInputStream(fi);
+            // Write objects to file
+            boolean moreObjects = true;
+            while (moreObjects) {
+                XMLChange c = (XMLChange) oi.readObject();
+                addChange(c);
+                // check if there are more objects
+                if (oi.available() == 0) {
+                    moreObjects = false;
+                }
+            }
+            oi.close();
+            fi.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void exportToOmeTiff(String path, Document newXMLDom) {
+    }
+    public void exportToOmeTiff(String path) {
+    }
+
+    public void openImage(String path) {
+    }
+
+    public void showCurrentXML() {
+    }
+
+    public void openXML(String absolutePath) {
+    }
+
+    public void openAbout() {
+    }
+
+    public void openTutorial() {
+    }
+
+    public void saveChangeHistory(String absolutePath) {
+    }
+
+    public void setSeries(Object series) {
+
+    }
 }

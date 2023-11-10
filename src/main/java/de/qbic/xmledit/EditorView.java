@@ -22,9 +22,10 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.util.LinkedList;
 
 public class EditorView extends javax.swing.JFrame {
-    /** This class defines the visual representation of the OME-Editor.
+    /** This class defines the visual representation of the OME-Editor.<
      *
      */
     // -----------------------------------------------------------------------------------------------------------------
@@ -54,56 +55,55 @@ public class EditorView extends javax.swing.JFrame {
     //-----------------------------------------------------------------------------------------------------------------
     public Document xml;
     public XMLTree myTree;
-    private JSplitPane splitPane;  // split the window in top and bottom
+    public JSplitPane splitPane;  // split the window in top and bottom
     private JPanel bottomPanel;    // container panel for the bottom
-    private JScrollPane scrollPaneBottom; // makes the text scrollable
-    private JScrollPane scrollPaneTop; // makes the text scrollable
-    private NodedTextField textField;     // the text
+    public JScrollPane scrollPaneBottom; // makes the text scrollable
+    public JScrollPane scrollPaneTop; // makes the text scrollable
+    public NodedTextField textField;     // the text
     private JMenuItem openSchemaButton;
-    private JMenuItem undoChangeButton;
-    private JMenuItem resetChangeHistoryButton;
-    private JMenuItem applyChangesToFolderButton;
-    private JMenuItem showCurrentXML;
-    private JMenuItem showChangeButton;
-    private JMenuItem loadChangeButton;
-    private JMenuItem saveChangeButton;
-    private JMenuItem validateChangeButton;
-    private JMenuItem exportOmeTiffButton;
-    private JMenuItem exportOmeXmlButton;
-    private JMenuItem howToUseButton;
-    private JMenuItem aboutButton;
-    private JMenuItem setSchemaPath;
-    private JCheckBoxMenuItem simplifiedTree;
-    private JPanel editPanel;
+    public JMenuItem undoChangeButton;
+    public JMenuItem resetChangeHistoryButton;
+    public JMenuItem applyChangesToFolderButton;
+    public JMenuItem showCurrentXML;
+    public JMenuItem showChangeButton;
+    public JMenuItem loadChangeButton;
+    public JMenuItem saveChangeButton;
+    public JMenuItem validateChangeButton;
+    public JMenuItem exportOmeTiffButton;
+    public JMenuItem exportOmeXmlButton;
+    public JMenuItem howToUseButton;
+    public JMenuItem aboutButton;
+    public JMenuItem setSchemaPath;
+    public JCheckBoxMenuItem simplifiedTree;
+    public JPanel editPanel;
     private JMenuBar mb;
     private JMenu file, settings, changeHistoryMenu, help;
-    private JMenuItem openImage;
-    private JMenuItem openXML;
-    private static final JPanel titlePanel = new JPanel();
+    public JMenuItem openImage;
+    public JMenuItem openXML;
+    public static final JPanel titlePanel = new JPanel();
     public static final JTabbedPane tabbedPane = new JTabbedPane();
     public static final JScrollPane changeHistoryPane = new JScrollPane();
-    private static final ButtonGroup bg = new ButtonGroup();
-    private int labelCount =0;
-    private static final JButton addButton = new JButton("Add Node");
-    private static final JButton delButton = new JButton("Delete");
+    public static final ButtonGroup bg = new ButtonGroup();
+    public int labelCount =0;
+    public static final JButton addButton = new JButton("Add Node");
+    public static final JButton delButton = new JButton("Delete");
     public static final JTextArea validationErrorsField = new JTextArea();
     public static final JPanel changeHistoryWindowPanel = new JPanel();
-    private XMLNode selectedNode;
-    private XMLNode toBeDeletedNode;
+    public XMLNode selectedNode;
+    public XMLNode toBeDeletedNode;
     private final Border fieldBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
     public XMLTableModel feedBackTableModel = null;
     public XMLTableModel historyTableModel = null;
     public JTable historyTable = null;
     private JOptionPane schemaHelp = null;
-    public EditorController controller;
+
     // create a new panel for the table
     // private JPanel feedbackTablePanel = new JPanel();
 
     // -----------------------------------------------------------------------------------------------------------------
     // Constructor
     // -----------------------------------------------------------------------------------------------------------------
-    public EditorView(EditorController myEditorController) {
-        controller = myEditorController;
+    public EditorView() {
         // INITIALIZE COMPONENTS ---------------------------------------------------------------------------------------
         mb = new JMenuBar();
 
@@ -153,8 +153,7 @@ public class EditorView extends javax.swing.JFrame {
         simplifiedTree = new JCheckBoxMenuItem("Simplified Tree");
         simplifiedTree.setSelected(true);
 
-        initializeAddButton();
-        initializeDelButton();
+
 
         splitPane = new JSplitPane();
         splitPane.setName("XML-Editor");
@@ -178,220 +177,9 @@ public class EditorView extends javax.swing.JFrame {
         splitPane.setOpaque(true);
         splitPane.setBackground(Color.WHITE);
         splitPane.setForeground(Color.WHITE);
-        // -------------------------------------------------------------------------------------------------------------
-        // ADD ACTION LISTENERS
-        // -------------------------------------------------------------------------------------------------------------
-        textField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                String newText = textField.getText();
-                try {
-                    controller.makeNewChange("edit", textField.getNode());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                textField.getNode().setUserObject(newText);
-            }
-        });
 
-        // undo the last change in the change history
-        undoChangeButton.addActionListener(e -> {
-            try {
-                controller.undoChange();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
 
-        // apply the current change history to all files in a folder
-        applyChangesToFolderButton.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Select Folder");
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int userSelection = chooser.showOpenDialog(splitPane);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File folder = chooser.getSelectedFile();
-                try {
-                    System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-                    System.out.println("Folder: " + folder.getAbsolutePath());
-                    this.makeFeedbackTab();
-                    Thread.sleep(2000);
-                    controller.applyChangesToFolder(folder.getAbsolutePath());
 
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        // reset the change history
-        resetChangeHistoryButton.addActionListener(e -> {
-            try {
-                controller.resetChangeHistory();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
-        // show change profile action listener
-        showChangeButton.addActionListener(e -> {
-            try {
-                makeChangeHistoryTab();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
-        // save change history action listener
-        saveChangeButton.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Save Change History");
-            int userSelection = chooser.showSaveDialog(splitPane);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToSave = chooser.getSelectedFile();
-                try {
-                    controller.saveChangeHistory(fileToSave.getAbsolutePath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        // load change history action listener
-        loadChangeButton.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Load Change history");
-            int userSelection = chooser.showOpenDialog(splitPane);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToLoad = chooser.getSelectedFile();
-                try {
-                    controller.loadChangeHistory(fileToLoad.getAbsolutePath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        // validate change history action listener
-        validateChangeButton.addActionListener(e -> {
-            try {
-                controller.validateChangeHistory();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
-        // Opens the tutorial
-        howToUseButton.addActionListener(e -> {
-            try {
-                controller.openTutorial();
-            }
-            catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        // opens the about page
-        aboutButton.addActionListener(e -> {
-            try {
-                controller.openAbout();
-            }
-            catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        // set schema path
-
-        setSchemaPath.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Set Schema Path");
-            int userSelection = chooser.showOpenDialog(splitPane);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToLoad = chooser.getSelectedFile();
-                try {
-                    controller.setSchemaPath(fileToLoad.getAbsolutePath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        openImage.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            int returnVal = chooser.showOpenDialog(null);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                try {
-                    controller.openImage(chooser.getSelectedFile().getAbsolutePath());
-                    makeChangeHistoryTab();
-                    // focus the xml tab
-                    tabbedPane.setSelectedIndex(0);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        // Opens a new XML file in the topPanel of the GUI, in a new tab
-        openXML.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            int returnVal = chooser.showOpenDialog(null);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                try {
-                    controller.openXML(chooser.getSelectedFile().getAbsolutePath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        // Opens the Current XML in the topPanel of the GUI, in a new tab
-        showCurrentXML.addActionListener(e -> {
-            try {
-                controller.showCurrentXML();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
-        exportOmeTiffButton.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Export to OmeTiff");
-            int userSelection = chooser.showSaveDialog(splitPane);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToSave = chooser.getSelectedFile();
-                try {
-                    controller.exportToOmeTiff(fileToSave.getPath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        exportOmeXmlButton.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Export to OmeXml");
-            int userSelection = chooser.showSaveDialog(splitPane);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToSave = chooser.getSelectedFile();
-                try {
-                    controller.exportToOmeXml(fileToSave.getPath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        // Add an action listener to the JCheckBoxMenuItem
-        simplifiedTree.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Get the source of the event
-                JCheckBoxMenuItem source = (JCheckBoxMenuItem) e.getSource();
-                // Get the selection state of the checkbox
-                boolean selected = source.isSelected();
-                // Perform some action based on the selection state
-                controller.setSimplified(selected);
-                controller.updateTree();
-            }
-        });
         // -------------------------------------------------------------------------------------------------------------
         // SET LAYOUT + DIMENSIONS
         // -------------------------------------------------------------------------------------------------------------
@@ -571,34 +359,8 @@ public class EditorView extends javax.swing.JFrame {
         p.setBorder(line);
         p.setOpaque(true);
     }
-    /**
-     * Creates a change history tab in the tabbed pane
-     */
-    public void makeChangeHistoryTab() throws Exception {
-        // create changer history window panel
-        changeHistoryWindowPanel.setLayout(new BoxLayout(changeHistoryWindowPanel, BoxLayout.Y_AXIS));
-        // add the change history pane to the change history window panel
-        changeHistoryWindowPanel.add(changeHistoryPane);
-        // Create Header entrys for the list of changes, so the user knows which entry is what
-        makeHistoryTable();
-        // add a textfield to the change history panel to display validation errors
-        validationErrorsField.setEditable(false);
-        validationErrorsField.setLineWrap(true);
-        validationErrorsField.setWrapStyleWord(true);
-        validationErrorsField.setSize(WIDTH, BUTTON_HEIGHT);
-        // add a border to the validation errors textfield
-        makePanelBorder(validationErrorsField);
-        // add the validation errors to the change history window panel
-        changeHistoryWindowPanel.add(validationErrorsField);
-        // add the changes to the table model
-        controller.addChangesToTable(historyTableModel);
-        // add the table to the change history pane
-        changeHistoryPane.add(historyTable);
-        // set the view port of the change history pane to the table
-        changeHistoryPane.setViewportView(historyTable);
-        // add the change panel to the tabbed pane
-        makeNewTab(changeHistoryWindowPanel, "Change History", CHANGE_SVG);
-    }
+
+
     /**
      * Initializes the change history table
      */
@@ -668,75 +430,7 @@ public class EditorView extends javax.swing.JFrame {
         // add the panel to the tabbed pane
         makeNewTab(feedbackScrollPane, "Feedback", FEEDBACK_SVG);
     }
-    /**
-     * Creates a new xml-viewer tab.
-     * @param dom the xml dom that is to be displayed in the tab
-     * @param simplified whether the xml-view should be simplified (only show elements) or not (show all nodes)
-     * @param title the title of the new xml-viewer tab
-     */
-    public void makeNewTreeTab(Document dom, boolean simplified, String title) throws TransformerException {
-        // create a new XMLTree from the DOM
-        myTree = new XMLTree(dom, simplified);
-        myTree.setOpaque(true);
-        myTree.setShowsRootHandles(false);
-        myTree.putClientProperty("JTree.lineStyle", "None");
-        myTree.setDragEnabled(true);
-        // add a listener to the jTree
-        myTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
-                // get the selected node
-                selectedNode = (XMLNode) myTree.getLastSelectedPathComponent();
-                updateEditPanel();
-            }
-        });
 
-        // add the jTree to a new panel and add it to the tabbedPane
-        scrollPaneTop.setViewportView(myTree);
-
-        makeNewTab(scrollPaneTop, title, TREE_SVG);
-    }
-    /**
-     * Updates the xml-viewer tab with the specified dom tree,
-     * @param dom the new xml dom that is to be displayed in the tab
-     * @param simplified whether the xml-view should be simplified (only show elements) or not (show all nodes)
-     */
-    public void updateTreeTab(Document dom, boolean simplified){ // originally called updateTree
-        // create a new XMLTree from the DOM
-        myTree = new XMLTree(dom, simplified);
-        myTree.setOpaque(true);
-        myTree.setShowsRootHandles(false);
-        myTree.putClientProperty("JTree.lineStyle", "None");
-        myTree.setDragEnabled(true);
-        // add a listener to the jTree
-        myTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
-                // get the selected node
-                selectedNode = (XMLNode) myTree.getLastSelectedPathComponent();
-                updateEditPanel();
-            }
-        });
-
-        // add the jTree to a new panel and add it to the tabbedPane
-        scrollPaneTop.setViewportView(myTree);
-    }
-    /**
-     * Creates a new xml-viewer tab. This version does not allow the user to edit the xml.
-     * @param dom the xml dom that is to be displayed in the tab
-     * @param title the title of the new xml-viewer tab
-     */
-    public void showXMLTree(Document dom, String title) {
-        XMLTree currentTree = new XMLTree(dom, false);
-        currentTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
-                // get the selected node
-                selectedNode = (XMLNode) myTree.getLastSelectedPathComponent();
-                updateEditPanel();
-            }
-        });
-        JScrollPane currentScrollPane = new JScrollPane();
-        currentScrollPane.setViewportView(currentTree);
-        makeNewTab(currentScrollPane, title, TREE_SVG);
-    }
     /**
      * Helper function called by multiple methods to create new tabs.
      * @param p the component that is to be added to a new tab
@@ -792,61 +486,12 @@ public class EditorView extends javax.swing.JFrame {
         // return the ImageIcon
         return icon;
     }
-    /**
-     * Updates the editPanel, which shows the attributes and text nodes of the currently selected element node.
-     */
-    public void updateEditPanel() {
-        // reset the editPanel
-        labelCount = 0;
-        editPanel.removeAll();
-        editPanel.revalidate();
-        editPanel.repaint();
 
-        // identify the currently selected element node and add it as title button (the children will be added in addTitleButton())
-        if (selectedNode.getType().equals("attribute") ||
-                selectedNode.getType().equals("text") ||
-                selectedNode.getType().equals("value")) {
 
-            selectedNode = selectedNode.getParent();
-            makeEditPanel();
-        }
-        else {
-            makeEditPanel();
-        }
-        JPanel spacer = new JPanel();
-        labelCount++;
-        editPanel.add(spacer);
-        spacer.setPreferredSize(new Dimension(0, spacer.getHeight()));
-        SpringUtilities.makeCompactGrid(editPanel, labelCount, 1,0,0,0, 0);
-        scrollPaneBottom.setViewportView(editPanel);
-    }
-    /**
-     * Creates the editPanel, which shows the attributes and text nodes of the currently selected element node.
-     */
-    private void makeEditPanel() {
-        // make border for the editPanel
-        // makePanelBorder(editPanel);
-        // add the Element Button to the editPanel
-        addElementButton();
-        // draw the children of the element node
-        for (int c=0; c<selectedNode.getChildCount();c++) {
-            XMLNode child = (XMLNode) selectedNode.getChildAt(c);
-            if (child.getType().equals("attribute")) {
-                XMLNode childChild = child.getFirstChild();
-                addAttributeButton(child.getUserObject().toString(), childChild);
-            }
-            else if (child.getType().equals("value")) {
-                addAttributeButton(selectedNode.getUserObject().toString(), child);
-            }
-            else if (child.getType().equals("text")){
-                addTextButton(child);
-            }
-        }
-    }
     /**
      * Adds a title button to the editPanel at the top. If clicked, an add and a delete button will pop up.
      */
-    private void addElementButton() {
+    public void addElementButton() {
         // reset the titlePanel
         titlePanel.removeAll();
         titlePanel.revalidate();
@@ -894,435 +539,27 @@ public class EditorView extends javax.swing.JFrame {
         });
 
     }
-    /**
-     * Adds an attribute to the editPanel
-     * @param labelText
-     * @param node
-     */
-    private void addAttributeButton(String labelText, XMLNode node) {
-        // add a new attribute to the editPanel consisting of a label, a textfield and a delete button in a new panel
-        JPanel attributePanel = new JPanel();
-        attributePanel.setLayout(new BorderLayout(0,0));
-        JToggleButton attrButton = new JToggleButton(labelText);
-        // set the unselected background color of the button to gray
-        attrButton.setBackground(Color.LIGHT_GRAY);
-        // set the border of the attribute Button
-        makeLineBorder(attrButton);
-        // make new textfield for the attribute
-        NodedTextField textField = new NodedTextField(node);
-        // give the textfield  a border
-        makeLineBorder(textField);
-        // add to button group so only one attribute can be selected at a time
-        bg.add(attrButton);
-        // change the background color of the textfield when it is selected
-        textField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                textField.setBackground(PASTEL_BLUE);
-            }
-            @Override
-            public void focusLost(FocusEvent e) {
-                textField.setBackground(Color.WHITE);
-                textField.setText(textField.getNode().getUserObject().toString());
-            }
-        });
 
-        // add a listener to the textfield to detect changes
-        textField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                if (!textField.getNode().getUserObject().equals(textField.getText())) {
-                    textField.getNode().setUserObject(textField.getText());
-                    try {
-                        controller.makeNewChange("modify" , textField.getNode());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    System.out.println("change detected");
-                }
-                textField.getParent().requestFocus();
-            }
-        });
-        // add a listener to the button to detect selection and show the delete button
-        attrButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // remove the add button from the titlePanel
-                titlePanel.remove(addButton);
-                // set the to be deleted node to the currently selected attribute
-                toBeDeletedNode = node.getParent();
-                // add the delete button to the attributePanel
-                attributePanel.add(delButton, BorderLayout.EAST);
-                attributePanel.revalidate();
-                attributePanel.repaint();
-            }
-        });
-        // set the size of the buttons and the textfield
-        Dimension d = new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT);
-        attributePanel.setPreferredSize(d);
-        attrButton.setPreferredSize(d);
-        delButton.setPreferredSize(d);
-        // set the minimum size of the buttons and the textfield
-        attributePanel.setMinimumSize(d);
-        attrButton.setMinimumSize(d);
-        delButton.setMinimumSize(d);
-        // set the maximum size of the buttons and the textfield
-        attributePanel.setMaximumSize(d);
-        attrButton.setMaximumSize(d);
-        delButton.setMaximumSize(d);
-
-        // add the components to the panel and the panel to the editPanel
-        attributePanel.add(attrButton, BorderLayout.WEST);
-        attributePanel.add(textField, BorderLayout.CENTER);
-        editPanel.add(attributePanel);
-
-        // increase the labelCount so the layout can be updated
-        labelCount +=1;
+    public void showXMLTree(Document exampleXmlDoc, String nodeName) {
     }
-    /**
-     * Adds a text button to the editPanel
-     * @param node
-     */
-    private void addTextButton(XMLNode node) {
-        // add a new text to the editPanel consisting of a label, a textfield and a delete button in a new panel
-        JPanel textPanel = new JPanel();
-        textPanel.setLayout(new BorderLayout(0,0));
-        NodedTextField textField = new NodedTextField(node);
-        // give the textfield  a border
-        makeLineBorder(textField);
 
-        // add a listener to the textfield to dtetect if it is selected
-        textField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                textField.setBackground(PASTEL_BLUE);
-            }
-            @Override
-            public void focusLost(FocusEvent e) {
-                textField.setBackground(Color.WHITE);
-                textField.setText(textField.getNode().getUserObject().toString());
-            }
-        });
-
-        // add a listener to the textfield to detect changes
-        textField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                if (!textField.getNode().getUserObject().equals(textField.getText())) {
-                    textField.getNode().setUserObject(textField.getText());
-                    try {
-                        controller.makeNewChange("modify" , textField.getNode());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    System.out.println("change detected");
-                }
-                textField.getParent().requestFocus();
-            }
-        });
-
-        // add a mouse listener to the textfield to detect selection and show the delete button
-        textField.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (SwingUtilities.isLeftMouseButton(e)) {
-                    // remove the add button from the titlePanel
-                    titlePanel.remove(addButton);
-
-                    // set the to be deleted node to the currently selected text
-                    toBeDeletedNode = node;
-
-                    // add the delete button to the textPanel
-                    textPanel.add(delButton, BorderLayout.EAST);
-                    textPanel.revalidate();
-                    textPanel.repaint();
-                }
-            }
-        });
-
-        // set the size of the buttons and the textfield
-        Dimension d = new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT);
-        textPanel.setPreferredSize(d);
-        delButton.setPreferredSize(d);
-        // set the minimum size of the buttons and the textfield
-        textPanel.setMinimumSize(d);
-        delButton.setMinimumSize(d);
-        // set the maximum size of the buttons and the textfield
-        textPanel.setMaximumSize(d);
-        delButton.setMaximumSize(d);
-
-        // add the components to the panel and the panel to the editPanel
-        //textPanel.add(textButton, BorderLayout.WEST);
-        textPanel.add(textField, BorderLayout.CENTER);
-        editPanel.add(textPanel);
-
-        // increase the labelCount so the layout can be updated
-        labelCount +=1;
+    public void makeChangeHistoryTab() {
     }
+
+    public void makeNewTreeTab(Document newXmlDoc, Object simplified, String title) {
+    }
+
+    public void updateTree() {
+    }
+
+    public void updateTreeTab(Document newXmlDoc, Object simplified) {
+    }
+
+
     /**
      * Initializes the add button
      */
-    private void initializeAddButton() {
-        addButton.addActionListener(event -> {
-            // create optionPane that is a pane containing two panels.
-            // A radio button panel on the left and a panel for each type of node on the right
-            // The right panel is only visible when the corresponding radio button is selected
-            JOptionPane optionPane = new JOptionPane();
-            optionPane.setLayout(new BorderLayout(10, 10));
-            optionPane.setPreferredSize(new Dimension(600, 150));
 
-            // create left panel for radio buttons
-            JPanel leftPanel = new JPanel();
-            leftPanel.setLayout(new GridLayout(3, 1));
-            leftPanel.setPreferredSize(new Dimension(200, 150));
 
-            // create panel for the right part of the optionPane and create new SpringLayout
-            JPanel rightPanel = new JPanel();
-            SpringLayout rightPanelLayout = new SpringLayout();
-            rightPanel.setLayout(rightPanelLayout);
-            rightPanel.setPreferredSize(new Dimension(400, 150));
-
-            // add leftPanel and rightPanel to optionPane
-            optionPane.add(leftPanel, BorderLayout.WEST);
-            optionPane.add(rightPanel, BorderLayout.CENTER);
-
-            // make my titled border for both panels
-            makeTitledBorder(leftPanel, "Choose Node Type");
-            makeTitledBorder(rightPanel, "Node Details");
-
-            // create radio buttons for "Attribute", "Text" and "Element"
-            JRadioButton attrRadio = new JRadioButton("Attribute");
-            JRadioButton textRadio = new JRadioButton("Text");
-            JRadioButton elementRadio = new JRadioButton("Element");
-
-            // set action command for each radio button
-            attrRadio.setActionCommand("attribute");
-            textRadio.setActionCommand("text");
-            elementRadio.setActionCommand("element");
-
-            // add radio buttons to leftPanel
-            leftPanel.add(attrRadio);
-            leftPanel.add(textRadio);
-            leftPanel.add(elementRadio);
-
-            // group the radio buttons
-            ButtonGroup group = new ButtonGroup();
-            group.add(attrRadio);
-            group.add(textRadio);
-            group.add(elementRadio);
-
-            // create textfields for each type of node
-            JTextField attrField = new JTextField(1);
-            JTextField valField = new JTextField(1);
-            JTextField textField = new JTextField(1);
-            JTextField elementField = new JTextField(1);
-            JTextField elementIDField = new JTextField(1);
-
-            // create label for each textfield
-            JLabel attrLabel = new JLabel("Attribute:");
-            JLabel valLabel = new JLabel("Value:");
-            JLabel textLabel = new JLabel("Text:");
-            JLabel elementLabel = new JLabel("Element:");
-            JLabel elementIDLabel = new JLabel("ID:");
-
-            // set preferred width for each textfield to textfield width and height to BUTTON_HEIGHT
-            attrField.setPreferredSize(new Dimension(attrField.getWidth(), BUTTON_HEIGHT));
-            valField.setPreferredSize(new Dimension(valField.getWidth(), BUTTON_HEIGHT));
-            textField.setPreferredSize(new Dimension(textField.getWidth(), BUTTON_HEIGHT));
-            elementField.setPreferredSize(new Dimension(elementField.getWidth(), BUTTON_HEIGHT));
-            elementIDField.setPreferredSize(new Dimension(elementIDField.getWidth(), BUTTON_HEIGHT));
-
-            // set labels for each textfield
-            attrLabel.setLabelFor(attrField);
-            valLabel.setLabelFor(valField);
-            textLabel.setLabelFor(textField);
-            elementLabel.setLabelFor(elementField);
-            elementIDLabel.setLabelFor(elementIDField);
-
-            // set default selection
-            attrRadio.setSelected(true);
-            rightPanel.add(attrLabel);
-            rightPanel.add(attrField);
-            rightPanel.add(valLabel);
-            rightPanel.add(valField);
-            SpringUtilities.makeCompactGrid(rightPanel, 2, 2, 5, 5, 5, 5);
-
-            // add actionlistener to radio buttons, upon selection, change the right panel to the selected type
-            attrRadio.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // reset rightPanel
-                    rightPanel.removeAll();
-
-                    // add labels and textfields to rightPanel
-                    rightPanel.add(attrLabel);
-                    rightPanel.add(attrField);
-                    rightPanel.add(valLabel);
-                    rightPanel.add(valField);
-
-                    // Lay out the panel by defining SpringUtilities constraints
-                    SpringUtilities.makeCompactGrid(rightPanel, rightPanel.getComponentCount()/2, 2, 5, 5, 5, 5);
-
-                    // revalidate and repaint
-                    rightPanel.revalidate();
-                    rightPanel.repaint();
-                }
-            });
-            textRadio.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // reset rightPanel
-                    rightPanel.removeAll();
-
-                    // add labels and textfields to rightPanel
-                    rightPanel.add(textLabel);
-                    rightPanel.add(textField);
-
-                    // Lay out the panel by defining SpringUtilities constraints
-                    SpringUtilities.makeCompactGrid(rightPanel, rightPanel.getComponentCount()/2, 2, 5, 5, 5, 5);
-
-                    // revalidate and repaint
-                    rightPanel.revalidate();
-                    rightPanel.repaint();
-                }
-            });
-            elementRadio.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // reset rightPanel
-                    rightPanel.removeAll();
-
-                    // add labels and textfields to rightPanel
-                    rightPanel.add(elementLabel);
-                    rightPanel.add(elementField);
-                    rightPanel.add(elementIDLabel);
-                    rightPanel.add(elementIDField);
-
-                    // Lay out the panel by defining SpringUtilities constraints
-                    SpringUtilities.makeCompactGrid(rightPanel, rightPanel.getComponentCount()/2, 2, 5, 5, 5, 5);
-
-                    // revalidate and repaint
-                    rightPanel.revalidate();
-                    rightPanel.repaint();
-                }
-            });
-
-            int confirmed = JOptionPane.showConfirmDialog(null, optionPane,
-                    "Create new Node", JOptionPane.OK_CANCEL_OPTION);
-
-            if (confirmed == JOptionPane.OK_OPTION) {
-                String selection = group.getSelection().getActionCommand();
-                if (selection.equals("attribute")) {
-                    // create new XMLNode and add it to the selected node
-                    XMLNode newAttrNode = new XMLNode();
-                    XMLNode newValNode = new XMLNode();
-                    newAttrNode.add(newValNode);
-                    newAttrNode.setUserObject(attrField.getText());
-                    newValNode.setUserObject(valField.getText());
-                    newAttrNode.setType("attribute");
-                    newValNode.setType("value");
-                    selectedNode.add(newAttrNode);
-
-                    // add the new node to the change history
-                    try {
-                        controller.makeNewChange("add", newAttrNode);
-                    } catch (MalformedURLException | TransformerException | SAXException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    // add the new node to the argument panel
-                    addAttributeButton(newAttrNode.getUserObject().toString(), newValNode);
-
-                    // redraw the argument panel
-                    updateEditPanel();
-                    myTree.updateUI();
-                }
-                else if (selection.equals("text")) {
-                    // create new XMLNode and add it to the selected node
-                    XMLNode newTextNode = new XMLNode();
-                    newTextNode.setUserObject(textField.getText());
-                    newTextNode.setType("text");
-                    selectedNode.add(newTextNode);
-
-                    // add the new node to the change history
-                    try {
-                        controller.makeNewChange("add", newTextNode);
-                    } catch (MalformedURLException | SAXException | TransformerException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    // add the new node to the argument panel
-                    addAttributeButton(newTextNode.getUserObject().toString(), newTextNode);
-
-                    // redraw the argument panel
-                    updateEditPanel();
-                    myTree.updateUI();
-                }
-                else if (selection.equals("element")) {
-                    // create new XMLNode and add it to the selected node
-                    XMLNode newElementNode = new XMLNode();
-                    newElementNode.setUserObject(elementField.getText());
-                    newElementNode.setType("element");
-                    // create a new ID node for the new element
-                    XMLNode newIDNode = new XMLNode();
-                    newIDNode.setUserObject("ID");
-                    newIDNode.setType("attribute");
-                    // create a new ID value node for the new element
-                    XMLNode newIDValNode = new XMLNode();
-                    newIDValNode.setUserObject(elementIDField.getText());
-                    newIDValNode.setType("value");
-                    // add the ID value node to the ID node
-                    newIDNode.add(newIDValNode);
-                    // add the ID node to the new element node
-                    newElementNode.add(newIDNode);
-                    // redraw the argument panel
-                    updateEditPanel();
-                    System.out.println(selectedNode.getChildCount());
-                    // redraw the tree
-                    XMLTreeModel model = (XMLTreeModel) myTree.getModel();
-                    model.insertNodeInto(newElementNode, selectedNode, selectedNode.getChildCount());
-                    System.out.println(selectedNode.getChildCount());
-                    myTree.updateUI();
-                    // add the new node to the change history
-                    try {
-                        controller.makeNewChange("add", newElementNode);
-                    }
-                    catch (MalformedURLException | TransformerException | SAXException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                }
-            }
-            // make sure the option pane closes when the user clicks cancel
-            else {
-                optionPane.setVisible(false);
-            }
-        });
-    }
-    /**
-     *
-     */
-    private void initializeDelButton() {
-        // remove all the action listeners from the delete button
-        for (ActionListener al : delButton.getActionListeners()) {
-            delButton.removeActionListener(al);
-        }
-        // add action listener to delete button
-        delButton.addActionListener(event -> {
-            System.out.println("Delete button pressed");
-            System.out.println("To be Deleted node: " + toBeDeletedNode.getUserObject());
-
-            // remove the node from the tree
-            try {
-                controller.makeNewChange("delete", toBeDeletedNode);
-            } catch (MalformedURLException | TransformerException | SAXException e) {
-                throw new RuntimeException(e);
-            }
-            XMLNode parentNode = toBeDeletedNode.getParent();
-            selectedNode = parentNode;
-            parentNode.remove(toBeDeletedNode);
-
-            myTree.updateUI();
-            updateEditPanel();
-        });
-    }
 
 }

@@ -9,8 +9,8 @@ public class CommandLineInterface {
     // Initialisations and Instantiations
     //------------------------------------------------------------------------------------------------------------------
     EditorController controller;
-    CommandLineInterface(EditorController contr) {
-        controller = contr;
+    public CommandLineInterface() {
+        controller = new EditorController();
     }
 
     //------------------------------------------------------------------------------------------------------------------
