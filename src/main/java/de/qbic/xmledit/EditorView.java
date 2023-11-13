@@ -4,7 +4,6 @@ package de.qbic.xmledit;
 // ---------------------------------------------------------------------------------------------------------------------
 // IMPORTS
 // ---------------------------------------------------------------------------------------------------------------------
-import loci.plugins.config.SpringUtilities;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.intellij.markdown.ast.ASTNode;
@@ -13,16 +12,12 @@ import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor;
 import org.intellij.markdown.html.HtmlGenerator;
 import org.intellij.markdown.parser.MarkdownParser;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.xml.transform.TransformerException;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.util.LinkedList;
 
 public class EditorView extends javax.swing.JFrame {
     /** This class defines the visual representation of the OME-Editor.<
@@ -78,10 +73,10 @@ public class EditorView extends javax.swing.JFrame {
     public JPanel editPanel;
     private JMenuBar mb;
     private JMenu file, settings, changeHistoryMenu, help;
-    public JMenuItem openImage;
+    public JMenuItem openImageButton;
     public JMenuItem openXML;
     public static final JPanel titlePanel = new JPanel();
-    public static final JTabbedPane tabbedPane = new JTabbedPane();
+    public JTabbedPane tabbedPane;
     public static final JScrollPane changeHistoryPane = new JScrollPane();
     public static final ButtonGroup bg = new ButtonGroup();
     public int labelCount =0;
@@ -106,7 +101,7 @@ public class EditorView extends javax.swing.JFrame {
     public EditorView() {
         // INITIALIZE COMPONENTS ---------------------------------------------------------------------------------------
         mb = new JMenuBar();
-
+        tabbedPane = new JTabbedPane();
         // Menu for the file
         file = new JMenu("File");
         // Menu for the settings
@@ -118,7 +113,7 @@ public class EditorView extends javax.swing.JFrame {
         makeHistoryTable();
 
         // Button that opens the xml tree of an image
-        openImage = new JMenuItem("Open Image");
+        openImageButton = new JMenuItem("Open Image");
         // Button that opens an external xml file
         openXML = new JMenuItem("Open XML");
         // Button that shows the current XML
@@ -201,7 +196,7 @@ public class EditorView extends javax.swing.JFrame {
         //--------------------------------------------------------------------------------------------------------------
         // SET ICONS FOR MENU ITEMS
         //--------------------------------------------------------------------------------------------------------------
-        openImage.setIcon(loadSvgAsImageIcon(FILES_SVG));
+        openImageButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
         openXML.setIcon(loadSvgAsImageIcon(FILES_SVG));
         showCurrentXML.setIcon(loadSvgAsImageIcon(FILES_SVG));
         exportOmeTiffButton.setIcon(loadSvgAsImageIcon(FILES_SVG));
@@ -239,7 +234,7 @@ public class EditorView extends javax.swing.JFrame {
         mb.add(help);
 
         // add menu items to file menu
-        file.add(openImage);
+        file.add(openImageButton);
         file.add(openXML);
         file.add(openSchemaButton);
         file.add(showCurrentXML);
@@ -546,8 +541,6 @@ public class EditorView extends javax.swing.JFrame {
     public void makeChangeHistoryTab() {
     }
 
-    public void makeNewTreeTab(Document newXmlDoc, Object simplified, String title) {
-    }
 
     public void updateTree() {
     }

@@ -9,6 +9,7 @@ import loci.common.Location;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
+import loci.common.xml.XMLTools;
 import loci.formats.*;
 import loci.formats.gui.AWTImageTools;
 import loci.formats.gui.BufferedImageReader;
@@ -475,6 +476,26 @@ public class EditorModel {
     /**
      *
      */
+    /**
+     * load an image and returns the metadata as a xml
+     * @param path the path to the image
+     */
+    public Document loadFile(String path) throws Exception {
+        omexmlOnly = true;
+        omexml = true;
+        id = path;
+
+        createReader();
+        configureReaderPreInit();
+        reader.setId(path);
+        configureReaderPostInit();
+
+        reader.setSeries(series);
+
+        String xml = getOMEXML();
+        reader.close();
+        return XMLTools.parseDOM(xml);
+    }
     public void setXMLElement(Element ele) {
         this.xmlElement = ele;
     }
@@ -516,5 +537,8 @@ public class EditorModel {
 
     public Object getSeries() {
         return series;
+    }
+    public boolean getSimplified() {
+        return simplified;
     }
 }

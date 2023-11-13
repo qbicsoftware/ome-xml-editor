@@ -1,26 +1,14 @@
 package de.qbic.xmledit;
 
-import loci.common.services.DependencyException;
-import loci.common.services.ServiceException;
-import loci.common.services.ServiceFactory;
 import loci.common.xml.XMLTools;
 import loci.formats.FormatException;
-import loci.formats.ImageWriter;
-import loci.formats.meta.IMetadata;
-import loci.formats.services.OMEXMLService;
 import loci.plugins.config.SpringUtilities;
-import ome.xml.meta.OMEXMLMetadataRoot;
-import ome.xml.model.OMEModel;
-import ome.xml.model.OMEModelImpl;
-import ome.xml.model.enums.EnumerationException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
 import javax.swing.*;
 import javax.xml.transform.TransformerException;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -37,16 +25,26 @@ public class GraphicalUserInterface implements InOut{
     //------------------------------------------------------------------------------------------------------------------
     private EditorController controller;
     private EditorView view;
+    //------------------------------------------------------------------------------------------------------------------
+    // Constructor
+    //------------------------------------------------------------------------------------------------------------------
     public GraphicalUserInterface() {
-
         view = new EditorView();
+        view.setVisible(true);
+        view.setDefaultCloseOperation(view.EXIT_ON_CLOSE);
+        System.out.println("view initialised");
         initializeAddButton();
+        System.out.println("add initialised");
         initializeDelButton();
+        System.out.println("del initialised");
         controller = new EditorController();
-
+        System.out.println("Controller initialised");
         // -------------------------------------------------------------------------------------------------------------
         // ADD ACTION LISTENERS
         // -------------------------------------------------------------------------------------------------------------
+        /** Textfield
+         * @return
+         */
         view.textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 String newText = view.textField.getText();
@@ -62,8 +60,9 @@ public class GraphicalUserInterface implements InOut{
                 view.textField.getNode().setUserObject(newText);
             }
         });
-
-        // undo the last change in the change history
+        /**
+         *
+         */
         view.undoChangeButton.addActionListener(e -> {
             try {
                 controller.undoChange();
@@ -71,8 +70,9 @@ public class GraphicalUserInterface implements InOut{
                 throw new RuntimeException(ex);
             }
         });
-
-        // apply the current change history to all files in a folder
+        /**
+         * apply the current change history to all files in a folder
+         */
         view.applyChangesToFolderButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Select Folder");
@@ -105,7 +105,7 @@ public class GraphicalUserInterface implements InOut{
         // show change profile action listener
         view.showChangeButton.addActionListener(e -> {
             try {
-                view.makeChangeHistoryTab();
+                makeChangeHistoryTab();
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -184,15 +184,19 @@ public class GraphicalUserInterface implements InOut{
             }
         });
 
-        view.openImage.addActionListener(e -> {
+        view.openImageButton.addActionListener(e -> {
+            System.out.println("Open Image button pressed");
             JFileChooser chooser = new JFileChooser();
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
-                    controller.openImage(chooser.getSelectedFile().getAbsolutePath());
-                    view.makeChangeHistoryTab();
+                    String path = chooser.getSelectedFile().getAbsolutePath();
+                    Document xml_doc = controller.openImage(path);
+                    makeChangeHistoryTab();
+                    String title = path.substring(path.lastIndexOf("/") + 1);
+                    makeNewTreeTab(xml_doc, controller.getSimplified(), title);
                     // focus the xml tab
-                    view.tabbedPane.setSelectedIndex(0);
+                    //view.tabbedPane.setSelectedIndex(0);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -267,12 +271,6 @@ public class GraphicalUserInterface implements InOut{
     //------------------------------------------------------------------------------------------------------------------
     // Methods for the Controller
     //------------------------------------------------------------------------------------------------------------------
-    public void startView() {
-        view = new EditorView();
-        view.setVisible(true);
-        view.setDefaultCloseOperation(view.EXIT_ON_CLOSE);
-
-    }
 
 
     @Override
@@ -285,7 +283,7 @@ public class GraphicalUserInterface implements InOut{
     public void loadChangeHistory(String path) throws Exception {
         controller.loadChangeHistory(path);
         // apply changes to the view port and show the change history
-        view.makeChangeHistoryTab();
+        makeChangeHistoryTab();
         view.updateTree();
 
     }
@@ -965,20 +963,7 @@ public class GraphicalUserInterface implements InOut{
         view.updateTreeTab(new_xml_doc, controller.getSimplified());
         view.makeChangeHistoryTab();
     }
-    /**
-     *
-     */
-    public void openImage(String path) throws Exception {
-        // make title from path
-        String title = path.substring(path.lastIndexOf("/") + 1);
-        controller.setXMLDoc(loadFile(path));
-        Document new_xml_doc = (Document) controller.getXMLDoc().cloneNode(true);
-        if (!controller.getChangeHistory().isEmpty()) {
-            controller.applyChanges(new_xml_doc);
-            view.makeChangeHistoryTab();
-        }
-        view.makeNewTreeTab(new_xml_doc, controller.getSimplified(), title);
-    }
+
     /**
      * Opens an external XML file and applies loaded changes to it
      * @param path the path to the file
@@ -995,7 +980,7 @@ public class GraphicalUserInterface implements InOut{
             controller.applyChanges(new_xml_doc);
             view.makeChangeHistoryTab();
         }
-        view.makeNewTreeTab(new_xml_doc, controller.getSimplified(), title);
+        makeNewTreeTab(new_xml_doc, controller.getSimplified(), title);
     }
     /**
      *

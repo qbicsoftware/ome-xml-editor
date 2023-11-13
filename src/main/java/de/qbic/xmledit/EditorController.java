@@ -25,11 +25,12 @@ public class EditorController {
     // Instantiations
     //------------------------------------------------------------------------------------------------------------------
     private EditorView view;
-    private EditorModel model = new EditorModel(this);
+    private EditorModel model;
     //------------------------------------------------------------------------------------------------------------------
     // Constructor
     //------------------------------------------------------------------------------------------------------------------
     public EditorController() {
+        model = new EditorModel(this);
     }
 
 
@@ -114,7 +115,7 @@ public class EditorController {
      */
     public void applyChangesToFile(String path) throws Exception {
         FeedbackStore fbStore= new FeedbackStore(path);
-        Document newXMLDom =  loadFile(path);
+        Document newXMLDom =  model.loadFile(path);
         if (validateChangeHistory(newXMLDom)) {
             fbStore.setValidity(true);
             try {
@@ -133,9 +134,6 @@ public class EditorController {
         // update teh feedback tabl
     }
 
-    private Document loadFile(String path) {
-        return null;
-    }
 
     /**
      *
@@ -304,8 +302,8 @@ public class EditorController {
     public void setXMLElement(Element documentElement) {
     }
 
-    public Object getSimplified() {
-        return null;
+    public boolean getSimplified() {
+        return model.getSimplified();
     }
 
     public void setXMLDoc(Document document) {
@@ -360,7 +358,20 @@ public class EditorController {
     public void exportToOmeTiff(String path) {
     }
 
-    public void openImage(String path) {
+    /**
+     *
+     */
+    public Document openImage(String path) throws Exception {
+        // make title from path
+        String title = path.substring(path.lastIndexOf("/") + 1);
+        Document xml_doc = model.loadFile(path);
+        model.setXMLDoc(xml_doc);
+        Document new_xml_doc = (Document) xml_doc.cloneNode(true);
+        if (!getChangeHistory().isEmpty()) {
+            applyChanges(new_xml_doc);
+            //view.makeChangeHistoryTab();
+        }
+        return new_xml_doc;
     }
 
     public void showCurrentXML() {
