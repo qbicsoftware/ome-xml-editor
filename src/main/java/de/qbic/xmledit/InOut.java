@@ -103,7 +103,7 @@ public interface InOut {
      * @param path the path to the file
      */
     public default void exportToOmeTiff(String path) throws IOException, FormatException {
-        exportToOmeTiff(path, controller.getXmlDoc());
+        exportToOmeTiff(path, controller.getXMLDoc());
     }
 
     /**
@@ -111,7 +111,7 @@ public interface InOut {
      * @param path the path to the file
      */
     public default void exportToOmeXml(String path) throws Exception {
-        exportToOmeXml(path, controller.getXmlDoc());
+        exportToOmeXml(path, controller.getXMLDoc());
     }
     /**
      * Exports the current metadata to an OME-XML file

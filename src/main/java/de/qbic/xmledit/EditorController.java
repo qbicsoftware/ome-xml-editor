@@ -155,20 +155,17 @@ public class EditorController {
     /**
      * @return
      */
-    public Document undoChange() throws Exception {
+    public void undoChange() throws Exception {
         if (!model.getChangeHistory().isEmpty()) {
             // remove the last change from the history
             model.getChangeHistory().removeLast();
             // define a new xml document
-            Document new_xml_doc = (Document) model.getXmlElement().cloneNode(true);
+
+            Document new_xml_doc = model.getXMLDoc().cloneNode(true).getOwnerDocument();
+            System.out.println("Undoing change");
             // apply all changes to the original xml
             model.applyChanges(new_xml_doc);
-            return new_xml_doc;
         }
-        else {
-            return model.getXMLDoc();
-        }
-
     }
     /**
      *
@@ -391,9 +388,5 @@ public class EditorController {
 
     public void setSeries(Object series) {
 
-    }
-
-    public Document getXmlDoc() {
-        return model.getXMLDoc();
     }
 }

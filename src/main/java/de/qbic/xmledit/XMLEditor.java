@@ -47,6 +47,7 @@ import java.util.stream.Stream;
 
 // Class
 @Plugin(type = Command.class, menuPath = "Plugins>XML-Editor")
+@Deprecated
 public class XMLEditor<T extends RealType<T>> implements Command {
     // -----------------------------------------------------------------------------------------------------------------
     // Constants

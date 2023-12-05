@@ -3,6 +3,7 @@ package de.qbic.xmledit;
 import loci.common.xml.XMLTools;
 import loci.formats.FormatException;
 import loci.plugins.config.SpringUtilities;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import javax.swing.*;
@@ -49,7 +50,7 @@ public class GraphicalUserInterface implements InOut{
             public void actionPerformed(ActionEvent event) {
                 String newText = view.textField.getText();
                 try {
-                    controller.makeNewChange("edit", view.textField.getNode());
+                    makeNewChange("edit", view.textField.getNode());
                     // update the view
                     if (view.tabbedPane.indexOfComponent(view.changeHistoryWindowPanel) != -1) {
                         updateChangeHistoryTab();
@@ -65,7 +66,7 @@ public class GraphicalUserInterface implements InOut{
          */
         view.undoChangeButton.addActionListener(e -> {
             try {
-                controller.undoChange();
+                undoChange();
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -368,7 +369,7 @@ public class GraphicalUserInterface implements InOut{
                 if (!textField.getNode().getUserObject().equals(textField.getText())) {
                     textField.getNode().setUserObject(textField.getText());
                     try {
-                        controller.makeNewChange("modify" , textField.getNode());
+                        makeNewChange("modify" , textField.getNode());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -628,8 +629,8 @@ public class GraphicalUserInterface implements InOut{
 
                     // add the new node to the change history
                     try {
-                        controller.makeNewChange("add", newAttrNode);
-                    } catch (MalformedURLException | TransformerException | SAXException e) {
+                        makeNewChange("add", newAttrNode);
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
 
@@ -649,8 +650,8 @@ public class GraphicalUserInterface implements InOut{
 
                     // add the new node to the change history
                     try {
-                        controller.makeNewChange("add", newTextNode);
-                    } catch (MalformedURLException | SAXException | TransformerException e) {
+                        makeNewChange("add", newTextNode);
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
 
@@ -663,21 +664,7 @@ public class GraphicalUserInterface implements InOut{
                 }
                 else if (selection.equals("element")) {
                     // create new XMLNode and add it to the selected node
-                    XMLNode newElementNode = new XMLNode();
-                    newElementNode.setUserObject(elementField.getText());
-                    newElementNode.setType("element");
-                    // create a new ID node for the new element
-                    XMLNode newIDNode = new XMLNode();
-                    newIDNode.setUserObject("ID");
-                    newIDNode.setType("attribute");
-                    // create a new ID value node for the new element
-                    XMLNode newIDValNode = new XMLNode();
-                    newIDValNode.setUserObject(elementIDField.getText());
-                    newIDValNode.setType("value");
-                    // add the ID value node to the ID node
-                    newIDNode.add(newIDValNode);
-                    // add the ID node to the new element node
-                    newElementNode.add(newIDNode);
+                    XMLNode newElementNode = makeXmlNode(elementField, elementIDField);
                     // redraw the argument panel
                     updateEditPanel();
                     System.out.println(view.selectedNode.getChildCount());
@@ -688,9 +675,9 @@ public class GraphicalUserInterface implements InOut{
                     view.myTree.updateUI();
                     // add the new node to the change history
                     try {
-                        controller.makeNewChange("add", newElementNode);
+                        makeNewChange("add", newElementNode);
                     }
-                    catch (MalformedURLException | TransformerException | SAXException e) {
+                    catch (Exception e) {
                         throw new RuntimeException(e);
                     }
 
@@ -702,6 +689,27 @@ public class GraphicalUserInterface implements InOut{
             }
         });
     }
+
+    @NotNull
+    private static XMLNode makeXmlNode(JTextField elementField, JTextField elementIDField) {
+        XMLNode newElementNode = new XMLNode();
+        newElementNode.setUserObject(elementField.getText());
+        newElementNode.setType("element");
+        // create a new ID node for the new element
+        XMLNode newIDNode = new XMLNode();
+        newIDNode.setUserObject("ID");
+        newIDNode.setType("attribute");
+        // create a new ID value node for the new element
+        XMLNode newIDValNode = new XMLNode();
+        newIDValNode.setUserObject(elementIDField.getText());
+        newIDValNode.setType("value");
+        // add the ID value node to the ID node
+        newIDNode.add(newIDValNode);
+        // add the ID node to the new element node
+        newElementNode.add(newIDNode);
+        return newElementNode;
+    }
+
     /**
      *
      */
@@ -717,8 +725,8 @@ public class GraphicalUserInterface implements InOut{
 
             // remove the node from the tree
             try {
-                controller.makeNewChange("delete", view.toBeDeletedNode);
-            } catch (MalformedURLException | TransformerException | SAXException e) {
+                makeNewChange("delete", view.toBeDeletedNode);
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
             XMLNode parentNode = view.toBeDeletedNode.getParent();
@@ -729,6 +737,17 @@ public class GraphicalUserInterface implements InOut{
             updateEditPanel();
         });
     }
+    /**
+     * makeNewChange call to the controller to also update the view.
+     */
+    public void makeNewChange(String changeType, XMLNode node) throws Exception {
+        makeNewChange(changeType, node);
+        // update the view
+        if (view.tabbedPane.indexOfComponent(view.changeHistoryWindowPanel) != -1) {
+            updateChangeHistoryTab();
+        }
+    }
+
 
     /**
      * Adds a text button to the editPanel
@@ -761,7 +780,7 @@ public class GraphicalUserInterface implements InOut{
                 if (!textField.getNode().getUserObject().equals(textField.getText())) {
                     textField.getNode().setUserObject(textField.getText());
                     try {
-                        controller.makeNewChange("modify" , textField.getNode());
+                        makeNewChange("modify" , textField.getNode());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -959,9 +978,10 @@ public class GraphicalUserInterface implements InOut{
     }
     
     public void undoChange() throws Exception {
-        Document new_xml_doc = controller.undoChange();
-        view.updateTreeTab(new_xml_doc, controller.getSimplified());
-        view.makeChangeHistoryTab();
+        controller.undoChange();
+        Document updatedXMLDoc = controller.getXMLDoc();
+        updateTreeTab(updatedXMLDoc, controller.getSimplified());
+        makeChangeHistoryTab();
     }
 
     /**

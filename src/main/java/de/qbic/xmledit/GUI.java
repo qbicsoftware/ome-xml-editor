@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.util.LinkedList;
 
 // CLASS
+@Deprecated
 public class GUI extends javax.swing.JFrame{
     // -----------------------------------------------------------------------------------------------------------------
     // Constants

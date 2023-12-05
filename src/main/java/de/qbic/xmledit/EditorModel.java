@@ -72,7 +72,7 @@ public class EditorModel {
     private String format = null;
     private String cachedir = null;
     public LinkedList<XMLChange> changeHistory = null;
-    public Document xml_doc;
+    public Document xmlDoc;
     public Element xmlElement;
     private DynamicMetadataOptions options = new DynamicMetadataOptions();
     private IFormatReader reader;
@@ -465,7 +465,7 @@ public class EditorModel {
      * @return
      */
     public Document getXMLDoc() {
-        return this.xml_doc;
+        return this.xmlDoc;
     }
     /**
      *
@@ -503,13 +503,7 @@ public class EditorModel {
      *
      */
     public void setXMLDoc(Document doc) {
-        this.xml_doc = doc;
-    }
-    /**
-     *
-     */
-    public Element getXmlElement() {
-        return this.xmlElement;
+        this.xmlDoc = doc;
     }
     /**
      *
