@@ -1,17 +1,16 @@
-package de.qbic.xmledit;
+package de.qbic.omeedit;
 
 import loci.common.xml.XMLTools;
 import loci.formats.FormatException;
 import loci.plugins.config.SpringUtilities;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+
 import javax.swing.*;
 import javax.xml.transform.TransformerException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;

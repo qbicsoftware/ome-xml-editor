@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.qbic.xmledit;
+package de.qbic.omeedit;
 
 import loci.common.Constants;
 import loci.common.DataTools;
@@ -672,7 +672,7 @@ public final class ImageConverter {
         }
     }
 
-    // -- Main method --
+    // -- de.qbic.xmledit.Main method --
 
     public static void main(String[] args) throws FormatException, IOException {
         DebugTools.enableLogging("INFO");

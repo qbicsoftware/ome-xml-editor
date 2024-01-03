@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package de.qbic.omeedit;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;

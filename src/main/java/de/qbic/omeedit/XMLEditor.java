@@ -1,5 +1,5 @@
 // Package
-package de.qbic.xmledit;
+package de.qbic.omeedit;
 // Imports
 
 import loci.common.DebugTools;

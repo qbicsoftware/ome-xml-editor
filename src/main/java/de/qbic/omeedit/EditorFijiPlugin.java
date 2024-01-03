@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package de.qbic.omeedit;
 
 import net.imglib2.type.numeric.RealType;
 import org.scijava.command.Command;

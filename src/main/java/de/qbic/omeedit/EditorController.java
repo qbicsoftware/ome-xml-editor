@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package de.qbic.omeedit;
 
 import loci.common.xml.XMLTools;
 import loci.formats.FormatException;

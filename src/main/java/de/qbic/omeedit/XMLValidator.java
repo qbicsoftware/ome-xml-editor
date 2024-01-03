@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package de.qbic.omeedit;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;

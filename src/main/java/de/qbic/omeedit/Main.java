@@ -1,6 +1,4 @@
-import de.qbic.xmledit.CommandLineInterface;
-import de.qbic.xmledit.EditorController;
-import de.qbic.xmledit.GraphicalUserInterface;
+package de.qbic.omeedit;
 
 public class Main {
     public static void main(String[] args) {

@@ -36,7 +36,7 @@
     </xsd:documentation>
   </xsd:annotation>
 
-  <!-- Main OME element -->
+  <!-- de.qbic.omeedit.Main OME element -->
   <xsd:element name="OME"> <!-- top level definition -->
     <xsd:annotation>
       <xsd:documentation>

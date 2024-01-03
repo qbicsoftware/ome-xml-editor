@@ -123,7 +123,7 @@
   <properties>
     <license.copyrightOwners>My Company, Inc.</license.copyrightOwners>
     <license.licenseName>cc0</license.licenseName>
-    <package-name>de.qbic.xmledit</package-name>
-    <main-class>de.qbic.xmledit.XMLEditor</main-class>
+    <package-name>de.qbic.omeedit</package-name>
+    <main-class>de.qbic.omeedit.XMLEditor</main-class>
   </properties>
 </project>

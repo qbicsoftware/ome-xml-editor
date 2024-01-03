@@ -67,10 +67,10 @@
     </build>
 
     <groupId>de.qbic</groupId>        <!-- FIXME: Your organization groupId here -->
-    <artifactId>XMLEditor</artifactId> <!-- FIXME: Your project artifactId here   -->
+    <artifactId>OMEEditor</artifactId> <!-- FIXME: Your project artifactId here   -->
     <version>20_04_23</version>
 
-    <name>XML Editor</name>                                               <!-- FIXME: Your project name here          -->
+    <name>OME Editor</name>                                               <!-- FIXME: Your project name here          -->
     <description>A Maven project implementing an ImageJ command.</description> <!-- FIXME: Your project description here   -->
     <url>https://mycompany.com/imagej/gauss-filtering/</url>                   <!-- FIXME: Your project website here       -->
     <inceptionYear>2017</inceptionYear>                                        <!-- FIXME: Your project starting year here -->
@@ -134,8 +134,8 @@
     </ciManagement>
 
     <properties>
-        <package-name>de.qbic.xmledit</package-name>                   <!-- FIXME: Your project package prefix here -->
-        <main-class>de.qbic.xmledit.XMLEditor</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
+        <package-name>de.qbic.omeedit</package-name>                   <!-- FIXME: Your project package prefix here -->
+        <main-class>de.qbic.omeedit.Main</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
         <license.licenseName>cc0</license.licenseName>                      <!-- FIXME: Your license-maven-plugin license code here -->
         <license.copyrightOwners>My Company, Inc.</license.copyrightOwners> <!-- FIXME: Your organization legal entity name here -->
     </properties>
