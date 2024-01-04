@@ -1,9 +1,13 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.models;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // IMPORTS
 // ---------------------------------------------------------------------------------------------------------------------
 
+import de.qbic.omeedit.utilities.XMLChange;
+import de.qbic.omeedit.deprecated.XMLEditor;
+import de.qbic.omeedit.utilities.XMLNode;
+import de.qbic.omeedit.controllers.EditorController;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;
@@ -39,14 +43,10 @@ public class EditorModel {
     // -----------------------------------------------------------------------------------------------------------------
     // CONSTANTS
     // -----------------------------------------------------------------------------------------------------------------
-    private static final Logger LOGGER = LoggerFactory.getLogger(XMLEditor.class);
-
     // -- Fields --
-
 
     private boolean doMeta = true;
     private boolean filter = true;
-    private boolean thumbs = false;
     private boolean minmax = false;
     private boolean merge = false;
     private boolean stitch = false;
@@ -57,7 +57,6 @@ public class EditorModel {
     private boolean cache = false;
     private boolean originalMetadata = true;
     private boolean normalize = false;
-    private boolean fastBlit = false;
     private boolean autoscale = false;
     public boolean omexmlOnly = false;
     private boolean validate = true;
@@ -68,22 +67,22 @@ public class EditorModel {
     private int end = Integer.MAX_VALUE;
     public int series = 0;
     private int xCoordinate = 0, yCoordinate = 0, width = 0, height = 0;
-    private String swapOrder = null, shuffleOrder = null;
     private String format = null;
     private String cachedir = null;
     public LinkedList<XMLChange> changeHistory = null;
     public Document xmlDoc;
     public Element xmlElement;
     private DynamicMetadataOptions options = new DynamicMetadataOptions();
-    private IFormatReader reader;
-    private IFormatReader baseReader;
     private MinMaxCalculator minMaxCalc;
     private DimensionSwapper dimSwapper;
-    private BufferedImageReader biReader;
-    public String schemaPath = "./data/resources/ome.xsd";
+
+    private String schemaPath = "./data/resources/ome.xsd";
     public String id = null;
     public EditorController controller;
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // CONSTRUCTOR
+    // -----------------------------------------------------------------------------------------------------------------
     public EditorModel(EditorController cont) {
         controller = cont;
         changeHistory = new LinkedList<>();
@@ -91,218 +90,6 @@ public class EditorModel {
     // -----------------------------------------------------------------------------------------------------------------
     // METHODS
     // -----------------------------------------------------------------------------------------------------------------
-    /**
-     *
-     */
-    public void createReader() {
-        reader = new ImageReader();
-        baseReader = reader;
-    }
-    /**
-     *
-     */
-    public void configureReaderPreInit() throws FormatException, IOException {
-        if (omexml) {
-            reader.setOriginalMetadataPopulated(originalMetadata);
-            try {
-                ServiceFactory factory = new ServiceFactory();
-                OMEXMLService service = factory.getInstance(OMEXMLService.class);
-                reader.setMetadataStore(
-                        service.createOMEXMLMetadata(null, omexmlVersion));
-            }
-            catch (DependencyException de) {
-                throw new MissingLibraryException(OMEXMLServiceImpl.NO_OME_XML_MSG, de);
-            }
-            catch (ServiceException se) {
-                throw new FormatException(se);
-            }
-        }
-
-        // check file format
-        if (reader instanceof ImageReader) {
-            // determine format
-            ImageReader ir = (ImageReader) reader;
-            if (new Location(id).exists()) {
-                LOGGER.info("Checking file format [{}]", ir.getFormat(id));
-            }
-        }
-        else {
-            // verify format
-            LOGGER.info("Checking {} format [{}]", reader.getFormat(),
-                    reader.isThisType(id) ? "yes" : "no");
-        }
-
-        LOGGER.info("Initializing reader");
-        if (stitch) {
-            reader = new FileStitcher(reader, true);
-            Location f = new Location(id);
-            String pat = null;
-            if (!f.exists()) {
-                ((FileStitcher) reader).setUsingPatternIds(true);
-                pat = id;
-            }
-            else {
-                pat = FilePattern.findPattern(f);
-            }
-            if (pat != null) id = pat;
-        }
-        if (expand) reader = new ChannelFiller(reader);
-        if (separate) reader = new ChannelSeparator(reader);
-        if (merge) reader = new ChannelMerger(reader);
-        if (cache) {
-            if (cachedir != null) {
-                reader  = new Memoizer(reader, 0, new File(cachedir));
-            } else {
-                reader = new Memoizer(reader, 0);
-            }
-        }
-        minMaxCalc = null;
-        if (minmax || autoscale) reader = minMaxCalc = new MinMaxCalculator(reader);
-        dimSwapper = null;
-        if (swapOrder != null || shuffleOrder != null) {
-            reader = dimSwapper = new DimensionSwapper(reader);
-        }
-        reader = biReader = new BufferedImageReader(reader);
-
-        reader.close();
-        reader.setNormalized(normalize);
-        reader.setMetadataFiltered(filter);
-        reader.setGroupFiles(group);
-        options.setMetadataLevel(
-                doMeta ? MetadataLevel.ALL : MetadataLevel.MINIMUM);
-        options.setValidate(validate);
-        reader.setMetadataOptions(options);
-        reader.setFlattenedResolutions(flat);
-    }
-    /**
-     *
-     */
-    public void configureReaderPostInit() {
-        if (swapOrder != null) dimSwapper.swapDimensions(swapOrder);
-        if (shuffleOrder != null) dimSwapper.setOutputOrder(shuffleOrder);
-    }
-    /**
-     *
-     */
-    public BufferedImage[] readPixels2() throws FormatException, IOException {
-        String seriesLabel = reader.getSeriesCount() > 1 ?
-                (" series #" + series) : "";
-        LOGGER.info("");
-
-        int num = reader.getImageCount();
-        if (start < 0) start = 0;
-        if (start >= num) start = num - 1;
-        if (end < 0) end = 0;
-        if (end >= num) end = num - 1;
-        if (end < start) end = start;
-
-        LOGGER.info("Reading{} pixel data ({}-{})",
-                new Object[] {seriesLabel, start, end});
-
-        width = reader.getSizeX();
-        height = reader.getSizeY();
-
-        int pixelType = reader.getPixelType();
-
-        BufferedImage[] images = new BufferedImage[end - start + 1];
-        long s = System.currentTimeMillis();
-        long timeLastLogged = s;
-        for (int i=start; i<=end; i++) {
-            if (!fastBlit) {
-                images[i - start] = thumbs ? biReader.openThumbImage(i) :
-                        biReader.openImage(i, xCoordinate, yCoordinate, width, height);
-            }
-            if (images[i - start] == null) {
-                LOGGER.warn("\t************ Failed to read plane #{} ************", i);
-            }
-            if (reader.isIndexed() && reader.get8BitLookupTable() == null &&
-                    reader.get16BitLookupTable() == null)
-            {
-                LOGGER.warn("\t************ no LUT for plane #{} ************", i);
-            }
-
-            // check for pixel type mismatch
-            int pixType = AWTImageTools.getPixelType(images[i - start]);
-            if (pixType != pixelType && pixType != pixelType + 1 && !fastBlit) {
-                LOGGER.info("\tPlane #{}: pixel type mismatch: {}/{}",
-                        new Object[] {i, FormatTools.getPixelTypeString(pixType),
-                                FormatTools.getPixelTypeString(pixelType)});
-            }
-            else {
-                // log number of planes read every second or so
-                long t = System.currentTimeMillis();
-                if (i == end || (t - timeLastLogged) / 1000 > 0) {
-                    int current = i - start + 1;
-                    int total = end - start + 1;
-                    int percent = 100 * current / total;
-                    LOGGER.info("\tRead {}/{} planes ({}%)", new Object[] {
-                            current, total, percent
-                    });
-                    timeLastLogged = t;
-                }
-            }
-        }
-
-        long e = System.currentTimeMillis();
-
-        LOGGER.info("Deone reading pixel data");
-
-        // output timing results
-        float sec = (e - s) / 1000f;
-        float avg = (float) (e - s) / images.length;
-        LOGGER.info("{}s elapsed ({}ms per plane)", sec, avg);
-
-        // display pixels in image viewer
-        return images;
-    }
-    /**
-     *
-     */
-    public String getOMEXML() throws MissingLibraryException, ServiceException, IOException, ParserConfigurationException, SAXException {
-        String xml = "";
-        LOGGER.info("");
-        MetadataStore ms = reader.getMetadataStore();
-
-        if (baseReader instanceof ImageReader) {
-            baseReader = ((ImageReader) baseReader).getReader();
-        }
-
-        OMEXMLService service;
-        try {
-            ServiceFactory factory = new ServiceFactory();
-            service = factory.getInstance(OMEXMLService.class);
-        }
-        catch (DependencyException de) {
-            throw new MissingLibraryException(OMEXMLServiceImpl.NO_OME_XML_MSG, de);
-        }
-        String version = service.getOMEXMLVersion(ms);
-        if (version == null) LOGGER.info("Generating OME-XML");
-        else {
-            LOGGER.info("Generating OME-XML (schema version {})", version);
-        }
-        if (ms instanceof MetadataRetrieve) {
-            if (omexmlOnly) {
-                DebugTools.setRootLevel("INFO");
-            }
-            xml = service.getOMEXML((MetadataRetrieve) ms);
-
-            if (omexmlOnly) {
-                DebugTools.setRootLevel("OFF");
-            }
-        }
-        else {
-            LOGGER.info("The metadata could not be converted to OME-XML.");
-            if (omexmlVersion == null) {
-                LOGGER.info("The OME-XML Java library is probably not available.");
-            }
-            else {
-                LOGGER.info("{} is probably not a legal schema version.",
-                        omexmlVersion);
-            }
-        }
-        return xml;
-    }
-
     /**
      *
      */
@@ -476,26 +263,7 @@ public class EditorModel {
     /**
      *
      */
-    /**
-     * load an image and returns the metadata as a xml
-     * @param path the path to the image
-     */
-    public Document loadFile(String path) throws Exception {
-        omexmlOnly = true;
-        omexml = true;
-        id = path;
 
-        createReader();
-        configureReaderPreInit();
-        reader.setId(path);
-        configureReaderPostInit();
-
-        reader.setSeries(series);
-
-        String xml = getOMEXML();
-        reader.close();
-        return XMLTools.parseDOM(xml);
-    }
     public void setXMLElement(Element ele) {
         this.xmlElement = ele;
     }
@@ -504,12 +272,6 @@ public class EditorModel {
      */
     public void setXMLDoc(Document doc) {
         this.xmlDoc = doc;
-    }
-    /**
-     *
-     */
-    public IFormatReader getReader() {
-        return reader;
     }
     /**
      *
@@ -534,5 +296,13 @@ public class EditorModel {
     }
     public boolean getSimplified() {
         return simplified;
+    }
+
+    public Element getXmlElement() {
+        return xmlElement;
+    }
+
+    public String getSchemaPath() {
+        return schemaPath;
     }
 }

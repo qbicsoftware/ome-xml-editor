@@ -1,7 +1,8 @@
 // Package
-package de.qbic.omeedit;
+package de.qbic.omeedit.deprecated;
 // Imports
 
+import de.qbic.omeedit.utilities.*;
 import loci.common.DebugTools;
 import loci.common.Location;
 import loci.common.services.DependencyException;

@@ -1,5 +1,8 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
 
+
+import de.qbic.omeedit.controllers.EditorController;
+import de.qbic.omeedit.views.EditorView;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
@@ -26,8 +29,8 @@ public interface InOut {
     public void loadChangeHistory(String path) throws Exception;
     public void applyChangeHistory(String path)throws Exception;
     // Output
-    public void saveImage(String path) throws IOException, FormatException;
-    public default void exportToOmeTiff(String path, Document newXML) throws IOException, FormatException {
+    public void saveImage(String path) throws IOException, FormatException, Exception;
+    public default void exportToOmeTiff(String path, Document newXML) throws Exception {
 
         System.out.println("Inside exportToOmeTiff");
         System.out.println("Path: " + path);
@@ -102,7 +105,7 @@ public interface InOut {
      * Exports the current metadata to an OME-TIFF file
      * @param path the path to the file
      */
-    public default void exportToOmeTiff(String path) throws IOException, FormatException {
+    public default void exportToOmeTiff(String path) throws Exception {
         exportToOmeTiff(path, controller.getXMLDoc());
     }
 

@@ -1,7 +1,7 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.views;
 
+import de.qbic.omeedit.controllers.EditorController;
 import loci.common.xml.XMLTools;
-import loci.formats.FormatException;
 import loci.plugins.config.SpringUtilities;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 
-public class GraphicalUserInterface implements InOut{
+import de.qbic.omeedit.utilities.*;
+
+public class GraphicalUserInterface implements InOut {
     /** This class aims to implement the input layer via a graphical user interface. It should only contain methods
      * which are needed for communication between the View and the Controller. The View itself should be implemented in
      * a separate class.
@@ -105,7 +107,9 @@ public class GraphicalUserInterface implements InOut{
         // show change profile action listener
         view.showChangeButton.addActionListener(e -> {
             try {
-                makeChangeHistoryTab();
+                view.makeChangeHistoryTab();
+                // add the changes to the table model
+                addChangesToTable(view.historyTableModel);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -189,30 +193,39 @@ public class GraphicalUserInterface implements InOut{
             JFileChooser chooser = new JFileChooser();
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
+                String path = chooser.getSelectedFile().getAbsolutePath();
                 try {
-                    String path = chooser.getSelectedFile().getAbsolutePath();
-                    Document xml_doc = controller.openImage(path);
-                    makeChangeHistoryTab();
-                    String title = path.substring(path.lastIndexOf("/") + 1);
-                    makeNewTreeTab(xml_doc, controller.getSimplified(), title);
-                    // focus the xml tab
-                    //view.tabbedPane.setSelectedIndex(0);
+                    loadImage(path);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
 
-        // Opens a new XML file in the topPanel of the GUI, in a new tab
         view.openXML.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                try {
-                    controller.openXML(chooser.getSelectedFile().getAbsolutePath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+                File fileToOpen = chooser.getSelectedFile();
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        controller.openXML(fileToOpen.getAbsolutePath());
+                        return null;
+                    }
+                    @Override
+                    protected void done() {
+                        try {
+                            get();
+                            System.out.println("Successfully opened " + fileToOpen.getPath());
+                        } catch (Exception ex) {
+                            System.out.println("Error opening " + fileToOpen.getPath());
+                            view.reportError("Error opening " + fileToOpen.getPath());
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                };
+                worker.execute();
             }
         });
 
@@ -231,11 +244,27 @@ public class GraphicalUserInterface implements InOut{
             int userSelection = chooser.showSaveDialog(view.splitPane);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = chooser.getSelectedFile();
-                try {
-                    controller.exportToOmeTiff(fileToSave.getPath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        controller.exportToOmeTiff(fileToSave.getPath());
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            get();
+                            System.out.println("Successfully exported to " + fileToSave.getPath());
+                            view.reportSuccess("Successfully exported to " + fileToSave.getPath());
+                            System.out.println("Successfully exported to " + fileToSave.getPath());
+                        } catch (Exception ex) {
+                            System.out.println("Error exporting to " + fileToSave.getPath());
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                };
+                worker.execute();
             }
         });
 
@@ -245,11 +274,27 @@ public class GraphicalUserInterface implements InOut{
             int userSelection = chooser.showSaveDialog(view.splitPane);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = chooser.getSelectedFile();
-                try {
-                    controller.exportToOmeXml(fileToSave.getPath());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        controller.exportToOmeXml(fileToSave.getPath());
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            get();
+                            System.out.println("Successfully exported to " + fileToSave.getPath());
+                            view.reportSuccess("Successfully exported to " + fileToSave.getPath());
+                            System.out.println("Successfully exported to " + fileToSave.getPath());
+                        } catch (Exception ex) {
+                            System.out.println("Error exporting to " + fileToSave.getPath());
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                };
+                worker.execute();
             }
         });
 
@@ -276,6 +321,11 @@ public class GraphicalUserInterface implements InOut{
     @Override
     public void loadImage(String path) throws Exception {
         controller.openImage(path);
+        view.makeChangeHistoryTab();
+        // add the changes to the table model
+        addChangesToTable(view.historyTableModel);
+        String title = path.substring(path.lastIndexOf("/") + 1);
+        makeNewTreeTab(controller.getXMLDoc(), controller.getSimplified(), title);
 
     }
 
@@ -283,7 +333,9 @@ public class GraphicalUserInterface implements InOut{
     public void loadChangeHistory(String path) throws Exception {
         controller.loadChangeHistory(path);
         // apply changes to the view port and show the change history
-        makeChangeHistoryTab();
+        view.makeChangeHistoryTab();
+        // add the changes to the table model
+        addChangesToTable(view.historyTableModel);
         view.updateTree();
 
     }
@@ -294,7 +346,7 @@ public class GraphicalUserInterface implements InOut{
     }
 
     @Override
-    public void saveImage(String path) throws IOException, FormatException {
+    public void saveImage(String path) throws Exception {
             controller.exportToOmeTiff(path);
 
     }
@@ -304,7 +356,7 @@ public class GraphicalUserInterface implements InOut{
     /**
      * Takes a table model and adds changes stored in the change history to it
      */
-    public void addChangesToTable(XMLTableModel model) throws TransformerException {
+    public void addChangesToTable(XMLTableModel model) throws Exception {
         // get the change history
         LinkedList<XMLChange> changeHistory = controller.getChangeHistory();
 
@@ -740,7 +792,7 @@ public class GraphicalUserInterface implements InOut{
      * makeNewChange call to the controller to also update the view.
      */
     public void makeNewChange(String changeType, XMLNode node) throws Exception {
-        makeNewChange(changeType, node);
+         controller.makeNewChange(changeType, node);
         // update the view
         if (view.tabbedPane.indexOfComponent(view.changeHistoryWindowPanel) != -1) {
             updateChangeHistoryTab();
@@ -896,34 +948,7 @@ public class GraphicalUserInterface implements InOut{
         currentScrollPane.setViewportView(currentTree);
         view.makeNewTab(currentScrollPane, title, view.TREE_SVG);
     }
-    /**
-     * Creates a change history tab in the tabbed pane
-     */
-    public void makeChangeHistoryTab() throws Exception {
-        // create changer history window panel
-        view.changeHistoryWindowPanel.setLayout(new BoxLayout(view.changeHistoryWindowPanel, BoxLayout.Y_AXIS));
-        // add the change history pane to the change history window panel
-        view.changeHistoryWindowPanel.add(view.changeHistoryPane);
-        // Create Header entrys for the list of changes, so the user knows which entry is what
-        view.makeHistoryTable();
-        // add a textfield to the change history panel to display validation errors
-        view.validationErrorsField.setEditable(false);
-        view.validationErrorsField.setLineWrap(true);
-        view.validationErrorsField.setWrapStyleWord(true);
-        view.validationErrorsField.setSize(view.WIDTH, view.BUTTON_HEIGHT);
-        // add a border to the validation errors textfield
-        view.makePanelBorder(view.validationErrorsField);
-        // add the validation errors to the change history window panel
-        view.changeHistoryWindowPanel.add(view.validationErrorsField);
-        // add the changes to the table model
-        addChangesToTable(view.historyTableModel);
-        // add the table to the change history pane
-        view.changeHistoryPane.add(view.historyTable);
-        // set the view port of the change history pane to the table
-        view.changeHistoryPane.setViewportView(view.historyTable);
-        // add the change panel to the tabbed pane
-        view.makeNewTab(view.changeHistoryWindowPanel, "Change History", view.CHANGE_SVG);
-    }
+
     public void openTutorial() throws IOException {
         String path = "./data/resources/HowToUse.md";
         String md = new String(Files.readAllBytes(Paths.get(path)));
@@ -955,32 +980,15 @@ public class GraphicalUserInterface implements InOut{
         }
     }
 
-    /**
-     *
-     */
-    public Document loadFile(String path) throws Exception {
-        String[] args = new String[2];
-        args[0] = path; // the id parameter
-        args[1] = "-omexml-only";
-        controller.setId(path);
 
-        controller.createReader();
-        controller.configureReaderPreInit();
-        controller.getReader().setId(path);
-        controller.configureReaderPostInit();
-
-        controller.setSeries(controller.getSeries());
-
-        String xml = controller.getOMEXML();
-        controller.getReader().close();
-        return XMLTools.parseDOM(xml);
-    }
     
     public void undoChange() throws Exception {
         controller.undoChange();
         Document updatedXMLDoc = controller.getXMLDoc();
         updateTreeTab(updatedXMLDoc, controller.getSimplified());
-        makeChangeHistoryTab();
+        view.makeChangeHistoryTab();
+        // add the changes to the table model
+        addChangesToTable(view.historyTableModel);
     }
 
     /**
@@ -1027,7 +1035,7 @@ public class GraphicalUserInterface implements InOut{
     /**
      * Update the change history tab with the new changes
      */
-    public void updateChangeHistoryTab() throws TransformerException {
+    public void updateChangeHistoryTab() throws Exception {
         // empty the table model
         view.historyTableModel.setRowCount(0);
         // add new data to the table model

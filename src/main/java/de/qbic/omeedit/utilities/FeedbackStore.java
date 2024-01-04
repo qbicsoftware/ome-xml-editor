@@ -1,4 +1,4 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
 
 public class FeedbackStore {
     private String filePath = null;

@@ -1,6 +1,6 @@
 // Build the XML Tree for GUI + ImageInfo
 
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -10,7 +10,7 @@ import org.w3c.dom.NodeList;
 import javax.swing.*;
 import javax.swing.tree.TreeModel;
 
-class XMLTree extends JTree {
+public class XMLTree extends JTree {
 
     XMLTreeModel dtModel;
     private final boolean simplified;

@@ -1,5 +1,6 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
 
+import de.qbic.omeedit.controllers.EditorController;
 import net.imglib2.type.numeric.RealType;
 import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;

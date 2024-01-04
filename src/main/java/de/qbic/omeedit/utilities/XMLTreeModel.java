@@ -1,4 +1,4 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
 
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeModel;

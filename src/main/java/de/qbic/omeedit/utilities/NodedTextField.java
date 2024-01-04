@@ -1,14 +1,16 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
+
+import de.qbic.omeedit.utilities.XMLNode;
 
 import javax.swing.*;
 
 public class NodedTextField extends JTextField {
     private XMLNode myNode;
-    NodedTextField(XMLNode node) {
+    public NodedTextField(XMLNode node) {
         super(node.getUserObject().toString());
         myNode = node;
     }
-    NodedTextField() {
+    public NodedTextField() {
         super();
     }
     public XMLNode getNode() {

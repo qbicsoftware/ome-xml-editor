@@ -1,5 +1,5 @@
 // PACKAGE
-package de.qbic.omeedit;
+package de.qbic.omeedit.views;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // IMPORTS
@@ -19,6 +19,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.StringReader;
 
+import de.qbic.omeedit.utilities.*;
+import de.qbic.omeedit.controllers.*;
+
+
 public class EditorView extends javax.swing.JFrame {
     /** This class defines the visual representation of the OME-Editor.<
      *
@@ -26,8 +30,8 @@ public class EditorView extends javax.swing.JFrame {
     // -----------------------------------------------------------------------------------------------------------------
     // Constants
     // -----------------------------------------------------------------------------------------------------------------
-    static final Color PASTEL_RED = new Color(255, 153, 153);
-    static final Color PASTEL_GREEN = new Color(153, 255, 153);
+    public static final Color PASTEL_RED = new Color(255, 153, 153);
+    public static final Color PASTEL_GREEN = new Color(153, 255, 153);
     static final Color PASTEL_BLUE = new Color(153, 153, 255);
     static final Color DARK_GREEN = new Color(30, 150, 30);
     static final Color DARK_BLUE = new Color(30, 30, 150);
@@ -141,7 +145,7 @@ public class EditorView extends javax.swing.JFrame {
         // Button that opens the tutorial
         howToUseButton = new JMenuItem("How To Use");
         // Button that add the about page to the tabbed pane
-        aboutButton = new JMenuItem("About XML-Editor");
+        aboutButton = new JMenuItem("About OME-Editor");
         //Button that sets the schema path
         setSchemaPath = new JMenuItem("Set Schema Path");
         // simplifiedTree checkbox
@@ -151,7 +155,7 @@ public class EditorView extends javax.swing.JFrame {
 
 
         splitPane = new JSplitPane();
-        splitPane.setName("XML-Editor");
+        splitPane.setName("OME-Editor");
 
         bottomPanel = new JPanel();
         scrollPaneBottom = new JScrollPane();
@@ -538,8 +542,6 @@ public class EditorView extends javax.swing.JFrame {
     public void showXMLTree(Document exampleXmlDoc, String nodeName) {
     }
 
-    public void makeChangeHistoryTab() {
-    }
 
 
     public void updateTree() {
@@ -550,8 +552,40 @@ public class EditorView extends javax.swing.JFrame {
 
 
     /**
-     * Initializes the add button
+     * Report success pop up window
      */
+    public void reportSuccess(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Success!", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Creates a change history tab in the tabbed pane
+     */
+    public void makeChangeHistoryTab() throws Exception {
+        // create changer history window panel
+        changeHistoryWindowPanel.setLayout(new BoxLayout(changeHistoryWindowPanel, BoxLayout.Y_AXIS));
+        // add the change history pane to the change history window panel
+        changeHistoryWindowPanel.add(changeHistoryPane);
+        // Create Header entrys for the list of changes, so the user knows which entry is what
+        makeHistoryTable();
+        // add a textfield to the change history panel to display validation errors
+        validationErrorsField.setEditable(false);
+        validationErrorsField.setLineWrap(true);
+        validationErrorsField.setWrapStyleWord(true);
+        validationErrorsField.setSize(WIDTH, BUTTON_HEIGHT);
+        // add a border to the validation errors textfield
+        makePanelBorder(validationErrorsField);
+        // add the validation errors to the change history window panel
+        changeHistoryWindowPanel.add(validationErrorsField);
+        // add the changes to the table model
+        // addChangesToTable(historyTableModel);
+        // add the table to the change history pane
+        changeHistoryPane.add(historyTable);
+        // set the view port of the change history pane to the table
+        changeHistoryPane.setViewportView(historyTable);
+        // add the change panel to the tabbed pane
+        makeNewTab(changeHistoryWindowPanel, "Change History", CHANGE_SVG);
+    }
 
 
 

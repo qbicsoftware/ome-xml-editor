@@ -1,4 +1,4 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
 
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.ImageTranscoder;

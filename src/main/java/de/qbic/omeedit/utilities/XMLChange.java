@@ -1,4 +1,4 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
 
 import javax.swing.tree.TreeNode;
 import java.io.Serializable;
@@ -15,7 +15,7 @@ public class XMLChange implements Serializable {
     private boolean valid;
     private String validationError = null;
 
-    XMLChange(String mod, XMLNode newN) {
+    public XMLChange(String mod, XMLNode newN) {
         System.out.println("- - - - Creating new XMLChange - - - -");
         setChangeType(mod);
         setToBeChangedNode(newN);

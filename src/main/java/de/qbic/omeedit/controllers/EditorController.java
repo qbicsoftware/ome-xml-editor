@@ -1,8 +1,15 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.controllers;
 
+import de.qbic.omeedit.models.EditorModel;
+import de.qbic.omeedit.utilities.FeedbackStore;
+import de.qbic.omeedit.utilities.XMLChange;
+import de.qbic.omeedit.utilities.XMLNode;
+import de.qbic.omeedit.utilities.XMLValidator;
+import de.qbic.omeedit.views.EditorView;
 import loci.common.xml.XMLTools;
 import loci.formats.FormatException;
 import loci.formats.IFormatHandler;
+import loci.formats.IFormatReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -16,7 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EditorController {
+public class EditorController extends IO {
     /** This class aims to control or manage the interaction between the View and the Model. It is triggered via the
      * Command or Graphical interfaces (or really any interface implemented). It then calls the appropriate methods to
      * update the Model and the View.
@@ -26,11 +33,13 @@ public class EditorController {
     //------------------------------------------------------------------------------------------------------------------
     private EditorView view;
     private EditorModel model;
+
     //------------------------------------------------------------------------------------------------------------------
     // Constructor
     //------------------------------------------------------------------------------------------------------------------
     public EditorController() {
         model = new EditorModel(this);
+        controller = this;
     }
 
 
@@ -115,7 +124,7 @@ public class EditorController {
      */
     public void applyChangesToFile(String path) throws Exception {
         FeedbackStore fbStore= new FeedbackStore(path);
-        Document newXMLDom =  model.loadFile(path);
+        Document newXMLDom =  loadFile(path);
         if (validateChangeHistory(newXMLDom)) {
             fbStore.setValidity(true);
             try {
@@ -177,7 +186,7 @@ public class EditorController {
     /**
      *
      */
-    public boolean validateChangeHistory(Document newXMLDom) throws TransformerException {
+    public boolean validateChangeHistory(Document newXMLDom) throws Exception {
         System.out.println("- - - - Validating Change History - - - -");
         Document example_xml_doc = (Document) newXMLDom.cloneNode(true);
         boolean changeHistoryValidity= true;
@@ -193,10 +202,10 @@ public class EditorController {
                 // catch verification errors and print them
                 // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
                 // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
-                if (!(new File(model.schemaPath).exists())) {
+                if (!(new File(model.getSchemaPath()).exists())) {
                     view.popupSchemaHelp();
                 }
-                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), model.schemaPath);
+                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), model.getSchemaPath());
                 if (error == null){
                     System.out.println("XML is valid");
                     c.setValidity(true);
@@ -218,7 +227,7 @@ public class EditorController {
     /**
      *
      */
-    public boolean validateChangeHistory() throws TransformerException {
+    public boolean validateChangeHistory() throws Exception {
         System.out.println("- - - - Validating Change History - - - -");
         Document example_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
         boolean changeHistoryValidity= true;
@@ -234,10 +243,10 @@ public class EditorController {
                 // catch verification errors and print them
                 // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
                 // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
-                if (!(new File(model.schemaPath).exists())) {
+                if (!(new File(model.getSchemaPath()).exists())) {
                     view.popupSchemaHelp();
                 }
-                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), model.schemaPath);
+                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), model.getSchemaPath());
                 if (error == null){
                     System.out.println("XML is valid");
                     c.setValidity(true);
@@ -284,16 +293,17 @@ public class EditorController {
         return model.getId();
     }
 
-    public BufferedImage[] readPixels() throws IOException, FormatException {
-        return model.readPixels2();
+    public BufferedImage[] readPixels() throws Exception {
+        return controller.readPixels2();
     }
 
-    public IFormatHandler getReader() {
-        return model.getReader();
+    public IFormatReader getReader() {
+        return reader;
     }
 
     public Element getXmlElement() {
-        return null;
+
+        return model.getXmlElement();
     }
 
     public void setXMLElement(Element documentElement) {
@@ -305,11 +315,6 @@ public class EditorController {
 
     public void setXMLDoc(Document document) {
     }
-
-    public String getOMEXML() {
-        return null;
-    }
-
     public Object getSeries() {
         return model.getSeries();
     }
@@ -318,9 +323,6 @@ public class EditorController {
     }
 
     public void configureReaderPreInit() {
-    }
-
-    public void createReader() {
     }
 
     public void setId(String path) {
@@ -350,18 +352,13 @@ public class EditorController {
         }
     }
 
-    public void exportToOmeTiff(String path, Document newXMLDom) {
-    }
-    public void exportToOmeTiff(String path) {
-    }
-
     /**
      *
      */
     public Document openImage(String path) throws Exception {
         // make title from path
         String title = path.substring(path.lastIndexOf("/") + 1);
-        Document xml_doc = model.loadFile(path);
+        Document xml_doc = loadFile(path);
         model.setXMLDoc(xml_doc);
         Document new_xml_doc = (Document) xml_doc.cloneNode(true);
         if (!getChangeHistory().isEmpty()) {

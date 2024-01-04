@@ -124,6 +124,6 @@
     <license.copyrightOwners>My Company, Inc.</license.copyrightOwners>
     <license.licenseName>cc0</license.licenseName>
     <package-name>de.qbic.omeedit</package-name>
-    <main-class>de.qbic.omeedit.XMLEditor</main-class>
+    <main-class>de.qbic.omeedit.deprecated.XMLEditor</main-class>
   </properties>
 </project>

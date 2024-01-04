@@ -1,4 +1,4 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.views;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;

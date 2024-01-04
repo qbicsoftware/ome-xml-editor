@@ -1,10 +1,12 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.views;
 
+import de.qbic.omeedit.utilities.InOut;
+import de.qbic.omeedit.controllers.EditorController;
 import loci.formats.FormatException;
 
 import java.io.IOException;
 
-public class CommandLineInterface implements InOut{
+public class CommandLineInterface implements InOut {
     /** This class aims to implement the input layer via a commandline interface. It should only contain methods
      * which are needed for communication between the View and the Controller. The View itself should be implemented in
      * a separate class.

@@ -1,8 +1,10 @@
 // PACKAGE
-package de.qbic.omeedit;
+package de.qbic.omeedit.deprecated;
 // ---------------------------------------------------------------------------------------------------------------------
 // IMPORTS
 // ---------------------------------------------------------------------------------------------------------------------
+import de.qbic.omeedit.utilities.*;
+import de.qbic.omeedit.views.CloseButton;
 import loci.plugins.config.SpringUtilities;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;

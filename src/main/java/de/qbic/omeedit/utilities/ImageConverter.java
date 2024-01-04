@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
 
 import loci.common.Constants;
 import loci.common.DataTools;

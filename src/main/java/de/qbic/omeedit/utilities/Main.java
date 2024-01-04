@@ -1,4 +1,7 @@
-package de.qbic.omeedit;
+package de.qbic.omeedit.utilities;
+
+import de.qbic.omeedit.views.CommandLineInterface;
+import de.qbic.omeedit.views.GraphicalUserInterface;
 
 public class Main {
     public static void main(String[] args) {
