@@ -297,9 +297,6 @@ public class EditorController extends IO {
         return controller.readPixels2();
     }
 
-    public IFormatReader getReader() {
-        return reader;
-    }
 
     public Element getXmlElement() {
 
@@ -317,12 +314,6 @@ public class EditorController extends IO {
     }
     public Object getSeries() {
         return model.getSeries();
-    }
-
-    public void configureReaderPostInit() {
-    }
-
-    public void configureReaderPreInit() {
     }
 
     public void setId(String path) {
