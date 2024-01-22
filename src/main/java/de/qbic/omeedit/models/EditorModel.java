@@ -271,7 +271,9 @@ public class EditorModel {
      *
      */
     public void setXMLDoc(Document doc) {
+        System.out.println("Inside setXMLDoc");
         this.xmlDoc = doc;
+        System.out.println("XMLDoc: " + this.xmlDoc);
     }
     /**
      *
@@ -304,5 +306,9 @@ public class EditorModel {
 
     public String getSchemaPath() {
         return schemaPath;
+    }
+
+    public void removeLastChange() {
+        this.changeHistory.removeLast();
     }
 }

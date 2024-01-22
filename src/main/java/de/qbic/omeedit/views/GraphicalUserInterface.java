@@ -44,6 +44,7 @@ public class GraphicalUserInterface implements InOut {
         // -------------------------------------------------------------------------------------------------------------
         // ADD ACTION LISTENERS
         // -------------------------------------------------------------------------------------------------------------
+
         /** Textfield
          * @return
          */
@@ -62,9 +63,7 @@ public class GraphicalUserInterface implements InOut {
                 view.textField.getNode().setUserObject(newText);
             }
         });
-        /**
-         *
-         */
+        // undo the last change in the change history
         view.undoChangeButton.addActionListener(e -> {
             try {
                 undoChange();
@@ -72,6 +71,7 @@ public class GraphicalUserInterface implements InOut {
                 throw new RuntimeException(ex);
             }
         });
+
         /**
          * apply the current change history to all files in a folder
          */
@@ -325,6 +325,7 @@ public class GraphicalUserInterface implements InOut {
         // add the changes to the table model
         addChangesToTable(view.historyTableModel);
         String title = path.substring(path.lastIndexOf("/") + 1);
+        System.out.println("Title: " + controller.getXMLDoc());
         makeNewTreeTab(controller.getXMLDoc(), controller.getSimplified(), title);
 
     }
@@ -355,12 +356,14 @@ public class GraphicalUserInterface implements InOut {
     // -----------------------------------------------------------------------------------------------------------------
     /**
      * Takes a table model and adds changes stored in the change history to it
+     *
      */
     public void addChangesToTable(XMLTableModel model) throws Exception {
+
         // get the change history
         LinkedList<XMLChange> changeHistory = controller.getChangeHistory();
-
         controller.validateChangeHistory(controller.getXMLDoc());
+
         int index = 0;
         for (XMLChange c : changeHistory) {
             model.addRow(new Object[]{index, c.getChangeType(), c.getLocation(), c.getNodeType()});
@@ -376,17 +379,18 @@ public class GraphicalUserInterface implements InOut {
                 view.validationErrorsField.setText(c.getValidationError());
                 // set the text color to red
                 view.validationErrorsField.setForeground(EditorView.DARK_RED);
+                if (c.getValidationError().equals("Schema path does not exist")) {
+                    view.popupSchemaHelp();
+                }
             }
             index++;
         }
     }
-
     /**
      * Adds an attribute to the editPanel
-     * @param labelText
-     * @param node
      */
     private void addAttributeButton(String labelText, XMLNode node) {
+
         // add a new attribute to the editPanel consisting of a label, a textfield and a delete button in a new panel
         JPanel attributePanel = new JPanel();
         attributePanel.setLayout(new BorderLayout(0,0));
@@ -983,14 +987,13 @@ public class GraphicalUserInterface implements InOut {
 
     
     public void undoChange() throws Exception {
-        controller.undoChange();
-        Document updatedXMLDoc = controller.getXMLDoc();
+
+        Document updatedXMLDoc = controller.undoChange();
         updateTreeTab(updatedXMLDoc, controller.getSimplified());
         view.makeChangeHistoryTab();
         // add the changes to the table model
         addChangesToTable(view.historyTableModel);
     }
-
     /**
      * Opens an external XML file and applies loaded changes to it
      * @param path the path to the file

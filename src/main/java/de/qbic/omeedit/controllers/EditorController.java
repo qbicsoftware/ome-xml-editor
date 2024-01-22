@@ -164,17 +164,22 @@ public class EditorController extends IO {
     /**
      * @return
      */
-    public void undoChange() throws Exception {
+    public Document undoChange() throws Exception {
         if (!model.getChangeHistory().isEmpty()) {
             // remove the last change from the history
-            model.getChangeHistory().removeLast();
+            model.removeLastChange();
             // define a new xml document
-
-            Document new_xml_doc = model.getXMLDoc().cloneNode(true).getOwnerDocument();
-            System.out.println("Undoing change");
+            Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
             // apply all changes to the original xml
             model.applyChanges(new_xml_doc);
+            return new_xml_doc;
         }
+        else {
+            System.out.println("No changes to undo");
+            Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
+            return new_xml_doc;
+        }
+
     }
     /**
      *
@@ -203,7 +208,7 @@ public class EditorController extends IO {
                 // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
                 // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
                 if (!(new File(model.getSchemaPath()).exists())) {
-                    view.popupSchemaHelp();
+                    throw new Exception("Schema path does not exist");
                 }
                 String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), model.getSchemaPath());
                 if (error == null){
@@ -219,6 +224,7 @@ public class EditorController extends IO {
             } catch (Exception e) {
                 c.setValidity(false);
                 c.setValidationError(e.getMessage());
+                return false;
             }
             changeHistoryValidity = model.getChangeHistory().getLast().getValidity();
         }
@@ -230,40 +236,7 @@ public class EditorController extends IO {
     public boolean validateChangeHistory() throws Exception {
         System.out.println("- - - - Validating Change History - - - -");
         Document example_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
-        boolean changeHistoryValidity= true;
-        for (XMLChange c : model.getChangeHistory()) {
-            System.out.println("- - - - Applying Change - - - -");
-            System.out.println("ToBeChangedNode: " + c.getToBeChangedNode().getUserObject().toString());
-            System.out.println("ToBeChangedNode Type: " + c.getNodeType());
-            System.out.println("Change Type: " + c.getChangeType());
-            model.applyChange(c, example_xml_doc, example_xml_doc, 0);
-            try {
-                // Element xmlExampleElement = example_xml_doc.getDocumentElement();
-                //OMEModel xmlModel = new OMEModelImpl();
-                // catch verification errors and print them
-                // MetadataRoot mdr = new OMEXMLMetadataRoot(xmlExampleElement, xmlModel);
-                // XMLTools.validateXML(XMLTools.getXML(example_xml_doc));
-                if (!(new File(model.getSchemaPath()).exists())) {
-                    view.popupSchemaHelp();
-                }
-                String error = XMLValidator.validateOMEXML(XMLTools.getXML(example_xml_doc), model.getSchemaPath());
-                if (error == null){
-                    System.out.println("XML is valid");
-                    c.setValidity(true);
-                    c.setValidationError("OME-XML is valid");
-                }
-                else {
-                    System.out.println("XML is not valid");
-                    c.setValidity(false);
-                    c.setValidationError(error);
-                }
-            } catch (Exception e) {
-                c.setValidity(false);
-                c.setValidationError(e.getMessage());
-            }
-            changeHistoryValidity = model.getChangeHistory().getLast().getValidity();
-        }
-        return changeHistoryValidity;
+        return validateChangeHistory(example_xml_doc);
     }
     /**
      *
@@ -350,6 +323,8 @@ public class EditorController extends IO {
         // make title from path
         String title = path.substring(path.lastIndexOf("/") + 1);
         Document xml_doc = loadFile(path);
+        System.out.println("Inside openImage");
+        System.out.println(xml_doc.cloneNode(true));
         model.setXMLDoc(xml_doc);
         Document new_xml_doc = (Document) xml_doc.cloneNode(true);
         if (!getChangeHistory().isEmpty()) {
