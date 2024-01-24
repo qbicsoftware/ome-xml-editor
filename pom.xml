@@ -4,35 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
-                <configuration>
-                    <artifactSet>
-                        <includes>
-                            <include>org.apache.xmlgraphics:batik-transcoder</include>
-                            <include>org.jetbrains:markdown</include>
-                        </includes>
-                    </artifactSet>
-                    <!-- put your configurations here -->
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
     <groupId>life.qbic</groupId>
-    <artifactId>XMLEditor</artifactId>
+    <artifactId>ome-xml-editor</artifactId>
     <version>1.0.0</version>
 
     <name>XML Editor</name>
@@ -43,6 +17,21 @@
         <package-name>life.qbic.xmledit</package-name>
         <main-class>life.qbic.xmledit.XMLEditor</main-class>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>nexus-releases</id>
+            <name>QBiC Releases</name>
+            <url>https://qbic-repo.qbic.uni-tuebingen.de/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>nexus-snapshots</id>
+            <name>QBiC Snapshots</name>
+            <url>https://qbic-repo.qbic.uni-tuebingen.de/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/net.imagej/imagej -->
@@ -79,10 +68,7 @@
             <artifactId>markdown</artifactId>
             <version>0.1.46</version>
         </dependency>
-
-
     </dependencies>
-
     <repositories>
         <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
         <!-- Main Maven repository -->
@@ -102,4 +88,41 @@
             <url>https://maven.scijava.org/content/groups/public</url>
         </repository>
     </repositories>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.4.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <artifactSet>
+                        <includes>
+                            <include>org.apache.xmlgraphics:batik-transcoder</include>
+                            <include>org.jetbrains:markdown</include>
+                        </includes>
+                    </artifactSet>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                    <finalName>${project.artifactId}-${project.version}</finalName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
