@@ -785,11 +785,4 @@ public class XMLEditor<T extends RealType<T>> implements Command {
         DebugTools.enableLogging("INFO");
         new XMLEditor().testEdit();
     }
-    /**
-     * Starts a new ImageJ session when started from outside Fiji
-     */
-    public static void main(String[] args) throws Exception {
-        final ImageJ ij = new ImageJ();
-        ij.command().run(XMLEditor.class, true);
-    }
 }
