@@ -16,6 +16,7 @@
     <properties>
         <package-name>life.qbic.xmledit</package-name>
         <main-class>life.qbic.xmledit.XMLEditor</main-class>
+        <log4j.version>2.20.0</log4j.version>
     </properties>
 
     <distributionManagement>
@@ -67,6 +68,21 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>markdown</artifactId>
             <version>0.1.46</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
     </dependencies>
     <repositories>
