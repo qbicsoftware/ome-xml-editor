@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.ImageTranscoder;

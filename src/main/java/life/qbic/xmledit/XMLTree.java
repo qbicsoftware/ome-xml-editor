@@ -1,6 +1,6 @@
 // Build the XML Tree for GUI + ImageInfo
 
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;

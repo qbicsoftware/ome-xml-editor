@@ -4,14 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>org.scijava</groupId>
-        <artifactId>pom-scijava</artifactId>
-        <version>31.1.0</version>
-        <relativePath />
-    </parent>
-
     <build>
         <plugins>
             <plugin>
@@ -36,126 +28,35 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--plugin>
-                <groupId>org.apache.xmlbeans</groupId>
-                <artifactId>xmlbeans</artifactId>
-                <version>4.0.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <sourceSchemas>
-                        <sourceSchema>data/ome.xsd</sourceSchema>
-                    </sourceSchemas>
-                    <name>omeSchema</name>
-                    <repackage>my.company.project.metadata</repackage>
-                    <partialMethods>ALL,-GET_LIST,-XGET_LIST,-XGET_ARRAY</partialMethods>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.xmlbeans</groupId>
-                        <artifactId>xmlbeans</artifactId>
-                        <version>5.1.1</version>
-                    </dependency>
-                </dependencies>
-            </plugin-->
         </plugins>
     </build>
 
-    <groupId>de.qbic</groupId>        <!-- FIXME: Your organization groupId here -->
-    <artifactId>XMLEditor</artifactId> <!-- FIXME: Your project artifactId here   -->
-    <version>20_04_23</version>
+    <groupId>life.qbic</groupId>
+    <artifactId>XMLEditor</artifactId>
+    <version>1.0.0</version>
 
-    <name>XML Editor</name>                                               <!-- FIXME: Your project name here          -->
-    <description>A Maven project implementing an ImageJ command.</description> <!-- FIXME: Your project description here   -->
-    <url>https://mycompany.com/imagej/gauss-filtering/</url>                   <!-- FIXME: Your project website here       -->
-    <inceptionYear>2017</inceptionYear>                                        <!-- FIXME: Your project starting year here -->
-    <organization>
-        <name>My Company</name>           <!-- FIXME: Your organization name here    -->
-        <url>https://mycompany.com/</url> <!-- FIXME: Your organization website here -->
-    </organization>
-    <licenses>
-        <license>                         <!-- FIXME: Your license here -->
-            <name>CC0</name>
-            <url>https://creativecommons.org/publicdomain/zero/1.0/</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <!-- See https://imagej.net/Team -->
-        <developer>
-            <id>octocat</id>                                          <!-- FIXME: Your GitHub handle here -->
-            <name>Noma Onomatopoeia</name>                            <!-- FIXME: Your name here          -->
-            <url>https://mycompany.com/people/noma-onomatopoeia</url> <!-- FIXME: Your website here       -->
-            <roles>
-                <role>founder</role>
-                <role>lead</role>
-                <role>developer</role>
-                <role>debugger</role>
-                <role>reviewer</role>
-                <role>support</role>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-    </developers>
-
-    <contributors>
-        <contributor>
-            <name>None</name>
-        </contributor>
-    </contributors>
-
-    <mailingLists>
-        <mailingList>
-            <name>Image.sc Forum</name>
-            <archive>https://forum.image.sc/tag/imagej</archive>
-        </mailingList>
-    </mailingLists>
-
-    <scm>
-        <connection>scm:git:https://github.com/imagej/example-imagej2-command</connection>
-        <developerConnection>scm:git:git@github.com:imagej/example-imagej2-command</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/imagej/example-imagej2-command</url>
-    </scm>
-
-    <issueManagement>
-        <system>GitHub Issues</system>
-        <url>https://github.com/imagej/example-imagej2-command/issues</url>
-    </issueManagement>
-
-    <ciManagement>
-        <system>None</system>
-    </ciManagement>
+    <name>XML Editor</name>
+    <description>A Maven project implementing an ImageJ command.</description>
+    <url>http://qbic.life</url>
 
     <properties>
-        <package-name>de.qbic.xmledit</package-name>                   <!-- FIXME: Your project package prefix here -->
-        <main-class>de.qbic.xmledit.XMLEditor</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
-        <license.licenseName>cc0</license.licenseName>                      <!-- FIXME: Your license-maven-plugin license code here -->
-        <license.copyrightOwners>My Company, Inc.</license.copyrightOwners> <!-- FIXME: Your organization legal entity name here -->
+        <package-name>life.qbic.xmledit</package-name>
+        <main-class>life.qbic.xmledit.XMLEditor</main-class>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>scijava.public</id>
-            <url>https://maven.scijava.org/content/groups/public</url>
-        </repository>
-    </repositories>
-
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/net.imagej/imagej -->
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>imagej</artifactId>
+            <version>2.15.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/ome/bio-formats_plugins -->
         <dependency>
             <groupId>ome</groupId>
             <artifactId>bio-formats_plugins</artifactId>
-            <version>6.1.1</version>
+            <version>7.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -167,29 +68,6 @@
             <artifactId>batik-transcoder</artifactId>
             <version>1.17</version>
         </dependency>
-        <!--dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>2.3.1</version>
-        </dependency-->
-
-        <!-- https://mvnrepository.com/artifact/com.sun.istack/istack-commons-runtime -->
-        <!--dependency>
-            <groupId>com.sun.istack</groupId>
-            <artifactId>istack-commons-runtime</artifactId>
-            <version>4.2.0</version>
-        </dependency-->
-
-        <!--dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.25.0-GA</version>
-        </dependency-->
         <!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
         <dependency>
             <groupId>org.apache.xmlbeans</groupId>
@@ -199,7 +77,29 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>markdown</artifactId>
-            <version>0.1.45</version>
+            <version>0.1.46</version>
         </dependency>
+
+
     </dependencies>
+
+    <repositories>
+        <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
+        <!-- Main Maven repository -->
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>org.openmicroscopy</id>
+            <url>	https://artifacts.openmicroscopy.org/artifactory/ome.releases/</url>
+        </repository>
+        <repository>
+            <id>scijava.public</id>
+            <url>https://maven.scijava.org/content/groups/public</url>
+        </repository>
+    </repositories>
 </project>

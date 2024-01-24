@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 import loci.common.Constants;
 import loci.common.DataTools;

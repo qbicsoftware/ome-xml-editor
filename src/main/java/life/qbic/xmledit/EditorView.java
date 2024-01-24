@@ -1,9 +1,53 @@
 // PACKAGE
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // IMPORTS
 // ---------------------------------------------------------------------------------------------------------------------
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
+import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.ScrollPaneLayout;
+import javax.swing.SpringLayout;
+import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.xml.transform.TransformerException;
 import loci.plugins.config.SpringUtilities;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -12,16 +56,9 @@ import org.intellij.markdown.flavours.MarkdownFlavourDescriptor;
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor;
 import org.intellij.markdown.html.HtmlGenerator;
 import org.intellij.markdown.parser.MarkdownParser;
+import org.ojalgo.random.process.GaussianField;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import javax.swing.*;
-import javax.swing.border.Border;
-import javax.xml.transform.TransformerException;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.File;
-import java.io.StringReader;
-import java.net.MalformedURLException;
 
 public class EditorView extends javax.swing.JFrame {
     // -----------------------------------------------------------------------------------------------------------------
@@ -515,15 +552,22 @@ public class EditorView extends javax.swing.JFrame {
      */
     public JComponent renderMarkdown(String md) {
         final String src = md;
-        final MarkdownFlavourDescriptor flavour = new GFMFlavourDescriptor();
-        final ASTNode parsedTree = new MarkdownParser(flavour).buildMarkdownTreeFromString(src);
-        final String html = new HtmlGenerator(src, parsedTree, flavour, false).generateHtml();
+
+        final String html = markdownToHtml(md);
         JEditorPane editor = new JEditorPane();
         JScrollPane scrollPane = new JScrollPane(editor);
         editor.setContentType("text/html");
         editor.setText(html);
         return scrollPane;
     }
+
+    private static String markdownToHtml(String markdown) {
+        final MarkdownFlavourDescriptor flavour = new GFMFlavourDescriptor();
+        final ASTNode parsedTree = new MarkdownParser(flavour).buildMarkdownTreeFromString(markdown);
+        HtmlGenerator htmlGenerator = new HtmlGenerator(markdown, parsedTree, flavour, false);
+        return htmlGenerator.generateHtml();
+    }
+
     /**
      * Adds a border to the specified panel with the specified title.
      * @param p the panel to which the border will be added

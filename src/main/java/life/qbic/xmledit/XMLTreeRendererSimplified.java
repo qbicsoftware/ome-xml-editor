@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 
 import javax.swing.*;
@@ -33,4 +33,3 @@ public class XMLTreeRendererSimplified extends DefaultTreeCellRenderer{
         return this;
     }
 }
-

@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 public class FeedbackStore {
     private String filePath = null;
