@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeModel;

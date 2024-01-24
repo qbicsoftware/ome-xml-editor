@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;

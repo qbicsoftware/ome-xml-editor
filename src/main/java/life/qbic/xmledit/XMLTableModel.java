@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;

@@ -7,7 +7,7 @@
     <relativePath>pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>de.qbic</groupId>
+  <groupId>life.qbic</groupId>
   <artifactId>XMLEditor</artifactId>
   <name>XML Editor</name>
   <version>20_04_23</version>
@@ -121,9 +121,9 @@
     </dependency>
   </dependencies>
   <properties>
-    <license.copyrightOwners>My Company, Inc.</license.copyrightOwners>
-    <license.licenseName>cc0</license.licenseName>
-    <package-name>de.qbic.xmledit</package-name>
-    <main-class>de.qbic.xmledit.XMLEditor</main-class>
+    <license.copyrightOwners>University of Tuebingen</license.copyrightOwners>
+    <license.licenseName>MIT</license.licenseName>
+    <package-name>life.qbic.xmledit</package-name>
+    <main-class>life.qbic.xmledit.XMLEditor</main-class>
   </properties>
 </project>

@@ -1,4 +1,4 @@
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 import javax.swing.tree.TreeNode;
 import java.io.Serializable;

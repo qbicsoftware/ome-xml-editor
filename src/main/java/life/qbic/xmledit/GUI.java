@@ -1,5 +1,5 @@
 // PACKAGE
-package de.qbic.xmledit;
+package life.qbic.xmledit;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // IMPORTS
@@ -1428,4 +1428,3 @@ public class GUI extends javax.swing.JFrame{
         });
     }
 }
-
