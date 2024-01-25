@@ -17,6 +17,8 @@
         <package-name>life.qbic.xmledit</package-name>
         <main-class>life.qbic.xmledit.XMLEditor</main-class>
         <log4j.version>2.20.0</log4j.version>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
     </properties>
 
     <distributionManagement>
