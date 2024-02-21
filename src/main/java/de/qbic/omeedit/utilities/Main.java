@@ -9,16 +9,21 @@ public class Main {
             if (args[0].equals("cli")) {
                 // Start command line interface
                 CommandLineInterface cli = new CommandLineInterface();
+                // Assuming there is a method to start the CLI
+                cli.start();
             }
             else if (args[0].equals("gui")) {
                 // Start graphical user interface
                 GraphicalUserInterface gui = new GraphicalUserInterface();
-                // gui.startView();
+                // Assuming there is a method to start the GUI
+                gui.start();
             }
             else {
                 System.out.println("Please specify either 'cli' or 'gui' as first argument.");
             }
         }
-
+        else {
+            System.out.println("No arguments provided. Please specify either 'cli' or 'gui' as first argument.");
+        }
     }
 }

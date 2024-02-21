@@ -17,7 +17,7 @@ import java.util.LinkedList;
 
 import de.qbic.omeedit.utilities.*;
 
-public class GraphicalUserInterface implements InOut {
+public class GraphicalUserInterface implements InOut, UserInterface {
     /** This class aims to implement the input layer via a graphical user interface. It should only contain methods
      * which are needed for communication between the View and the Controller. The View itself should be implemented in
      * a separate class.
@@ -31,23 +31,19 @@ public class GraphicalUserInterface implements InOut {
     // Constructor
     //------------------------------------------------------------------------------------------------------------------
     public GraphicalUserInterface() {
-        view = new EditorView();
-        view.setVisible(true);
-        view.setDefaultCloseOperation(view.EXIT_ON_CLOSE);
         System.out.println("view initialised");
         initializeAddButton();
         System.out.println("add initialised");
         initializeDelButton();
         System.out.println("del initialised");
-        controller = new EditorController();
-        System.out.println("Controller initialised");
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    // Methods for the Controller
+    //------------------------------------------------------------------------------------------------------------------
+    public void setupEventListeners() {
         // -------------------------------------------------------------------------------------------------------------
         // ADD ACTION LISTENERS
         // -------------------------------------------------------------------------------------------------------------
-
-        /** Textfield
-         * @return
-         */
         view.textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 String newText = view.textField.getText();
@@ -313,10 +309,15 @@ public class GraphicalUserInterface implements InOut {
         });
     }
 
-    //------------------------------------------------------------------------------------------------------------------
-    // Methods for the Controller
-    //------------------------------------------------------------------------------------------------------------------
-
+    @Override
+    public void start() {
+        // Initialize the controller
+        controller = new EditorController();
+        view = new EditorView();
+        setupEventListeners();
+        view.setVisible(true);
+        view.setDefaultCloseOperation(view.EXIT_ON_CLOSE);
+    }
 
     @Override
     public void loadImage(String path) throws Exception {

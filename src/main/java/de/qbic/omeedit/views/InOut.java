@@ -1,4 +1,4 @@
-package de.qbic.omeedit.utilities;
+package de.qbic.omeedit.views;
 
 
 import de.qbic.omeedit.controllers.EditorController;
