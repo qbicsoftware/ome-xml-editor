@@ -544,12 +544,6 @@ public class EditorView extends javax.swing.JFrame {
 
 
 
-    public void updateTree() {
-    }
-
-    public void updateTreeTab(Document newXmlDoc, Object simplified) {
-    }
-
 
     /**
      * Report success pop up window

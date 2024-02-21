@@ -158,8 +158,6 @@ public class EditorController extends IO {
         Document new_xml_doc = (Document) model.getXMLDoc().cloneNode(true);
         // apply all changes to the original xml
         model.applyChanges(new_xml_doc);
-        // update the tree
-        view.updateTreeTab(new_xml_doc, model.simplified);
     }
     /**
      * @return

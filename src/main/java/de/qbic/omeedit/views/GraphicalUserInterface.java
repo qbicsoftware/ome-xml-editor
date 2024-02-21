@@ -178,6 +178,8 @@ public class GraphicalUserInterface implements InOut, UserInterface {
                 File fileToLoad = chooser.getSelectedFile();
                 try {
                     controller.setSchemaPath(fileToLoad.getAbsolutePath());
+                    view.makeChangeHistoryTab();
+                    addChangesToTable(view.historyTableModel);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -305,6 +307,7 @@ public class GraphicalUserInterface implements InOut, UserInterface {
                 // Perform some action based on the selection state
                 controller.setSimplified(selected);
                 controller.updateTree();
+                updateTreeTab();
             }
         });
     }
@@ -338,7 +341,7 @@ public class GraphicalUserInterface implements InOut, UserInterface {
         view.makeChangeHistoryTab();
         // add the changes to the table model
         addChangesToTable(view.historyTableModel);
-        view.updateTree();
+        updateTreeTab();
 
     }
     
@@ -934,6 +937,9 @@ public class GraphicalUserInterface implements InOut, UserInterface {
 
         // add the jTree to a new panel and add it to the tabbedPane
         view.scrollPaneTop.setViewportView(view.myTree);
+    }
+    public void updateTreeTab() {
+        updateTreeTab(controller.getXMLDoc(), controller.getSimplified());
     }
     /**
      * Creates a new xml-viewer tab. This version does not allow the user to edit the xml.
